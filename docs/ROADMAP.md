@@ -12,11 +12,32 @@
 - [x] Event ordering (`originSequence`) et modèle temporel
       (monotonic vs wall-clock) documentés.
 - [x] `docs/RELEASE_0_1.md` — premier vertical slice défini.
-- [ ] Choix définitif de la stack de persistance mobile (SQLite/Drift ou
-      alternative justifiée — voir `docs/DATA_MODEL.md`).
-- [ ] Scaffolding initial `/mobile`, `/apple-watch`, `/wear-os`.
 
-## Phase 1 — Moteurs génériques
+## Phase 1A — Scaffolding exécutable & toolchain (statut : fait, avec blockers documentés)
+
+- [x] Décision définitive de persistance mobile : SQLite via Drift (voir
+      `docs/DATA_MODEL.md` — inclut le point d'attention `drift_dev`).
+- [x] `/mobile` — vraie app Flutter (Riverpod, go_router, Drift), coque
+      4 tabs (Accueil/Activités/Historique/Réglages), design tokens,
+      `flutter analyze`/`test` verts, lancée réellement (Chrome web —
+      seul target disponible sur cette machine, voir ci-dessous).
+- [x] `/apple-watch` — source Swift/SwiftUI écrite (App + RootView +
+      Info.plist + Assets.xcassets) ; **build non exécuté** : Xcode
+      complet absent de cette machine (seulement Command Line Tools),
+      confirmé par l'échec direct de `xcodebuild`/`xcrun simctl` et de
+      XcodeBuildMCP. Voir `apple-watch/README.md`.
+- [x] `/wear-os` — projet Kotlin + Compose for Wear OS Material3, wrapper
+      Gradle généré, **`./gradlew assembleDebug` exécuté réellement avec
+      succès** (APK debug produit). Aucun émulateur Wear OS local
+      disponible pour un lancement runtime (aucune image système
+      installée) ; fleet cloud Mobile MCP disponible mais non utilisée
+      (nécessite une connexion explicite de l'utilisateur).
+- [x] `/contracts/{score,timer,interval}` reserved test runner locations
+      créées (`mobile/test/conformance`, `apple-watch/tests/conformance`,
+      `wear-os/app/src/test/kotlin/.../conformance`) — vides, à peupler
+      en Phase 1B.
+
+## Phase 1B — Moteurs génériques
 
 - [ ] Score Engine + tests déterministes (`playtap-score-engine`),
       validés contre les fixtures `/contracts/score`.

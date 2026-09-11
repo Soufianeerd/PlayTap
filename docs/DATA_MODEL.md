@@ -113,15 +113,42 @@ Dans tous les cas : **jamais de timer basé sur un simple `remaining--`
 décrémenté à chaque tick.** L'état est toujours recalculé, jamais
 accumulé.
 
-## Stockage local (mobile)
+## Stockage local (mobile) — décision définitive : SQLite via Drift
 
-SQLite/Drift ou alternative justifiée (voir `CLAUDE.md`). Tables
-attendues au minimum : `sessions`, `events`, `presets`. Migrations
-versionnées — voir règle dans `playtap-offline-first`.
+**Retenu pour le MVP : Drift (SQLite) côté Flutter.** Pas de backend.
+
+Justification :
+- offline-first : SQLite est un fichier local, aucune dépendance réseau ;
+- `Session`/`Event`/`Preset` sont des données structurées et relationnelles
+  (voir modèle ci-dessus) — un vrai schéma relationnel avec requêtes
+  typées convient mieux qu'un simple stockage clé-valeur ;
+- migrations de schéma versionnées de première classe (nécessaire pour
+  `schemaVersion`, voir `playtap-offline-first`) ;
+- requêtes d'historique (tri, filtres, agrégations) faciles à exprimer et
+  testables sans mock ;
+- Dart pur, aucun plugin natif requis pour l'essentiel (`drift`/
+  `drift_flutter`/`path_provider`).
+
+Tables attendues au minimum : `sessions`, `events`, `presets`.
+
+**Point d'attention connu (Phase 1A) :** avec le SDK Flutter installé sur
+cette machine (Dart 3.10.1, `meta` figé à 1.17.0 par le SDK), les
+dernières versions de `drift_dev`/`build_runner`/`analyzer` compatibles
+avec `drift ^2.34.2` échouent en résolution de dépendances (elles exigent
+`meta ^1.18.0`, indisponible). `drift`, `drift_flutter` et `path_provider`
+sont donc déjà dans `mobile/pubspec.yaml`, mais **`drift_dev` et
+`build_runner` n'ont pas encore été ajoutés** — ils ne sont nécessaires
+qu'à partir du moment où un vrai schéma `@DriftDatabase` doit être généré
+(Phase 1B). À ce moment-là : soit le SDK Flutter aura été mis à jour
+(`flutter upgrade`, qui lève le pin `meta` — mutation globale à valider
+avec l'utilisateur avant de la lancer), soit une combinaison de versions
+compatible avec ce SDK devra être identifiée.
 
 ## Stockage local (watch)
 
 Stockage natif minimal permettant l'autonomie complète d'une session
 (voir `playtap-watch-sync` — "Fonctionnement montre 100% offline") :
-au moins la session active courante et ses events, avec transfert vers
-le phone dès reconnexion.
+au moins la session active courante et ses events non synchronisés, avec
+transfert vers le phone dès reconnexion. **Ne pas imposer Drift aux
+watches** — chaque plateforme choisit son propre stockage natif ; le
+choix précis se fera pendant la phase watch (voir `docs/ROADMAP.md`).

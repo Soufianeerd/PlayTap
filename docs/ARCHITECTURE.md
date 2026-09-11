@@ -59,15 +59,24 @@ Voir `docs/WATCH_SYNC.md` et le skill `playtap-watch-sync`.
 
 ## Stockage
 
-Voir `docs/DATA_MODEL.md` et le skill `playtap-offline-first`.
+**Décision retenue (Phase 1A) : SQLite via Drift** pour `/mobile`.
+Justification et détail : `docs/DATA_MODEL.md` et le skill
+`playtap-offline-first`. Les watches utilisent un stockage natif minimal
+propre à chaque plateforme (pas Drift) — voir `docs/DATA_MODEL.md`.
 
 ## Outillage de build/test
 
-- Flutter : `flutter analyze`, `flutter test`.
-- Apple : XcodeBuildMCP (build/test/run simulateur, puis device).
-- Android/Wear : build Gradle natif.
+- Flutter : `flutter analyze`, `flutter test`, `dart format`.
+- Apple : XcodeBuildMCP (build/test/run simulateur, puis device) — **non
+  disponible sur cette machine de développement** (Xcode complet non
+  installé, seulement les Command Line Tools). Voir `apple-watch/README.md`
+  pour le détail du blocage et comment le lever.
+- Android/Wear : Gradle (wrapper committé dans `/wear-os`).
 - Tests de parcours : Mobile MCP.
-- Docs à jour des libs : Context7 (voir règle dans `CLAUDE.md`).
+- Docs à jour des libs : Context7 (voir règle dans `CLAUDE.md`) — pour les
+  versions de packages Gradle/Maven, vérifier aussi directement
+  `maven-metadata.xml` sur `dl.google.com`/Maven Central quand Context7 ne
+  couvre pas la librairie (cas rencontré pour Wear Compose).
 
 Checklist complète avant release : `docs/RELEASE_CHECKLIST.md` et skill
 `playtap-release-gate`.

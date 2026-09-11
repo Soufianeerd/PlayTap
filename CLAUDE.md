@@ -86,17 +86,18 @@ Architecture de dossiers prévue :
 /mobile        Flutter — iOS + Android
 /apple-watch   SwiftUI / watchOS
 /wear-os       Kotlin + Compose for Wear OS
+/contracts     fixtures JSON de conformité inter-plateformes
 /docs          documentation
 /.claude       instructions et skills PlayTap
 ```
 
-**Mobile (Flutter)** : Dart, Flutter, Riverpod acceptable, stockage
-SQLite/Drift ou alternative justifiée.
+**Mobile (Flutter)** : Dart, Flutter, Riverpod, go_router, stockage
+**SQLite via Drift (décision définitive, voir `docs/DATA_MODEL.md`)**.
 
 **Apple Watch** : Swift, SwiftUI, WatchConnectivity.
 
-**Wear OS** : Kotlin, Compose for Wear OS, Data Layer API lorsque
-nécessaire.
+**Wear OS** : Kotlin, Compose for Wear OS (Material3), Data Layer API
+lorsque nécessaire.
 
 ## Outils à utiliser
 
