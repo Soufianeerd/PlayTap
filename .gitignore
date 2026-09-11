@@ -1,0 +1,43 @@
+# Secrets
+.env
+.env.*
+.mcp.json
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+
+# Apple
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+.build/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+**/ios/Flutter/.last_build_id
+**/ios/Pods/
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+
+# Android / Kotlin / Gradle
+.gradle/
+local.properties
+*.iml
+.idea/
+captures/
+
+# Editors / OS
+.DS_Store
+.vscode/
+*.swp

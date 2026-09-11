@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "tabata_20_10_x2",
+  "engine": "interval",
+  "description": "Tabata program: 20s work / 10s rest, repeated 2 times (shortened from the classic x8 for a fast conformance check). Verifies short-phase transitions stay accurate across repeats.",
+  "config": {
+    "schemaVersion": 1,
+    "warmup": null,
+    "blocks": [
+      {
+        "phases": [
+          { "type": "WORK", "durationMs": 20000, "label": "Work" },
+          { "type": "REST", "durationMs": 10000, "label": "Rest" }
+        ],
+        "repeat": 2
+      }
+    ],
+    "cooldown": null
+  },
+  "events": [
+    { "id": "e1", "originDevice": "phone", "originSequence": 1, "tOffsetMs": 0, "type": "PROGRAM_STARTED", "payload": {} }
+  ],
+  "expectedCheckpoints": [
+    { "atMs": 10000, "repeatIndex": 0, "phase": "WORK", "phaseElapsedMs": 10000, "phaseRemainingMs": 10000, "status": "RUNNING" },
+    { "atMs": 25000, "repeatIndex": 0, "phase": "REST", "phaseElapsedMs": 5000,  "phaseRemainingMs": 5000,  "status": "RUNNING" },
+    { "atMs": 35000, "repeatIndex": 1, "phase": "WORK", "phaseElapsedMs": 5000,  "phaseRemainingMs": 15000, "status": "RUNNING" },
+    { "atMs": 65000, "status": "COMPLETED" }
+  ]
+}

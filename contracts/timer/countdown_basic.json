@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "countdown_basic",
+  "engine": "timer",
+  "description": "COUNTDOWN of 60s, checked mid-flight and past its target. Verifies remaining time is computed from elapsed time, not decremented tick-by-tick, and clamps at zero instead of going negative.",
+  "config": {
+    "schemaVersion": 1,
+    "mode": "COUNTDOWN",
+    "durationTargetMs": 60000
+  },
+  "events": [
+    { "id": "e1", "originDevice": "phone", "originSequence": 1, "tOffsetMs": 0, "type": "TIMER_STARTED", "payload": {} }
+  ],
+  "expectedCheckpoints": [
+    { "atMs": 30000, "remainingMs": 30000, "status": "RUNNING" },
+    { "atMs": 60000, "remainingMs": 0, "status": "COMPLETED" },
+    { "atMs": 65000, "remainingMs": 0, "status": "COMPLETED", "note": "must clamp at zero, never go negative, even if a tick was missed" }
+  ]
+}

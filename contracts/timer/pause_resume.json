@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "pause_resume",
+  "engine": "timer",
+  "description": "STOPWATCH paused for 5s then resumed. Verifies elapsed time excludes the paused interval entirely rather than being adjusted by an approximate offset.",
+  "config": {
+    "schemaVersion": 1,
+    "mode": "STOPWATCH"
+  },
+  "events": [
+    { "id": "e1", "originDevice": "phone", "originSequence": 1, "tOffsetMs": 0,     "type": "TIMER_STARTED", "payload": {} },
+    { "id": "e2", "originDevice": "phone", "originSequence": 2, "tOffsetMs": 10000, "type": "TIMER_PAUSED",  "payload": {} },
+    { "id": "e3", "originDevice": "phone", "originSequence": 3, "tOffsetMs": 15000, "type": "TIMER_RESUMED", "payload": {} }
+  ],
+  "expectedCheckpoints": [
+    { "atMs": 12000, "elapsedMs": 10000, "status": "PAUSED", "note": "frozen at the moment of pause, regardless of how long the pause lasts" },
+    { "atMs": 20000, "elapsedMs": 15000, "status": "RUNNING", "note": "10000ms before pause + 5000ms after resume; the 5000ms paused interval is excluded" }
+  ]
+}

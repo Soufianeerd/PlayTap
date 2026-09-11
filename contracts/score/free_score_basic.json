@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "free_score_basic",
+  "engine": "score",
+  "description": "FREE_SCORE with two sides and a single undo; verifies undo removes exactly the last event and re-derives state by replay.",
+  "config": {
+    "schemaVersion": 1,
+    "mode": "FREE_SCORE",
+    "sides": ["side_a", "side_b"],
+    "defaultIncrement": 1
+  },
+  "events": [
+    { "id": "e1", "originDevice": "phone", "originSequence": 1, "tOffsetMs": 0, "type": "POINT_SCORED", "payload": { "side": "side_a", "amount": 1 } },
+    { "id": "e2", "originDevice": "phone", "originSequence": 2, "tOffsetMs": 1000, "type": "POINT_SCORED", "payload": { "side": "side_b", "amount": 1 } },
+    { "id": "e3", "originDevice": "phone", "originSequence": 3, "tOffsetMs": 2000, "type": "POINT_SCORED", "payload": { "side": "side_a", "amount": 1 } },
+    { "id": "e4", "originDevice": "phone", "originSequence": 4, "tOffsetMs": 3000, "type": "UNDO", "payload": {} }
+  ],
+  "expected": {
+    "scores": { "side_a": 1, "side_b": 1 },
+    "matchComplete": false,
+    "winner": null,
+    "appliedEventCount": 3
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "sprint_30_30_x3",
+  "engine": "interval",
+  "description": "Sprint interval program: 30s work / 30s rest, repeated 3 times, no warmup/cooldown. Verifies phase/repeat resolution from a single absolute timeline rather than chained independent timers.",
+  "config": {
+    "schemaVersion": 1,
+    "warmup": null,
+    "blocks": [
+      {
+        "phases": [
+          { "type": "WORK", "durationMs": 30000, "label": "Sprint" },
+          { "type": "REST", "durationMs": 30000, "label": "Recovery" }
+        ],
+        "repeat": 3
+      }
+    ],
+    "cooldown": null
+  },
+  "events": [
+    { "id": "e1", "originDevice": "phone", "originSequence": 1, "tOffsetMs": 0, "type": "PROGRAM_STARTED", "payload": {} }
+  ],
+  "expectedCheckpoints": [
+    { "atMs": 15000,  "repeatIndex": 0, "phase": "WORK", "phaseElapsedMs": 15000, "phaseRemainingMs": 15000, "status": "RUNNING" },
+    { "atMs": 45000,  "repeatIndex": 0, "phase": "REST", "phaseElapsedMs": 15000, "phaseRemainingMs": 15000, "status": "RUNNING" },
+    { "atMs": 65000,  "repeatIndex": 1, "phase": "WORK", "phaseElapsedMs": 5000,  "phaseRemainingMs": 25000, "status": "RUNNING" },
+    { "atMs": 185000, "status": "COMPLETED" }
+  ]
+}
