@@ -127,22 +127,40 @@ Justification :
 - requêtes d'historique (tri, filtres, agrégations) faciles à exprimer et
   testables sans mock ;
 - Dart pur, aucun plugin natif requis pour l'essentiel (`drift`/
-  `drift_flutter`/`path_provider`).
+  `path_provider`).
 
-Tables attendues au minimum : `sessions`, `events`, `presets`.
+Tables réelles (Phase 1B.1) : `sessions`, `events`, `presets` — schéma
+exact dans `mobile/lib/data/local/tables.dart`.
 
-**Point d'attention connu (Phase 1A) :** avec le SDK Flutter installé sur
-cette machine (Dart 3.10.1, `meta` figé à 1.17.0 par le SDK), les
-dernières versions de `drift_dev`/`build_runner`/`analyzer` compatibles
-avec `drift ^2.34.2` échouent en résolution de dépendances (elles exigent
-`meta ^1.18.0`, indisponible). `drift`, `drift_flutter` et `path_provider`
-sont donc déjà dans `mobile/pubspec.yaml`, mais **`drift_dev` et
-`build_runner` n'ont pas encore été ajoutés** — ils ne sont nécessaires
-qu'à partir du moment où un vrai schéma `@DriftDatabase` doit être généré
-(Phase 1B). À ce moment-là : soit le SDK Flutter aura été mis à jour
-(`flutter upgrade`, qui lève le pin `meta` — mutation globale à valider
-avec l'utilisateur avant de la lancer), soit une combinaison de versions
-compatible avec ce SDK devra être identifiée.
+### Résolution `drift_dev` (Phase 1B.1)
+
+Le blocage documenté en Phase 1A est résolu par une **combinaison de
+versions figée**, sans mutation globale (`flutter upgrade` non utilisé) :
+
+```
+drift: 2.31.0
+drift_dev: 2.31.0        (dev)
+build_runner: 2.15.1     (dev)
+analyzer: 8.4.1          (dev, épinglage explicite)
+```
+
+Analyse (voir `mobile/pubspec.yaml` pour le détail commenté) : `riverpod`
+dépend réellement (pas en dev) de `test ^1.0.0` ; `flutter_test` du SDK
+fige `test_api` à une version qui résout `test` à `1.26.3`, lequel plafonne
+`analyzer` à `<9.0.0`. Or `analyzer >=10.0.2` exige `meta ^1.18.0`,
+indisponible avec le SDK Flutter installé (`meta` figé à `1.17.0`).
+`drift_dev 2.31.0` est la dernière version dont le plancher `analyzer`
+(`>=8.1.0`) tient sous ce plafond — mais elle plafonne en retour `drift`/
+`sqlite3` à la ligne pré-auto-bundling (`drift <2.32`, `sqlite3 <3.0`).
+Conséquence : `sqlite3_flutter_libs` (version `0.5.42`, pas la `0.6.0+eol`)
+redevient nécessaire, et `drift_flutter` (qui force `sqlite3 ^3.0.0`) ne
+peut plus être utilisé — la connexion native est donc ouverte à la main
+(`data/local/connection.dart`, `NativeDatabase.createInBackground` +
+`path_provider`), l'autre méthode de premier niveau documentée par Drift,
+pas une solution de contournement.
+
+`dart run build_runner build` génère réellement `app_database.g.dart`
+avec cette combinaison — vérifié, pas supposé.
 
 ## Stockage local (watch)
 

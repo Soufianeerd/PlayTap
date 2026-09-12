@@ -8,7 +8,11 @@
 - [ ] `flutter analyze` — zéro erreur
 - [ ] `flutter test` — tous les tests passent (y compris tests moteurs
       déterministes)
-- [ ] Build natif Apple (app + watchOS) via XcodeBuildMCP
+- [ ] Build natif Apple (app + watchOS) via XcodeBuildMCP — **obligatoire
+      avant toute release Apple**, sans exception. Exécutable sur un
+      environnement macOS CI/build distant si Xcode n'est pas installé
+      localement (voir `CLAUDE.md` — "Stratégie Apple") ; l'absence de
+      Xcode local ne dispense jamais de cette étape avant publication.
 - [ ] Build natif Android + Wear OS
 - [ ] Flows critiques testés via Mobile MCP (Score/Timer/Training/Custom,
       bout en bout)

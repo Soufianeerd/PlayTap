@@ -122,6 +122,31 @@ hiérarchie. Ne réinterprète pas arbitrairement le design.
 Pour les targets Apple : ne considère jamais qu'un changement important
 est terminé sans essayer de compiler lorsque l'environnement le permet.
 
+## Stratégie Apple (machine de développement locale)
+
+**Xcode is intentionally not installed on the local development machine.
+Apple builds and native validation are performed later in a macOS CI/build
+environment. Lack of local Xcode must not block Flutter domain
+development, Android, or Wear OS development.**
+
+Concrètement :
+
+- Développement local normal (pas de blocker) : Flutter, Dart, logique
+  métier, Riverpod, Drift, tests Dart/Flutter, contrats de conformité
+  `/contracts`, Android, Wear OS.
+- Réservé à un environnement macOS CI/build distant, plus tard : build
+  iOS, build watchOS, tests natifs Apple (XCTest), signing, provisioning,
+  TestFlight, App Store.
+- Le build Apple reste **obligatoire avant toute publication** sur les
+  plateformes Apple — voir `docs/RELEASE_CHECKLIST.md`. Il est simplement
+  différé dans le temps, pas supprimé des exigences.
+- Ne jamais prétendre avoir validé un build iOS/watchOS tant qu'il n'a pas
+  réellement été exécuté dans un environnement disposant de Xcode. Ne pas
+  fabriquer manuellement un `.xcodeproj` non vérifiable (voir
+  `apple-watch/README.md`).
+- Ne pas demander à l'utilisateur d'installer Xcode localement — c'est une
+  décision produit déjà prise, pas un blocker à signaler.
+
 ### Mobile MCP
 
 Utilise Mobile MCP pour tester les parcours utilisateurs sur simulateur ou

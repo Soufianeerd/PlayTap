@@ -68,9 +68,12 @@ propre à chaque plateforme (pas Drift) — voir `docs/DATA_MODEL.md`.
 
 - Flutter : `flutter analyze`, `flutter test`, `dart format`.
 - Apple : XcodeBuildMCP (build/test/run simulateur, puis device) — **non
-  disponible sur cette machine de développement** (Xcode complet non
-  installé, seulement les Command Line Tools). Voir `apple-watch/README.md`
-  pour le détail du blocage et comment le lever.
+  disponible sur cette machine de développement**, délibérément (Xcode
+  complet non installé, seulement les Command Line Tools). Ce n'est plus
+  traité comme un blocker du développement courant : c'est une contrainte
+  d'environnement connue. Le build/la validation Apple se font plus tard
+  dans un environnement macOS CI/build distant, disposant de Xcode — voir
+  `CLAUDE.md` section "Stratégie Apple" et `apple-watch/README.md`.
 - Android/Wear : Gradle (wrapper committé dans `/wear-os`).
 - Tests de parcours : Mobile MCP.
 - Docs à jour des libs : Context7 (voir règle dans `CLAUDE.md`) — pour les

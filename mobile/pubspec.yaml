@@ -36,14 +36,36 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.3.2
   go_router: ^17.5.0
-  drift: ^2.34.2
-  drift_flutter: ^0.3.1
+  drift: 2.31.0
+  sqlite3_flutter_libs: 0.5.42
   path_provider: ^2.1.6
   uuid: ^4.6.0
+  meta: ^1.17.0
+  path: ^1.9.1
+  sqlite3: ^2.9.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  # Pinned combination compatible with this Flutter SDK's `meta: 1.17.0`
+  # pin — see docs/DATA_MODEL.md "Résolution drift_dev" for the full
+  # analysis. `riverpod` (a real dependency of flutter_riverpod, not dev)
+  # depends on `test ^1.0.0`, which flutter_test's SDK-pinned
+  # `test_api 0.7.7` resolves to `test 1.26.3` — and that version caps
+  # `analyzer` at <9.0.0. Meanwhile analyzer >=10.0.2 requires
+  # `meta ^1.18.0` (unavailable here). So analyzer must land in the
+  # 8.1.0–8.4.1 window. drift_dev 2.31.0 is the newest drift_dev whose
+  # analyzer floor (>=8.1.0) fits under that <9.0.0 ceiling — but it caps
+  # `drift`/`sqlite3` to the pre-auto-bundling line (drift <2.32,
+  # sqlite3 <3.0), so `sqlite3_flutter_libs` is required again and
+  # `drift_flutter` (which forces sqlite3 ^3.0.0) can't be used — the
+  # native database connection is opened manually instead (see
+  # data/local/connection.dart), which is Drift's other first-class,
+  # equally current setup path (not a workaround).
+  drift_dev: 2.31.0
+  build_runner: 2.15.1
+  analyzer: 8.4.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

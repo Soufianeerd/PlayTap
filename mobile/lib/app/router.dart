@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/activities/activities_page.dart';
+import '../features/activities/score_presets_page.dart';
 import '../features/history/history_page.dart';
 import '../features/home/home_page.dart';
+import '../features/score_free/active_free_score_session_page.dart';
+import '../features/score_free/free_score_config_page.dart';
+import '../features/score_free/score_summary_page.dart';
 import '../features/settings/settings_page.dart';
 import '../features/shared/coming_soon_page.dart';
 
@@ -57,6 +61,25 @@ GoRouter createAppRouter() => GoRouter(
       builder: (context, state) => ComingSoonPage(
         sectionLabel: state.extra as String? ?? 'Cette section',
       ),
+    ),
+    GoRoute(
+      path: '/activities/score',
+      builder: (context, state) => const ScorePresetsPage(),
+    ),
+    GoRoute(
+      path: '/score/free/config',
+      builder: (context, state) => const FreeScoreConfigPage(),
+    ),
+    GoRoute(
+      path: '/score/free/session/:sessionId',
+      builder: (context, state) => ActiveFreeScoreSessionPage(
+        sessionId: state.pathParameters['sessionId']!,
+      ),
+    ),
+    GoRoute(
+      path: '/score/free/summary/:sessionId',
+      builder: (context, state) =>
+          ScoreSummaryPage(sessionId: state.pathParameters['sessionId']!),
     ),
   ],
 );

@@ -1,28 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
+import '../shared/activity_category_grid.dart';
 
-class _HomeSection {
-  const _HomeSection(this.label, this.icon);
-
-  final String label;
-  final IconData icon;
-}
-
-const List<_HomeSection> _sections = [
-  _HomeSection('Score', Icons.sports_tennis_outlined),
-  _HomeSection('Timer', Icons.timer_outlined),
-  _HomeSection('Training', Icons.fitness_center_outlined),
-  _HomeSection('Custom', Icons.tune_outlined),
-];
-
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).playTapColors;
+    final activeSession = ref.watch(activeScoreSessionProvider).value;
 
     return Scaffold(
       body: SafeArea(
@@ -43,58 +33,19 @@ class HomePage extends StatelessWidget {
                   color: colors.textSecondary,
                 ),
               ),
-              const SizedBox(height: PlayTapSpacing.xxl),
-              Expanded(
-                child: GridView.builder(
-                  itemCount: _sections.length,
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 220,
-                    mainAxisSpacing: PlayTapSpacing.md,
-                    crossAxisSpacing: PlayTapSpacing.md,
-                    childAspectRatio: 1.1,
+              if (activeSession != null) ...[
+                const SizedBox(height: PlayTapSpacing.lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () =>
+                        context.push('/score/free/session/${activeSession.id}'),
+                    child: const Text('REPRENDRE LA PARTIE'),
                   ),
-                  itemBuilder: (context, index) {
-                    final section = _sections[index];
-                    return _SectionCard(section: section);
-                  },
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.section});
-
-  final _HomeSection section;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).playTapColors;
-
-    return Material(
-      color: colors.surface,
-      borderRadius: PlayTapRadii.mdRadius,
-      child: InkWell(
-        borderRadius: PlayTapRadii.mdRadius,
-        onTap: () => context.push('/coming-soon', extra: section.label),
-        child: Padding(
-          padding: const EdgeInsets.all(PlayTapSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(section.icon, color: colors.accent, size: 28),
-              Text(
-                section.label,
-                style: PlayTapTypography.title.copyWith(
-                  color: colors.textPrimary,
-                ),
-              ),
+              ],
+              const SizedBox(height: PlayTapSpacing.xxl),
+              const Expanded(child: ActivityCategoryGrid()),
             ],
           ),
         ),

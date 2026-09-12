@@ -37,19 +37,66 @@
       `wear-os/app/src/test/kotlin/.../conformance`) — vides, à peupler
       en Phase 1B.
 
-## Phase 1B — Moteurs génériques
+## Phase 1B.1 — Score Libre Mobile (statut : fait)
 
-- [ ] Score Engine + tests déterministes (`playtap-score-engine`),
-      validés contre les fixtures `/contracts/score`.
+Premier vertical slice métier de bout en bout — preuve que toute la
+plomberie fondamentale (event sourcing, Drift, undo, recovery, history,
+conformance) fonctionne avant d'ajouter des règles sportives complexes.
+
+- [x] **Résolution `drift_dev`** : combinaison figée `drift 2.31.0` +
+      `drift_dev 2.31.0` + `build_runner 2.15.1` + `analyzer 8.4.1`
+      (voir `docs/DATA_MODEL.md` — "Résolution drift_dev"). Codegen
+      (`dart run build_runner build`) fonctionne réellement.
+- [x] Score Engine pur FREE_SCORE (`domain/engines/score_engine.dart`) +
+      19 tests unitaires + fixture `/contracts/score/free_score_basic`
+      passée réellement (les 3 autres fixtures — modes non implémentés —
+      explicitement `skip`, jamais un faux succès).
+- [x] Modèle domaine : `Session`/`SessionEvent`/`ScoreRule`(sealed,
+      `FreeScoreRule`)/`ScoreState`/`ScoringSide`/`OriginDevice` —
+      extensible vers TARGET_SCORE/SEQUENTIAL_SCORE/TEAM_SCORE/SETS/
+      BEST_OF/WIN_BY sans réécriture.
+- [x] Base Drift réelle (`AppDatabase`, tables `sessions`/`events`/
+      `presets`, contrainte unique `(sessionId, originDevice,
+      originSequence)`), repositories (`SessionRepository`,
+      `EventRepository`), 12 tests DB réels (SQLite in-memory, pas de
+      mocks) + recovery testée.
+- [x] UI complète : Activités → Score → Score libre → config (2/3/4,
+      noms modifiables) → Active Score Session (zones tactiles pleines,
+      pulse ~150ms, haptic léger, undo AppBar, Terminer + confirmation)
+      → Résumé → Historique (dérivé de Session+Events, pas de colonne
+      `finalScore`). Home affiche "REPRENDRE LA PARTIE" si session active
+      ; choix Reprendre/Abandonner si une nouvelle partie est demandée
+      pendant qu'une autre est active.
+- [x] 40 tests verts (`flutter test`), 3 skip explicites (modes non
+      implémentés) — unitaires Score Engine, DB/repositories, conformance,
+      4 flows widget (2/3/4 participants, reprise de session).
+- [x] **Vérification runtime réelle sur émulateur Android** (AVD
+      `playtap_test`, API 34, provisionné dans cette session) — Chrome
+      web n'est plus un target valide dès que Drift/SQLite réel est
+      présent (`dart:ffi` non supporté sur web, confirmé par un échec de
+      compilation réel). Flow complet joué à la main (config → score →
+      undo → fin → résumé → historique), puis test de recovery réel :
+      `adb shell am force-stop` sur le process, relance à froid,
+      score exact retrouvé, `originSequence` vérifié strictement croissant
+      (1→10, aucun doublon) en lisant directement le fichier SQLite tiré
+      du device.
+- [x] Wear OS non-régressé (`./gradlew assembleDebug --offline` toujours
+      vert).
+
+## Phase 1B.2 — Moteurs génériques restants
+
 - [ ] Timer Engine (monotonic en exécution, timestamps pour la
       persistence — voir `playtap-timer-engine`), validé contre
       `/contracts/timer`.
 - [ ] Interval Engine (`playtap-interval-engine`), validé contre
       `/contracts/interval`.
 - [ ] Workout Sequence Engine (`playtap-workout-engine`).
-- [ ] Runners de conformité Dart/Swift/Kotlin exécutant les mêmes
+- [ ] Runners de conformité Swift/Kotlin (le runner Dart existe depuis
+      la Phase 1B.1 — `mobile/test/conformance/`) exécutant les mêmes
       fixtures `/contracts` (voir `docs/CONFORMANCE.md`).
-- [ ] Persistance locale offline-first (`playtap-offline-first`).
+- [ ] Reste du Score Engine générique : TARGET_SCORE, SEQUENTIAL_SCORE,
+      TEAM_SCORE, SETS, BEST_OF, WIN_BY (voir points d'extension déjà
+      identifiés dans `playtap-sports-rules`).
 
 ## Phase 2 — Presets V1
 
