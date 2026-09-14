@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
 import '../shared/activity_category_grid.dart';
+import '../shared/session_actions.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -12,7 +13,7 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).playTapColors;
-    final activeSession = ref.watch(activeScoreSessionProvider).value;
+    final activeSession = ref.watch(activeSessionProvider).value;
 
     return Scaffold(
       body: SafeArea(
@@ -39,8 +40,8 @@ class HomePage extends ConsumerWidget {
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: () =>
-                        context.push('/score/free/session/${activeSession.id}'),
-                    child: const Text('REPRENDRE LA PARTIE'),
+                        context.push(activeSessionRoute(activeSession)),
+                    child: const Text('REPRENDRE L\'ACTIVITÉ'),
                   ),
                 ),
               ],

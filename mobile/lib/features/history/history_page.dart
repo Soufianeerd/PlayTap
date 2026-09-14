@@ -4,32 +4,68 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
 import '../../domain/engines/free_score_deriver.dart';
+import '../../domain/engines/timer_deriver.dart';
 import '../../domain/models/free_score_snapshot.dart';
 import '../../domain/models/session_category.dart';
+import '../../domain/models/timer_mode.dart';
+import '../../domain/models/timer_snapshot.dart';
 
-/// Completed Score Libre sessions, most recent first — always derived from
-/// Session + Events replay (see docs/DATA_MODEL.md, "HistoryEntry"). Never
-/// a stored `finalScore` column, never fake/demo data.
-final completedFreeScoreSessionsProvider = FutureProvider((ref) async {
+sealed class HistoryEntry {
+  const HistoryEntry();
+}
+
+class ScoreHistoryEntry extends HistoryEntry {
+  const ScoreHistoryEntry(this.snapshot);
+  final FreeScoreSnapshot snapshot;
+}
+
+class TimerHistoryEntry extends HistoryEntry {
+  const TimerHistoryEntry(this.snapshot);
+  final TimerSnapshot snapshot;
+}
+
+/// Completed sessions across all categories, most recent first — always
+/// derived from Session + Events replay (see docs/DATA_MODEL.md,
+/// "HistoryEntry"). Never a stored `finalScore`/summary column, never
+/// fake/demo data.
+final historyProvider = FutureProvider<List<HistoryEntry>>((ref) async {
   final sessionRepo = ref.watch(sessionRepositoryProvider);
   final eventRepo = ref.watch(eventRepositoryProvider);
-  final sessions = await sessionRepo.getCompletedSessions(
-    SessionCategory.score,
-  );
+  final sessions = await sessionRepo.getCompletedSessions();
 
-  final snapshots = <FreeScoreSnapshot>[];
+  final entries = <HistoryEntry>[];
   for (final session in sessions) {
     final events = await eventRepo.getEventsForSession(session.id);
-    snapshots.add(
-      deriveFreeScoreSnapshot(
-        status: session.status,
-        startedAt: session.startedAt,
-        endedAt: session.endedAt,
-        events: events,
-      ),
-    );
+    switch (session.category) {
+      case SessionCategory.score:
+        entries.add(
+          ScoreHistoryEntry(
+            deriveFreeScoreSnapshot(
+              status: session.status,
+              startedAt: session.startedAt,
+              endedAt: session.endedAt,
+              events: events,
+            ),
+          ),
+        );
+      case SessionCategory.timer:
+        entries.add(
+          TimerHistoryEntry(
+            deriveTimerSnapshot(
+              sessionStatus: session.status,
+              startedAt: session.startedAt,
+              endedAt: session.endedAt,
+              events: events,
+              nowMs: DateTime.now().millisecondsSinceEpoch,
+            ),
+          ),
+        );
+      case SessionCategory.training:
+      case SessionCategory.custom:
+        break; // not implemented yet — nothing to show.
+    }
   }
-  return snapshots;
+  return entries;
 });
 
 class HistoryPage extends ConsumerWidget {
@@ -38,15 +74,15 @@ class HistoryPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).playTapColors;
-    final asyncSnapshots = ref.watch(completedFreeScoreSessionsProvider);
+    final asyncEntries = ref.watch(historyProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Historique')),
-      body: asyncSnapshots.when(
+      body: asyncEntries.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Erreur : $e')),
-        data: (snapshots) {
-          if (snapshots.isEmpty) {
+        data: (entries) {
+          if (entries.isEmpty) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(PlayTapSpacing.xl),
@@ -62,11 +98,11 @@ class HistoryPage extends ConsumerWidget {
           }
           return ListView.separated(
             padding: const EdgeInsets.all(PlayTapSpacing.lg),
-            itemCount: snapshots.length,
+            itemCount: entries.length,
             separatorBuilder: (_, _) =>
                 const SizedBox(height: PlayTapSpacing.sm),
             itemBuilder: (context, index) =>
-                _HistoryTile(snapshot: snapshots[index]),
+                _HistoryTile(entry: entries[index]),
           );
         },
       ),
@@ -75,19 +111,27 @@ class HistoryPage extends ConsumerWidget {
 }
 
 class _HistoryTile extends StatelessWidget {
-  const _HistoryTile({required this.snapshot});
+  const _HistoryTile({required this.entry});
 
-  final FreeScoreSnapshot snapshot;
+  final HistoryEntry entry;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).playTapColors;
-    final scoreLine = snapshot.sides
-        .map((s) => '${s.name} ${snapshot.scoreState.scores[s.id] ?? 0}')
-        .join(' — ');
-    final minutes = snapshot.endedAt != null
-        ? snapshot.endedAt!.difference(snapshot.startedAt).inMinutes
-        : 0;
+    final (label, headline, caption) = switch (entry) {
+      ScoreHistoryEntry(:final snapshot) => (
+        'Score libre',
+        snapshot.sides
+            .map((s) => '${s.name} ${snapshot.scoreState.scores[s.id] ?? 0}')
+            .join(' — '),
+        _durationCaption(snapshot.startedAt, snapshot.endedAt),
+      ),
+      TimerHistoryEntry(:final snapshot) => (
+        _timerModeLabel(snapshot.spec.mode),
+        _timerHeadline(snapshot),
+        _durationCaption(snapshot.startedAt, snapshot.endedAt),
+      ),
+    };
 
     return Container(
       padding: const EdgeInsets.all(PlayTapSpacing.lg),
@@ -100,19 +144,19 @@ class _HistoryTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Score libre',
+            label,
             style: PlayTapTypography.label.copyWith(
               color: colors.textSecondary,
             ),
           ),
           const SizedBox(height: PlayTapSpacing.xs),
           Text(
-            scoreLine,
+            headline,
             style: PlayTapTypography.title.copyWith(color: colors.textPrimary),
           ),
           const SizedBox(height: PlayTapSpacing.xs),
           Text(
-            minutes < 1 ? 'Moins d\'une minute' : '$minutes min',
+            caption,
             style: PlayTapTypography.caption.copyWith(
               color: colors.textSecondary,
             ),
@@ -121,4 +165,32 @@ class _HistoryTile extends StatelessWidget {
       ),
     );
   }
+}
+
+String _timerModeLabel(TimerMode mode) => switch (mode) {
+  TimerMode.stopwatch => 'Chronomètre',
+  TimerMode.countdown => 'Countdown',
+  TimerMode.lapTimer => 'Lap Timer',
+  TimerMode.interval => 'Interval',
+};
+
+String _timerHeadline(TimerSnapshot snapshot) {
+  final elapsed = _formatDuration(snapshot.state.elapsedMs);
+  if (snapshot.spec.mode == TimerMode.lapTimer) {
+    final lapCount = snapshot.state.laps.length;
+    return '$elapsed — $lapCount lap${lapCount == 1 ? '' : 's'}';
+  }
+  return elapsed;
+}
+
+String _formatDuration(int ms) {
+  final totalSeconds = ms ~/ 1000;
+  final minutes = totalSeconds ~/ 60;
+  final seconds = totalSeconds % 60;
+  return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+}
+
+String _durationCaption(DateTime startedAt, DateTime? endedAt) {
+  final minutes = endedAt != null ? endedAt.difference(startedAt).inMinutes : 0;
+  return minutes < 1 ? 'Moins d\'une minute' : '$minutes min';
 }

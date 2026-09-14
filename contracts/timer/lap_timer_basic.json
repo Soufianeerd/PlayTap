@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "lap_timer_basic",
+  "engine": "timer",
+  "description": "LAP_TIMER records two laps, with a pause/resume in between. Verifies each lap's cumulative elapsed and per-lap split are both derived from event timestamps alone, and that the paused interval is correctly excluded from both.",
+  "config": {
+    "schemaVersion": 1,
+    "mode": "LAP_TIMER"
+  },
+  "events": [
+    { "id": "e1", "originDevice": "phone", "originSequence": 1, "tOffsetMs": 0,     "type": "TIMER_STARTED", "payload": {} },
+    { "id": "e2", "originDevice": "phone", "originSequence": 2, "tOffsetMs": 5000,  "type": "LAP_RECORDED",  "payload": {} },
+    { "id": "e3", "originDevice": "phone", "originSequence": 3, "tOffsetMs": 6000,  "type": "TIMER_PAUSED",  "payload": {} },
+    { "id": "e4", "originDevice": "phone", "originSequence": 4, "tOffsetMs": 16000, "type": "TIMER_RESUMED", "payload": {} },
+    { "id": "e5", "originDevice": "phone", "originSequence": 5, "tOffsetMs": 20000, "type": "LAP_RECORDED",  "payload": {} }
+  ],
+  "expectedCheckpoints": [
+    {
+      "atMs": 20000,
+      "status": "RUNNING",
+      "elapsedMs": 10000,
+      "laps": [
+        { "lapNumber": 1, "cumulativeElapsedMs": 5000, "splitMs": 5000 },
+        { "lapNumber": 2, "cumulativeElapsedMs": 10000, "splitMs": 5000 }
+      ]
+    }
+  ]
+}

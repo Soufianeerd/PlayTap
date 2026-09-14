@@ -6,10 +6,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtap/data/local/app_database.dart';
 import 'package:playtap/data/repositories/event_repository.dart';
 import 'package:playtap/data/repositories/session_repository.dart';
+import 'package:playtap/domain/engines/timer_deriver.dart';
 import 'package:playtap/domain/events/session_event.dart';
 import 'package:playtap/domain/models/origin_device.dart';
 import 'package:playtap/domain/models/session_category.dart';
 import 'package:playtap/domain/models/session_status.dart';
+import 'package:playtap/domain/models/timer_mode.dart';
+import 'package:playtap/domain/models/timer_spec.dart';
+import 'package:playtap/domain/models/timer_status.dart';
 
 /// Drift/NativeDatabase round-trips a DateTime's exact instant but returns
 /// it tagged `isUtc: false` (correct: it's the local-time representation of
@@ -59,7 +63,7 @@ void main() {
           presetRef: 'free_score',
           startedAt: DateTime.utc(2026, 1, 1),
         );
-        final active = await sessions.getActiveSession(SessionCategory.score);
+        final active = await sessions.getActiveSession();
         expect(active?.id, 's1');
       },
     );
@@ -80,7 +84,7 @@ void main() {
       final fetched = await sessions.getSessionById('s1');
       expect(fetched!.status, SessionStatus.completed);
       expect(fetched.endedAt, sameMoment(DateTime.utc(2026, 1, 1, 0, 10)));
-      expect(await sessions.getActiveSession(SessionCategory.score), isNull);
+      expect(await sessions.getActiveSession(), isNull);
     });
 
     test(
@@ -101,7 +105,7 @@ void main() {
         final fetched = await sessions.getSessionById('s1');
         expect(fetched!.status, SessionStatus.abandoned);
         expect(
-          await sessions.getCompletedSessions(SessionCategory.score),
+          await sessions.getCompletedSessions(category: SessionCategory.score),
           isEmpty,
         );
       },
@@ -122,7 +126,7 @@ void main() {
         );
       }
       final completed = await sessions.getCompletedSessions(
-        SessionCategory.score,
+        category: SessionCategory.score,
       );
       expect(completed.map((s) => s.id).toList(), ['s3', 's2', 's1']);
     });
@@ -137,9 +141,9 @@ void main() {
       );
 
       final emissions = <String?>[];
-      final sub = sessions
-          .watchActiveSession(SessionCategory.score)
-          .listen((s) => emissions.add(s?.id));
+      final sub = sessions.watchActiveSession().listen(
+        (s) => emissions.add(s?.id),
+      );
 
       await Future<void>.delayed(Duration.zero);
       await sessions.completeSession(
@@ -266,6 +270,178 @@ void main() {
     });
   });
 
+  group('Timer persistence', () {
+    const countdownSpec = TimerSpec(
+      schemaVersion: 1,
+      mode: TimerMode.countdown,
+      durationTargetMs: 60000,
+    );
+
+    Future<void> createTimerSession(String id, {DateTime? startedAt}) =>
+        sessions.createSession(
+          id: id,
+          category: SessionCategory.timer,
+          ownerDevice: OriginDevice.phone,
+          presetRef: 'countdown',
+          startedAt: startedAt ?? DateTime.utc(2026, 1, 1),
+        );
+
+    test('SESSION_STARTED payload round-trips the TimerSpec exactly', () async {
+      await createTimerSession('t1');
+      await events.appendPhoneEvent(
+        id: 'e1',
+        sessionId: 't1',
+        type: SessionEventType.sessionStarted,
+        payload: {'timerSpec': countdownSpec.toJson()},
+        timestamp: DateTime.utc(2026, 1, 1),
+      );
+
+      final fetched = await events.getEventsForSession('t1');
+      final decodedSpec = TimerSpec.fromJson(
+        fetched.single.payload['timerSpec'] as Map<String, dynamic>,
+      );
+      expect(decodedSpec.schemaVersion, countdownSpec.schemaVersion);
+      expect(decodedSpec.mode, countdownSpec.mode);
+      expect(decodedSpec.durationTargetMs, countdownSpec.durationTargetMs);
+    });
+
+    test(
+      'start/pause/resume/lap/complete persist and replay to the correct TimerState',
+      () async {
+        await createTimerSession('t1', startedAt: DateTime.utc(2026, 1, 1));
+        await events.appendPhoneEvent(
+          id: 'e1',
+          sessionId: 't1',
+          type: SessionEventType.sessionStarted,
+          payload: {
+            'timerSpec': const TimerSpec(
+              schemaVersion: 1,
+              mode: TimerMode.lapTimer,
+            ).toJson(),
+          },
+          timestamp: DateTime.utc(2026, 1, 1),
+        );
+        await events.appendPhoneEvent(
+          id: 'e2',
+          sessionId: 't1',
+          type: SessionEventType.timerStarted,
+          payload: const {},
+          timestamp: DateTime.utc(2026, 1, 1),
+        );
+        await events.appendPhoneEvent(
+          id: 'e3',
+          sessionId: 't1',
+          type: SessionEventType.lapRecorded,
+          payload: const {},
+          timestamp: DateTime.utc(2026, 1, 1, 0, 0, 5),
+        );
+        await events.appendPhoneEvent(
+          id: 'e4',
+          sessionId: 't1',
+          type: SessionEventType.timerPaused,
+          payload: const {},
+          timestamp: DateTime.utc(2026, 1, 1, 0, 0, 6),
+        );
+        await events.appendPhoneEvent(
+          id: 'e5',
+          sessionId: 't1',
+          type: SessionEventType.timerResumed,
+          payload: const {},
+          timestamp: DateTime.utc(2026, 1, 1, 0, 0, 16),
+        );
+        await events.appendPhoneEvent(
+          id: 'e6',
+          sessionId: 't1',
+          type: SessionEventType.timerCompleted,
+          payload: const {},
+          timestamp: DateTime.utc(2026, 1, 1, 0, 0, 26),
+        );
+        await sessions.completeSession(
+          't1',
+          endedAt: DateTime.utc(2026, 1, 1, 0, 0, 26),
+        );
+
+        final session = await sessions.getSessionById('t1');
+        final fetchedEvents = await events.getEventsForSession('t1');
+        final snapshot = deriveTimerSnapshot(
+          sessionStatus: session!.status,
+          startedAt: session.startedAt,
+          endedAt: session.endedAt,
+          events: fetchedEvents,
+          nowMs: DateTime.utc(2026, 1, 1, 0, 0, 26).millisecondsSinceEpoch,
+        );
+
+        expect(snapshot.state.status, TimerStatus.completed);
+        // 6s running (0->6) + 10s running (16->26) = 16s.
+        expect(snapshot.state.elapsedMs, 16000);
+        expect(snapshot.state.laps, hasLength(1));
+        expect(snapshot.state.laps.single.cumulativeElapsedMs, 5000);
+        expect(session.status, SessionStatus.completed);
+      },
+    );
+
+    test('originSequence continues correctly for a Timer session after '
+        'process restart (new AppDatabase over the same executor)', () async {
+      drift.driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+      final executor = NativeDatabase.memory();
+      final db1 = AppDatabase(executor);
+      final sessionRepo1 = SessionRepository(db1);
+      final eventRepo1 = EventRepository(db1);
+
+      await sessionRepo1.createSession(
+        id: 't1',
+        category: SessionCategory.timer,
+        ownerDevice: OriginDevice.phone,
+        presetRef: 'stopwatch',
+        startedAt: DateTime.utc(2026, 1, 1),
+      );
+      await eventRepo1.appendPhoneEvent(
+        id: 'e1',
+        sessionId: 't1',
+        type: SessionEventType.sessionStarted,
+        payload: {
+          'timerSpec': const TimerSpec(
+            schemaVersion: 1,
+            mode: TimerMode.stopwatch,
+          ).toJson(),
+        },
+        timestamp: DateTime.utc(2026, 1, 1),
+      );
+      await eventRepo1.appendPhoneEvent(
+        id: 'e2',
+        sessionId: 't1',
+        type: SessionEventType.timerStarted,
+        payload: const {},
+        timestamp: DateTime.utc(2026, 1, 1),
+      );
+
+      // Simulate process death: a fresh AppDatabase over the same
+      // underlying executor, never closing db1 first (see the Recovery
+      // group above for why this is safe and representative).
+      final db2 = AppDatabase(executor);
+      final sessionRepo2 = SessionRepository(db2);
+      final eventRepo2 = EventRepository(db2);
+
+      final active = await sessionRepo2.getActiveSession();
+      expect(active?.id, 't1');
+
+      // originSequence must continue from 3, not reset to 1.
+      final e3 = await eventRepo2.appendPhoneEvent(
+        id: 'e3',
+        sessionId: 't1',
+        type: SessionEventType.timerPaused,
+        payload: const {},
+        timestamp: DateTime.utc(2026, 1, 1, 0, 0, 10),
+      );
+      expect(e3.originSequence, 3);
+
+      final allEvents = await eventRepo2.getEventsForSession('t1');
+      expect(allEvents.map((e) => e.originSequence), [1, 2, 3]);
+
+      await db1.close();
+    });
+  });
+
   group('Recovery', () {
     test(
       'a fresh AppDatabase instance over the same file sees prior writes',
@@ -304,9 +480,7 @@ void main() {
         final sessionRepo2 = SessionRepository(db2);
         final eventRepo2 = EventRepository(db2);
 
-        final active = await sessionRepo2.getActiveSession(
-          SessionCategory.score,
-        );
+        final active = await sessionRepo2.getActiveSession();
         expect(active?.id, 's1');
         final recoveredEvents = await eventRepo2.getEventsForSession('s1');
         expect(recoveredEvents, hasLength(1));

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtap/app/app.dart';
 import 'package:playtap/app/providers/database_providers.dart';
+import 'package:playtap/core/time/app_clock.dart';
 import 'package:playtap/data/local/app_database.dart';
 
 /// A fresh in-memory database per test (see the Phase 1B.1 brief, section
@@ -24,6 +25,30 @@ Widget appWithDb(AppDatabase db) {
 }
 
 Widget appWithFreshDb() => appWithDb(freshTestDb());
+
+/// For Timer flow tests: overrides both the database and the clock so
+/// elapsed time is driven by [FakeClock.advance] rather than real wall-clock
+/// waits (see the Phase 1B.2 brief, section 31 — no real-time sleeps).
+Widget appWithClock(AppDatabase db, AppClock clock) {
+  return ProviderScope(
+    overrides: [
+      databaseProvider.overrideWithValue(db),
+      clockProvider.overrideWithValue(clock),
+    ],
+    child: const PlayTapApp(),
+  );
+}
+
+/// The active Timer session page runs a live ~200ms repaint ticker for as
+/// long as it's the current screen (see `active_timer_session_page.dart`),
+/// so `pumpAndSettle` never sees "no more frames pending" while it's
+/// mounted — entering it, acting on it, and leaving it must all pump a
+/// bounded number of frames instead.
+Future<void> pumpTimer(WidgetTester tester) async {
+  for (var i = 0; i < 20; i++) {
+    await tester.pump(const Duration(milliseconds: 30));
+  }
+}
 
 Future<void> startFreeScoreSession(
   WidgetTester tester, {
@@ -77,7 +102,7 @@ void main() {
     );
   });
 
-  testWidgets('Tapping Timer navigates to the coming-soon page', (
+  testWidgets('Tapping Timer navigates to the Timer presets page', (
     tester,
   ) async {
     await tester.pumpWidget(appWithFreshDb());
@@ -86,7 +111,9 @@ void main() {
     await tester.tap(find.text('Timer'));
     await tester.pumpAndSettle();
 
-    expect(find.text('En cours de construction interne'), findsOneWidget);
+    expect(find.text('Chronomètre'), findsOneWidget);
+    expect(find.text('Countdown'), findsOneWidget);
+    expect(find.text('Lap Timer'), findsOneWidget);
   });
 
   testWidgets('FLOW 1 — 2 participants: score, undo, complete, history', (
@@ -201,9 +228,9 @@ void main() {
     await tester.pumpWidget(appWithDb(db));
     await tester.pumpAndSettle();
 
-    expect(find.text('REPRENDRE LA PARTIE'), findsOneWidget);
+    expect(find.text('REPRENDRE L\'ACTIVITÉ'), findsOneWidget);
 
-    await tester.tap(find.text('REPRENDRE LA PARTIE'));
+    await tester.tap(find.text('REPRENDRE L\'ACTIVITÉ'));
     await tester.pumpAndSettle();
 
     expect(find.text('2'), findsOneWidget); // Joueur 1, recovered exactly
@@ -213,4 +240,184 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('3'), findsOneWidget);
   });
+
+  testWidgets(
+    'TIMER FLOW — Stopwatch: pause freezes elapsed, resume continues, '
+    'terminer lands in history',
+    (tester) async {
+      final clock = FakeClock();
+      await tester.pumpWidget(appWithClock(freshTestDb(), clock));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Activités'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Chronomètre'));
+      await pumpTimer(tester); // now on the ticker-driven session page
+
+      expect(find.text('00:00.00'), findsOneWidget);
+
+      clock.advance(const Duration(seconds: 3));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('00:03.00'), findsOneWidget);
+
+      await tester.tap(find.text('PAUSE'));
+      await pumpTimer(tester);
+
+      // Frozen while paused, even though the clock keeps moving.
+      clock.advance(const Duration(seconds: 5));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('00:03.00'), findsOneWidget);
+
+      await tester.tap(find.text('REPRENDRE'));
+      await pumpTimer(tester);
+
+      clock.advance(const Duration(seconds: 2));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('00:05.00'), findsOneWidget);
+
+      await tester.tap(find.text('TERMINER LA SESSION'));
+      await pumpTimer(tester); // confirmation dialog
+      await tester.tap(find.text('TERMINER'));
+      await pumpTimer(tester); // leaves the ticker page for good
+      // The ticker is gone now — safe to let any in-flight page
+      // transition fully settle before asserting on the result.
+      await tester.pumpAndSettle();
+
+      // Summary screen.
+      expect(find.text('Chronomètre'), findsOneWidget);
+      expect(find.text('00:05'), findsOneWidget);
+
+      await tester.tap(find.text('TERMINER'));
+      await tester.pumpAndSettle();
+
+      // Landed on History with the completed session.
+      expect(find.textContaining('00:05'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'TIMER FLOW — Countdown completes on its own and lands on the summary',
+    (tester) async {
+      final clock = FakeClock();
+      await tester.pumpWidget(appWithClock(freshTestDb(), clock));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Activités'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Countdown'));
+      await tester.pumpAndSettle(); // config page, no live ticker yet
+
+      await tester.tap(find.text('30s'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('COMMENCER'));
+      await pumpTimer(tester); // now on the ticker-driven session page
+
+      expect(find.text('00:30.00'), findsOneWidget);
+
+      // Cross the finish line — the live ticker must detect this and
+      // persist TIMER_COMPLETED exactly once, then navigate on its own.
+      clock.advance(const Duration(seconds: 30));
+      await pumpTimer(tester);
+      // The ticker page auto-navigated away on completion — safe to let
+      // any in-flight page transition fully settle now.
+      await tester.pumpAndSettle();
+
+      expect(find.text('Countdown'), findsOneWidget);
+      expect(find.text('00:30'), findsOneWidget); // full duration elapsed
+    },
+  );
+
+  testWidgets('TIMER FLOW — Lap Timer records laps with correct splits', (
+    tester,
+  ) async {
+    final clock = FakeClock();
+    await tester.pumpWidget(appWithClock(freshTestDb(), clock));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Activités'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Timer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lap Timer'));
+    await pumpTimer(tester); // now on the ticker-driven session page
+
+    clock.advance(const Duration(seconds: 3));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('LAP'));
+    await pumpTimer(tester);
+
+    expect(find.text('Lap 1'), findsOneWidget);
+    expect(find.text('00:03.00'), findsWidgets); // main display + split
+
+    clock.advance(const Duration(seconds: 4));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('LAP'));
+    await pumpTimer(tester);
+
+    expect(find.text('Lap 2'), findsOneWidget);
+    expect(find.text('00:04.00'), findsOneWidget); // split, not cumulative
+
+    await tester.tap(find.text('TERMINER LA SESSION'));
+    await pumpTimer(tester); // confirmation dialog
+    await tester.tap(find.text('TERMINER'));
+    await pumpTimer(tester); // leaves the ticker page for good
+    // The ticker is gone now — safe to let any in-flight page transition
+    // fully settle before asserting on the result.
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lap Timer'), findsOneWidget);
+    expect(find.text('00:07'), findsOneWidget);
+    expect(find.text('2 laps'), findsOneWidget);
+
+    await tester.tap(find.text('TERMINER'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('00:07 — 2 laps'), findsOneWidget);
+  });
+
+  testWidgets(
+    'TIMER FLOW — a Timer session resumes after simulated app restart, '
+    'elapsed accounts for wall-clock time while the process was dead',
+    (tester) async {
+      final clock = FakeClock();
+      final db = freshTestDb();
+
+      await tester.pumpWidget(appWithClock(db, clock));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Activités'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Chronomètre'));
+      await pumpTimer(tester); // now on the ticker-driven session page
+
+      clock.advance(const Duration(seconds: 4));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('00:04.00'), findsOneWidget);
+
+      // Simulate the process dying while the stopwatch keeps "running"
+      // (from the persisted log's point of view) and being relaunched 6s
+      // of wall-clock time later — the monotonic clock resets, but
+      // recovery must still account for the full 10s via timestamps.
+      clock.simulateProcessRestart(
+        wallClockAdvance: const Duration(seconds: 6),
+      );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpWidget(appWithClock(db, clock));
+      await tester.pumpAndSettle();
+
+      expect(find.text('REPRENDRE L\'ACTIVITÉ'), findsOneWidget);
+
+      await tester.tap(find.text('REPRENDRE L\'ACTIVITÉ'));
+      await pumpTimer(tester); // now on the ticker-driven session page
+
+      expect(find.text('00:10.00'), findsOneWidget);
+    },
+  );
 }

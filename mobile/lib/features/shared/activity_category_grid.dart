@@ -16,7 +16,7 @@ class ActivityCategory {
 
 const List<ActivityCategory> activityCategories = [
   ActivityCategory('Score', Icons.sports_tennis_outlined, '/activities/score'),
-  ActivityCategory('Timer', Icons.timer_outlined, '/coming-soon'),
+  ActivityCategory('Timer', Icons.timer_outlined, '/activities/timer'),
   ActivityCategory('Training', Icons.fitness_center_outlined, '/coming-soon'),
   ActivityCategory('Custom', Icons.tune_outlined, '/coming-soon'),
 ];

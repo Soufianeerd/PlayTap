@@ -74,26 +74,20 @@ class SessionRepository {
     return row == null ? null : _toDomain(row);
   }
 
-  /// The single active session for [category], if any (see Release 0.1 —
-  /// exactly one active session at a time on the phone).
-  Future<SessionSummary?> getActiveSession(SessionCategory category) async {
+  /// The single active session across *all* categories, if any (see
+  /// Release 0.1 / Phase 1B.2 section 27 — exactly one active session at a
+  /// time on the phone, Score and Timer share the same invariant).
+  Future<SessionSummary?> getActiveSession() async {
     final row =
-        await (_db.select(_db.sessions)..where(
-              (t) =>
-                  t.category.equals(category.toJson()) &
-                  t.status.equals(SessionStatus.active.toJson()),
-            ))
+        await (_db.select(_db.sessions)
+              ..where((t) => t.status.equals(SessionStatus.active.toJson())))
             .getSingleOrNull();
     return row == null ? null : _toDomain(row);
   }
 
-  Stream<SessionSummary?> watchActiveSession(SessionCategory category) {
+  Stream<SessionSummary?> watchActiveSession() {
     final query = _db.select(_db.sessions)
-      ..where(
-        (t) =>
-            t.category.equals(category.toJson()) &
-            t.status.equals(SessionStatus.active.toJson()),
-      );
+      ..where((t) => t.status.equals(SessionStatus.active.toJson()));
     return query.watchSingleOrNull().map(
       (row) => row == null ? null : _toDomain(row),
     );
@@ -117,20 +111,21 @@ class SessionRepository {
     );
   }
 
-  /// Completed sessions for [category], most recent first (see
-  /// docs/DATA_MODEL.md — HistoryEntry is a derived view, not stored here).
-  Future<List<SessionSummary>> getCompletedSessions(
-    SessionCategory category,
-  ) async {
-    final rows =
-        await (_db.select(_db.sessions)
-              ..where(
-                (t) =>
-                    t.category.equals(category.toJson()) &
-                    t.status.equals(SessionStatus.completed.toJson()),
-              )
-              ..orderBy([(t) => OrderingTerm.desc(t.startedAt)]))
-            .get();
+  /// Completed sessions, most recent first — all categories unless
+  /// [category] is given (see docs/DATA_MODEL.md — HistoryEntry is a
+  /// derived view, not stored here).
+  Future<List<SessionSummary>> getCompletedSessions({
+    SessionCategory? category,
+  }) async {
+    final query = _db.select(_db.sessions)
+      ..where((t) {
+        final completed = t.status.equals(SessionStatus.completed.toJson());
+        return category == null
+            ? completed
+            : completed & t.category.equals(category.toJson());
+      })
+      ..orderBy([(t) => OrderingTerm.desc(t.startedAt)]);
+    final rows = await query.get();
     return rows.map(_toDomain).toList();
   }
 

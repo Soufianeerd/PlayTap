@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
 import '../../domain/models/scoring_side.dart';
-import '../../domain/models/session_category.dart';
+import '../shared/active_session_conflict_dialog.dart';
+import '../shared/session_actions.dart';
 import 'free_score_actions.dart';
 
 class FreeScoreConfigPage extends ConsumerStatefulWidget {
@@ -46,41 +47,19 @@ class _FreeScoreConfigPageState extends ConsumerState<FreeScoreConfigPage> {
 
     final existing = await ref
         .read(sessionRepositoryProvider)
-        .getActiveSession(SessionCategory.score);
+        .getActiveSession();
 
     if (!mounted) return;
 
     if (existing != null) {
-      final choice = await showDialog<_ActiveSessionChoice>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Une partie est déjà en cours'),
-          content: const Text(
-            'Vous pouvez reprendre la partie en cours ou l\'abandonner pour en démarrer une nouvelle.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () =>
-                  Navigator.of(context).pop(_ActiveSessionChoice.resume),
-              child: const Text('REPRENDRE LA PARTIE'),
-            ),
-            TextButton(
-              onPressed: () =>
-                  Navigator.of(context).pop(_ActiveSessionChoice.abandon),
-              child: const Text('ABANDONNER ET COMMENCER'),
-            ),
-          ],
-        ),
-      );
+      final choice = await showActiveSessionConflictDialog(context);
 
       if (choice == null) {
         setState(() => _starting = false);
         return;
       }
-      if (choice == _ActiveSessionChoice.resume) {
-        if (mounted) {
-          context.pushReplacement('/score/free/session/${existing.id}');
-        }
+      if (choice == ActiveSessionChoice.resume) {
+        if (mounted) context.pushReplacement(activeSessionRoute(existing));
         return;
       }
       await abandonSession(ref, existing.id);
@@ -149,5 +128,3 @@ class _FreeScoreConfigPageState extends ConsumerState<FreeScoreConfigPage> {
     );
   }
 }
-
-enum _ActiveSessionChoice { resume, abandon }

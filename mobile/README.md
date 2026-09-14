@@ -36,10 +36,11 @@ touchent la persistance.
 ```
 app/        point d'entrée, router, providers Riverpod, design tokens (theme/)
 core/       utilitaires transverses (ids, time, errors)
-domain/     modèles, events, moteurs purs (Score Engine, ...) — testables
-            sans Flutter/Riverpod/Drift
+domain/     modèles, events, moteurs purs (Score Engine, Timer Engine, ...)
+            — testables sans Flutter/Riverpod/Drift
 data/       persistance locale (Drift : tables, connexion, repositories)
-features/   écrans par domaine (home, activities, score_free, history, settings)
+features/   écrans par domaine (home, activities, score_free, timer,
+            history, settings)
 ```
 
 ## Principes

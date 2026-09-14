@@ -13,7 +13,8 @@ const _freeScorePresetRef = 'free_score';
 
 /// Creates a new Score Libre session and its SESSION_STARTED event
 /// atomically, then returns the new session id (see docs/RELEASE_0_1.md —
-/// callers must have already handled the "one active session" choice).
+/// callers must have already handled the "one active session" choice, see
+/// `features/shared/session_actions.dart`).
 Future<String> startFreeScoreSession(
   WidgetRef ref,
   List<ScoringSide> sides,
@@ -52,25 +53,4 @@ Future<String> startFreeScoreSession(
   });
 
   return sessionId;
-}
-
-/// Abandons an in-progress session (see docs/DATA_MODEL.md — ABANDONED is
-/// distinct from COMPLETED and excluded from the main history).
-Future<void> abandonSession(WidgetRef ref, String sessionId) async {
-  final now = DateTime.now().toUtc();
-  final db = ref.read(databaseProvider);
-  await db.transaction(() async {
-    await ref
-        .read(eventRepositoryProvider)
-        .appendPhoneEvent(
-          id: _uuid.v4(),
-          sessionId: sessionId,
-          type: SessionEventType.sessionAbandoned,
-          payload: const {},
-          timestamp: now,
-        );
-    await ref
-        .read(sessionRepositoryProvider)
-        .abandonSession(sessionId, endedAt: now);
-  });
 }

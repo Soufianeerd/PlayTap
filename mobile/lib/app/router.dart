@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/activities/activities_page.dart';
 import '../features/activities/score_presets_page.dart';
+import '../features/activities/timer_presets_page.dart';
 import '../features/history/history_page.dart';
 import '../features/home/home_page.dart';
 import '../features/score_free/active_free_score_session_page.dart';
@@ -10,6 +11,9 @@ import '../features/score_free/free_score_config_page.dart';
 import '../features/score_free/score_summary_page.dart';
 import '../features/settings/settings_page.dart';
 import '../features/shared/coming_soon_page.dart';
+import '../features/timer/active_timer_session_page.dart';
+import '../features/timer/countdown_config_page.dart';
+import '../features/timer/timer_summary_page.dart';
 
 /// Builds a fresh root navigator. Kept as a factory (not a top-level
 /// singleton) so each [PlayTapApp] instance — including each one created in
@@ -80,6 +84,24 @@ GoRouter createAppRouter() => GoRouter(
       path: '/score/free/summary/:sessionId',
       builder: (context, state) =>
           ScoreSummaryPage(sessionId: state.pathParameters['sessionId']!),
+    ),
+    GoRoute(
+      path: '/activities/timer',
+      builder: (context, state) => const TimerPresetsPage(),
+    ),
+    GoRoute(
+      path: '/timer/countdown/config',
+      builder: (context, state) => const CountdownConfigPage(),
+    ),
+    GoRoute(
+      path: '/timer/session/:sessionId',
+      builder: (context, state) =>
+          ActiveTimerSessionPage(sessionId: state.pathParameters['sessionId']!),
+    ),
+    GoRoute(
+      path: '/timer/summary/:sessionId',
+      builder: (context, state) =>
+          TimerSummaryPage(sessionId: state.pathParameters['sessionId']!),
     ),
   ],
 );
