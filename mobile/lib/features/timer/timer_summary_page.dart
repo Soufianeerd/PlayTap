@@ -38,15 +38,16 @@ class TimerSummaryPage extends ConsumerWidget {
                 const SizedBox(height: PlayTapSpacing.xxl),
                 Text(
                   _formatDuration(snapshot.state.elapsedMs),
-                  style: PlayTapTypography.title.copyWith(color: colors.accent),
+                  style: PlayTapTypography.scoreDisplay.copyWith(
+                    fontSize: 56,
+                    color: colors.primary,
+                  ),
                 ),
                 if (snapshot.spec.mode == TimerMode.lapTimer) ...[
                   const SizedBox(height: PlayTapSpacing.sm),
                   Text(
                     '${snapshot.state.laps.length} lap${snapshot.state.laps.length == 1 ? '' : 's'}',
-                    style: PlayTapTypography.body.copyWith(
-                      color: colors.textSecondary,
-                    ),
+                    style: PlayTapTypography.body.copyWith(color: colors.muted),
                   ),
                 ],
                 const SizedBox(height: PlayTapSpacing.lg),
@@ -54,9 +55,7 @@ class TimerSummaryPage extends ConsumerWidget {
                   duration.inMinutes < 1
                       ? 'Moins d\'une minute'
                       : '${duration.inMinutes} min',
-                  style: PlayTapTypography.body.copyWith(
-                    color: colors.textSecondary,
-                  ),
+                  style: PlayTapTypography.body.copyWith(color: colors.muted),
                 ),
                 const Spacer(),
                 SizedBox(

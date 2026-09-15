@@ -7,6 +7,7 @@ import '../../app/theme/theme.dart';
 import '../../domain/models/timer_mode.dart';
 import '../../domain/models/timer_spec.dart';
 import '../shared/active_session_conflict_dialog.dart';
+import '../shared/pill_selector.dart';
 import '../shared/session_actions.dart';
 import 'timer_actions.dart';
 
@@ -87,22 +88,16 @@ class _CountdownConfigPageState extends ConsumerState<CountdownConfigPage> {
                   Text(
                     'Durée rapide',
                     style: PlayTapTypography.label.copyWith(
-                      color: colors.textSecondary,
+                      color: colors.muted,
                     ),
                   ),
                   const SizedBox(height: PlayTapSpacing.sm),
-                  Wrap(
-                    spacing: PlayTapSpacing.sm,
-                    children: [
-                      for (final seconds in _quickPresetsSeconds)
-                        ChoiceChip(
-                          label: Text(_formatQuickLabel(seconds)),
-                          selected: _durationSeconds == seconds,
-                          onSelected: (_) => setState(
-                            () => _controller.text = seconds.toString(),
-                          ),
-                        ),
-                    ],
+                  PillSelector<int>(
+                    options: _quickPresetsSeconds,
+                    labelBuilder: _formatQuickLabel,
+                    value: _durationSeconds ?? -1,
+                    onChanged: (seconds) =>
+                        setState(() => _controller.text = seconds.toString()),
                   ),
                   const SizedBox(height: PlayTapSpacing.xl),
                   TextField(

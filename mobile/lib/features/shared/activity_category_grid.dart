@@ -18,10 +18,15 @@ class ActivityCategory {
 /// Score Libre config — with a single implemented preset, a middle list
 /// screen would only add a tap for nothing (see ScorePresetsPage, kept as
 /// unlinked infrastructure for when more sports return).
+///
+/// `Icons.exposure_plus_1` (not a racket/ball) for Score: Score Libre
+/// scores anything, and Score Libre is the only rule PlayTap 1.0.0's
+/// ScoreEngine actually implements — a sport-specific icon would promise a
+/// preset that doesn't exist yet (see the release brand brief section 9).
 const List<ActivityCategory> activityCategories = [
   ActivityCategory(
     'Compter un score',
-    Icons.sports_tennis_outlined,
+    Icons.exposure_plus_1,
     '/score/free/config',
   ),
   ActivityCategory('Chronométrer', Icons.timer_outlined, '/activities/timer'),
@@ -29,14 +34,20 @@ const List<ActivityCategory> activityCategories = [
 
 /// The 2-category picker used by both Home (quick access) and the Activités
 /// tab (see docs/RELEASE_0_1.md — "Activity library"). One widget, two
-/// entry points, so they can never drift apart. Full-bleed tiles, not a
-/// grid of small cards — PlayTap 1.0.0 only ever has a couple of choices
-/// here, so each one gets real tap area instead of leaving dead space.
+/// entry points, so they can never drift apart. Full-bleed editorial tiles
+/// in the two brand accent colors — violet for Score, lime for Timer (see
+/// the release brand brief section 8) — not a grid of small Material cards.
 class ActivityCategoryGrid extends StatelessWidget {
   const ActivityCategoryGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).playTapColors;
+    final brandPairs = [
+      (background: colors.primary, foreground: colors.onPrimary),
+      (background: colors.accent, foreground: colors.onAccent),
+    ];
+
     return Column(
       children: [
         for (final (index, category) in activityCategories.indexed) ...[
@@ -45,7 +56,8 @@ class ActivityCategoryGrid extends StatelessWidget {
             child: BigActionTile(
               icon: category.icon,
               label: category.label,
-              alternate: index.isOdd,
+              backgroundColor: brandPairs[index].background,
+              foregroundColor: brandPairs[index].foreground,
               onTap: () => context.push(category.route),
             ),
           ),

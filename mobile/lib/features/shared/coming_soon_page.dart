@@ -37,7 +37,7 @@ class ComingSoonPage extends StatelessWidget {
               Text(
                 '$sectionLabel n\'est pas encore implémenté.',
                 style: PlayTapTypography.body.copyWith(
-                  color: Theme.of(context).playTapColors.textSecondary,
+                  color: Theme.of(context).playTapColors.muted,
                 ),
                 textAlign: TextAlign.center,
               ),

@@ -46,11 +46,11 @@ class ScorePresetsPage extends StatelessWidget {
                       child: Text(
                         preset.label,
                         style: PlayTapTypography.body.copyWith(
-                          color: colors.textPrimary,
+                          color: colors.foreground,
                         ),
                       ),
                     ),
-                    Icon(Icons.chevron_right, color: colors.textSecondary),
+                    Icon(Icons.chevron_right, color: colors.muted),
                   ],
                 ),
               ),

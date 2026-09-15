@@ -182,14 +182,22 @@ class _ActiveTimerBody extends StatelessWidget {
       children: [
         Expanded(
           child: Center(
-            child: Semantics(
-              label:
-                  'Temps ${snapshot.spec.mode == TimerMode.countdown ? "restant" : "écoulé"}',
-              child: Text(
-                _formatMs(displayMs),
-                style: PlayTapTypography.scoreDisplay.copyWith(
-                  fontSize: 72,
-                  color: colors.textPrimary,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: PlayTapSpacing.lg,
+              ),
+              child: Semantics(
+                label:
+                    'Temps ${snapshot.spec.mode == TimerMode.countdown ? "restant" : "écoulé"}',
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    _formatMs(displayMs),
+                    style: PlayTapTypography.scoreDisplay.copyWith(
+                      fontSize: 104,
+                      color: colors.foreground,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -218,22 +226,32 @@ class _ActiveTimerBody extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: onPauseResume,
-                      child: Semantics(
-                        label: isRunning ? 'Mettre en pause' : 'Reprendre',
-                        child: Text(isRunning ? 'PAUSE' : 'REPRENDRE'),
+                    child: SizedBox(
+                      height: 56,
+                      child: FilledButton(
+                        onPressed: onPauseResume,
+                        child: Semantics(
+                          label: isRunning ? 'Mettre en pause' : 'Reprendre',
+                          child: Text(isRunning ? 'PAUSE' : 'REPRENDRE'),
+                        ),
                       ),
                     ),
                   ),
                   if (snapshot.spec.mode == TimerMode.lapTimer) ...[
                     const SizedBox(width: PlayTapSpacing.md),
                     Expanded(
-                      child: FilledButton(
-                        onPressed: isRunning ? onLap : null,
-                        child: Semantics(
-                          label: 'Enregistrer un tour',
-                          child: const Text('LAP'),
+                      child: SizedBox(
+                        height: 56,
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colors.accent,
+                            foregroundColor: colors.onAccent,
+                          ),
+                          onPressed: isRunning ? onLap : null,
+                          child: Semantics(
+                            label: 'Enregistrer un tour',
+                            child: const Text('LAP'),
+                          ),
                         ),
                       ),
                     ),
@@ -274,11 +292,11 @@ class _LapRow extends StatelessWidget {
         children: [
           Text(
             'Lap ${lap.lapNumber}',
-            style: PlayTapTypography.body.copyWith(color: colors.textSecondary),
+            style: PlayTapTypography.body.copyWith(color: colors.muted),
           ),
           Text(
             _formatMs(lap.splitMs),
-            style: PlayTapTypography.body.copyWith(color: colors.textPrimary),
+            style: PlayTapTypography.body.copyWith(color: colors.foreground),
           ),
         ],
       ),

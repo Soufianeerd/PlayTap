@@ -25,6 +25,10 @@ class ScoreSummaryPage extends ConsumerWidget {
               ? view.endedAt!.difference(view.startedAt)
               : Duration.zero;
           final minutes = duration.inMinutes;
+          final scores = view.scoreState.scores;
+          final maxScore = scores.values.isEmpty
+              ? 0
+              : scores.values.reduce((a, b) => a > b ? a : b);
 
           return Padding(
             padding: const EdgeInsets.all(PlayTapSpacing.xl),
@@ -46,14 +50,21 @@ class ScoreSummaryPage extends ConsumerWidget {
                       children: [
                         Text(
                           side.name,
-                          style: PlayTapTypography.title.copyWith(
-                            color: colors.textPrimary,
+                          style: PlayTapTypography.headline.copyWith(
+                            color: colors.foreground,
+                            fontSize: 20,
+                            fontWeight: (scores[side.id] ?? 0) == maxScore
+                                ? FontWeight.w800
+                                : FontWeight.w500,
                           ),
                         ),
                         Text(
-                          '${view.scoreState.scores[side.id] ?? 0}',
-                          style: PlayTapTypography.title.copyWith(
-                            color: colors.accent,
+                          '${scores[side.id] ?? 0}',
+                          style: PlayTapTypography.scoreDisplay.copyWith(
+                            fontSize: 36,
+                            color: (scores[side.id] ?? 0) == maxScore
+                                ? colors.primary
+                                : colors.muted,
                           ),
                         ),
                       ],
@@ -62,9 +73,7 @@ class ScoreSummaryPage extends ConsumerWidget {
                 const SizedBox(height: PlayTapSpacing.lg),
                 Text(
                   minutes < 1 ? 'Moins d\'une minute' : '$minutes min',
-                  style: PlayTapTypography.body.copyWith(
-                    color: colors.textSecondary,
-                  ),
+                  style: PlayTapTypography.body.copyWith(color: colors.muted),
                 ),
                 const Spacer(),
                 SizedBox(

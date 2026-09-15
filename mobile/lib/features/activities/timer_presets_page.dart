@@ -88,6 +88,15 @@ class _TimerPresetsPageState extends ConsumerState<TimerPresetsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).playTapColors;
+    // Restrained brand use (release brief section 16): one neutral tile,
+    // one violet, one lime — not three equally loud accent blocks.
+    final brandPairs = [
+      null,
+      (background: colors.primary, foreground: colors.onPrimary),
+      (background: colors.accent, foreground: colors.onAccent),
+    ];
+
     return Scaffold(
       appBar: AppBar(title: const Text('Timer')),
       body: Padding(
@@ -100,7 +109,8 @@ class _TimerPresetsPageState extends ConsumerState<TimerPresetsPage> {
                 child: BigActionTile(
                   icon: _presetIcons[index],
                   label: preset.label,
-                  alternate: index.isOdd,
+                  backgroundColor: brandPairs[index]?.background,
+                  foregroundColor: brandPairs[index]?.foreground,
                   onTap: _starting ? () {} : () => _onSelect(preset),
                 ),
               ),

@@ -9,15 +9,16 @@ l'écran d'accueil.
 ## Comment tester le parcours principal
 
 **Score Libre**
-1. Accueil → Score → Score libre.
+1. Accueil → "Compter un score" → Nouveau score.
 2. Choisir 2, 3 ou 4 joueurs (renommage optionnel des joueurs).
 3. Commencer → taper sur "+1" pour un ou plusieurs joueurs.
-4. Utiliser "Annuler" (Undo) pour retirer le dernier point si besoin.
+4. Utiliser "Annuler le dernier point" pour retirer le dernier point si
+   besoin.
 5. Terminer la partie → un résumé s'affiche.
 6. Onglet Historique → la partie terminée apparaît.
 
 **Timer**
-1. Accueil → Timer.
+1. Accueil → "Chronométrer".
 2. Choisir Chronomètre, Compte à rebours (configurer une durée) ou Tours.
 3. Pause / Reprise disponibles pendant la session ; "Lap" pour le mode
    Tours.
@@ -36,9 +37,6 @@ où elle en était (l'accueil propose "Reprendre l'activité").
   Bluetooth, pas de position, pas de caméra/micro).
 - Aucune donnée n'est collectée ni transmise — voir
   `privacy-policy-fr.md`.
-- Les onglets "Réglages" n'exposent volontairement aucun réglage dans
-  cette version (message explicite "Aucun réglage disponible pour le
-  moment", pas un bouton mort).
 - Le contenu de l'app est en français dans cette version 1.0.0.
 
 ## Contact pour la review

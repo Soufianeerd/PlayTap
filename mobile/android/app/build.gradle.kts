@@ -62,6 +62,27 @@ android {
     }
 }
 
+// Safety net: a release build silently falling back to the debug key is
+// fine for `flutter run --release` on a dev machine, but must never be
+// mistaken for a real, submittable Store artifact — so make the fallback
+// impossible to miss in the build output (see docs/RELEASE_CHECKLIST.md).
+if (!hasReleaseSigning) {
+    tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }
+        .configureEach {
+            doFirst {
+                logger.warn(
+                    "\n" +
+                        "==================================================================\n" +
+                        "  ATTENTION : ce build RELEASE est signe avec la cle DEBUG.\n" +
+                        "  android/key.properties est introuvable.\n" +
+                        "  Cet .apk/.aab NE DOIT PAS etre soumis au Play Store.\n" +
+                        "  Valide uniquement pour un test local (flutter run --release).\n" +
+                        "==================================================================\n"
+                )
+            }
+        }
+}
+
 flutter {
     source = "../.."
 }

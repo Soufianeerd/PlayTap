@@ -45,29 +45,7 @@ class ActiveFreeScoreSessionPage extends ConsumerWidget {
     final colors = Theme.of(context).playTapColors;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Score libre'),
-        actions: [
-          asyncView.maybeWhen(
-            data: (view) => Tooltip(
-              message: 'Annuler le dernier point',
-              child: IconButton(
-                icon: const Icon(Icons.undo),
-                onPressed: view.isUndoAvailable
-                    ? () => ref
-                          .read(
-                            freeScoreSessionControllerProvider(
-                              sessionId,
-                            ).notifier,
-                          )
-                          .undoLast()
-                    : null,
-              ),
-            ),
-            orElse: () => const SizedBox.shrink(),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Score libre'), toolbarHeight: 44),
       body: asyncView.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(
@@ -75,6 +53,12 @@ class ActiveFreeScoreSessionPage extends ConsumerWidget {
         ),
         data: (view) => Column(
           children: [
+            _UndoBar(
+              enabled: view.isUndoAvailable,
+              onTap: () => ref
+                  .read(freeScoreSessionControllerProvider(sessionId).notifier)
+                  .undoLast(),
+            ),
             Expanded(
               child: _ScoreLayout(
                 sides: view.sides,
@@ -106,6 +90,51 @@ class ActiveFreeScoreSessionPage extends ConsumerWidget {
   }
 }
 
+/// A compact, immediately-findable but clearly secondary Undo control —
+/// see the release brand brief section 15: the AppBar icon it replaces was
+/// too easy to miss, but Undo must never compete visually with scoring.
+class _UndoBar extends StatelessWidget {
+  const _UndoBar({required this.enabled, required this.onTap});
+
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).playTapColors;
+    final color = enabled ? colors.foreground : colors.muted;
+
+    return Material(
+      color: colors.surfaceVariant,
+      child: InkWell(
+        onTap: enabled
+            ? () {
+                HapticFeedback.selectionClick();
+                onTap();
+              }
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: PlayTapSpacing.lg,
+            vertical: PlayTapSpacing.sm,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.undo, size: 18, color: color),
+              const SizedBox(width: PlayTapSpacing.xs),
+              Text(
+                'Annuler le dernier point',
+                style: PlayTapTypography.caption.copyWith(color: color),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ScoreLayout extends StatelessWidget {
   const _ScoreLayout({
     required this.sides,
@@ -119,6 +148,8 @@ class _ScoreLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).playTapColors;
+
     // Fewer participants means more room per tile, so the score can (and
     // should, per the release brief — "SCORE ÉNORME") get bigger: 2 players
     // each get a half-screen tile and a very large digit; 4 players split
@@ -130,13 +161,34 @@ class _ScoreLayout extends StatelessWidget {
       _ => 72.0,
     };
 
+    // Every tile is one of PlayTap's 4 brand colors — never a hand-picked
+    // extra gray — so each participant is a strong, distinct editorial
+    // block (see the release brand brief sections 12-14). Name + position
+    // still carry identity too: color is support, not the only signal.
+    final violet = (background: colors.primary, foreground: colors.onPrimary);
+    final lime = (background: colors.accent, foreground: colors.onAccent);
+    final invertedNeutral = (
+      background: colors.foreground,
+      foreground: colors.background,
+    );
+    final softNeutral = (
+      background: colors.surfaceVariant,
+      foreground: colors.foreground,
+    );
+    final palette = switch (sides.length) {
+      2 => [violet, lime],
+      3 => [violet, lime, softNeutral],
+      _ => [violet, lime, invertedNeutral, softNeutral],
+    };
+
     Widget tile(int index, {bool nameFirst = true}) {
       final side = sides[index];
       return _ScoreTile(
         name: side.name,
         score: scores[side.id] ?? 0,
         nameFirst: nameFirst,
-        alternate: index.isOdd,
+        backgroundColor: palette[index].background,
+        foregroundColor: palette[index].foreground,
         fontSize: scoreFontSize,
         onTap: () => onTapSide(side.id),
       );
@@ -147,7 +199,6 @@ class _ScoreLayout extends StatelessWidget {
         return Column(
           children: [
             Expanded(child: tile(0)),
-            const Divider(height: 1),
             Expanded(child: tile(1, nameFirst: false)),
           ],
         );
@@ -155,12 +206,10 @@ class _ScoreLayout extends StatelessWidget {
         return Column(
           children: [
             Expanded(child: tile(0)),
-            const Divider(height: 1),
             Expanded(
               child: Row(
                 children: [
                   Expanded(child: tile(1)),
-                  const VerticalDivider(width: 1),
                   Expanded(child: tile(2)),
                 ],
               ),
@@ -174,17 +223,14 @@ class _ScoreLayout extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(child: tile(0)),
-                  const VerticalDivider(width: 1),
                   Expanded(child: tile(1)),
                 ],
               ),
             ),
-            const Divider(height: 1),
             Expanded(
               child: Row(
                 children: [
                   Expanded(child: tile(2)),
-                  const VerticalDivider(width: 1),
                   Expanded(child: tile(3)),
                 ],
               ),
@@ -203,16 +249,18 @@ class _ScoreTile extends StatefulWidget {
     required this.score,
     required this.onTap,
     required this.fontSize,
+    required this.backgroundColor,
+    required this.foregroundColor,
     this.nameFirst = true,
-    this.alternate = false,
   });
 
   final String name;
   final int score;
   final VoidCallback onTap;
   final double fontSize;
+  final Color backgroundColor;
+  final Color foregroundColor;
   final bool nameFirst;
-  final bool alternate;
 
   @override
   State<_ScoreTile> createState() => _ScoreTileState();
@@ -243,17 +291,18 @@ class _ScoreTileState extends State<_ScoreTile>
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).playTapColors;
     final nameText = Text(
       widget.name,
-      style: PlayTapTypography.title.copyWith(color: colors.textSecondary),
+      style: PlayTapTypography.title.copyWith(
+        color: widget.foregroundColor.withValues(alpha: 0.72),
+      ),
     );
     final scoreText = ScaleTransition(
       scale: _pulse,
       child: Text(
         '${widget.score}',
         style: PlayTapTypography.scoreDisplay.copyWith(
-          color: colors.textPrimary,
+          color: widget.foregroundColor,
           fontSize: widget.fontSize,
         ),
       ),
@@ -263,7 +312,7 @@ class _ScoreTileState extends State<_ScoreTile>
       button: true,
       label: 'Ajouter un point à ${widget.name}',
       child: Material(
-        color: widget.alternate ? colors.surfaceVariant : colors.surface,
+        color: widget.backgroundColor,
         child: InkWell(
           onTap: () {
             HapticFeedback.lightImpact();

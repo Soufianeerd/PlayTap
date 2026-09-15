@@ -92,7 +92,7 @@ class HistoryPage extends ConsumerWidget {
                     Text(
                       'Aucune activité pour le moment.',
                       style: PlayTapTypography.title.copyWith(
-                        color: colors.textPrimary,
+                        color: colors.foreground,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -100,7 +100,7 @@ class HistoryPage extends ConsumerWidget {
                     Text(
                       'Démarre un score ou un chronomètre pour commencer.',
                       style: PlayTapTypography.body.copyWith(
-                        color: colors.textSecondary,
+                        color: colors.muted,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -110,10 +110,10 @@ class HistoryPage extends ConsumerWidget {
             );
           }
           return ListView.separated(
-            padding: const EdgeInsets.all(PlayTapSpacing.lg),
+            padding: const EdgeInsets.symmetric(horizontal: PlayTapSpacing.lg),
             itemCount: entries.length,
             separatorBuilder: (_, _) =>
-                const SizedBox(height: PlayTapSpacing.sm),
+                Divider(height: 1, color: colors.border),
             itemBuilder: (context, index) =>
                 _HistoryTile(entry: entries[index]),
           );
@@ -146,33 +146,24 @@ class _HistoryTile extends StatelessWidget {
       ),
     };
 
-    return Container(
-      padding: const EdgeInsets.all(PlayTapSpacing.lg),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: PlayTapRadii.mdRadius,
-        border: Border.all(color: colors.border),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: PlayTapSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: PlayTapTypography.label.copyWith(
-              color: colors.textSecondary,
-            ),
+            style: PlayTapTypography.label.copyWith(color: colors.muted),
           ),
           const SizedBox(height: PlayTapSpacing.xs),
           Text(
             headline,
-            style: PlayTapTypography.title.copyWith(color: colors.textPrimary),
+            style: PlayTapTypography.title.copyWith(color: colors.foreground),
           ),
           const SizedBox(height: PlayTapSpacing.xs),
           Text(
             caption,
-            style: PlayTapTypography.caption.copyWith(
-              color: colors.textSecondary,
-            ),
+            style: PlayTapTypography.caption.copyWith(color: colors.muted),
           ),
         ],
       ),

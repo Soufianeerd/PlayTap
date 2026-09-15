@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,39 +16,40 @@ class HomePage extends ConsumerWidget {
     final colors = Theme.of(context).playTapColors;
     final activeSession = ref.watch(activeSessionProvider).value;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: PlayTapSpacing.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: PlayTapSpacing.xxl),
-              Text(
-                'PlayTap',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: PlayTapSpacing.xs),
-              Text(
-                'Score et chrono, prêts en un tap.',
-                style: PlayTapTypography.body.copyWith(
-                  color: colors.textSecondary,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: PlayTapTheme.overlayStyleOf(context),
+      child: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: PlayTapSpacing.xl),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: PlayTapSpacing.xxl),
+                Text(
+                  'PlayTap',
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
-              ),
-              if (activeSession != null) ...[
-                const SizedBox(height: PlayTapSpacing.lg),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: () =>
-                        context.push(activeSessionRoute(activeSession)),
-                    child: const Text('REPRENDRE L\'ACTIVITÉ'),
+                const SizedBox(height: PlayTapSpacing.xs),
+                Text(
+                  'Score et chrono, prêts en un tap.',
+                  style: PlayTapTypography.body.copyWith(color: colors.muted),
+                ),
+                if (activeSession != null) ...[
+                  const SizedBox(height: PlayTapSpacing.lg),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () =>
+                          context.push(activeSessionRoute(activeSession)),
+                      child: const Text('REPRENDRE L\'ACTIVITÉ'),
+                    ),
                   ),
-                ),
+                ],
+                const SizedBox(height: PlayTapSpacing.xxl),
+                const Expanded(child: ActivityCategoryGrid()),
               ],
-              const SizedBox(height: PlayTapSpacing.xxl),
-              const Expanded(child: ActivityCategoryGrid()),
-            ],
+            ),
           ),
         ),
       ),

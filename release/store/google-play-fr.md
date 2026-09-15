@@ -36,9 +36,9 @@ Trois modes de chronométrage, prêts à l'emploi.
 FIABLE ET HORS LIGNE
 PlayTap fonctionne entièrement sans connexion internet. Aucune donnée
 n'est envoyée où que ce soit : votre historique reste uniquement sur
-votre téléphone. Si l'application est fermée ou le téléphone redémarre
-en pleine partie ou en plein chronométrage, PlayTap reprend exactement
-là où vous en étiez.
+votre téléphone. Si l'application est interrompue ou fermée pendant une
+partie ou un chronométrage, PlayTap permet de reprendre la session
+exactement là où vous en étiez.
 
 SIMPLE PAR CONCEPTION
 Pas de compte à créer, pas de publicité, pas de fonctionnalité cachée

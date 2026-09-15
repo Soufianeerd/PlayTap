@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/activities/activities_page.dart';
@@ -13,6 +14,7 @@ import '../features/shared/coming_soon_page.dart';
 import '../features/timer/active_timer_session_page.dart';
 import '../features/timer/countdown_config_page.dart';
 import '../features/timer/timer_summary_page.dart';
+import 'theme/theme.dart';
 
 /// Builds a fresh root navigator. Kept as a factory (not a top-level
 /// singleton) so each [PlayTapApp] instance — including each one created in
@@ -104,31 +106,42 @@ class _RootScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
+    final colors = Theme.of(context).playTapColors;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: PlayTapTheme.overlayStyleOf(context),
+      child: Scaffold(
+        body: navigationShell,
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: colors.border)),
+          ),
+          child: NavigationBar(
+            elevation: 0,
+            selectedIndex: navigationShell.currentIndex,
+            onDestinationSelected: (index) => navigationShell.goBranch(
+              index,
+              initialLocation: index == navigationShell.currentIndex,
+            ),
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home),
+                label: 'Accueil',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.grid_view_outlined),
+                selectedIcon: Icon(Icons.grid_view),
+                label: 'Activités',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.history_outlined),
+                selectedIcon: Icon(Icons.history),
+                label: 'Historique',
+              ),
+            ],
+          ),
         ),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Accueil',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.grid_view_outlined),
-            selectedIcon: Icon(Icons.grid_view),
-            label: 'Activités',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: 'Historique',
-          ),
-        ],
       ),
     );
   }

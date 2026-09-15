@@ -10,7 +10,9 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.playtap.app
       vars:
-        APP_STORE_APPLE_ID: 0000000000 # TODO: replace with the real App Store Connect App Apple ID once the app record exists
+        # TODO: besoin de l'Apple ID numérique App Store Connect — remplacer
+        # ce placeholder une fois l'app enregistrée dans App Store Connect.
+        APP_STORE_APPLE_ID: 0000000000
         BUNDLE_ID: com.playtap.app
       flutter: stable
       xcode: latest

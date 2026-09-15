@@ -6,6 +6,7 @@ import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
 import '../../domain/models/scoring_side.dart';
 import '../shared/active_session_conflict_dialog.dart';
+import '../shared/pill_selector.dart';
 import '../shared/session_actions.dart';
 import 'free_score_actions.dart';
 
@@ -86,19 +87,15 @@ class _FreeScoreConfigPageState extends ConsumerState<FreeScoreConfigPage> {
                   Text(
                     'Nombre de participants',
                     style: PlayTapTypography.label.copyWith(
-                      color: colors.textSecondary,
+                      color: colors.muted,
                     ),
                   ),
                   const SizedBox(height: PlayTapSpacing.sm),
-                  SegmentedButton<int>(
-                    segments: const [
-                      ButtonSegment(value: 2, label: Text('2')),
-                      ButtonSegment(value: 3, label: Text('3')),
-                      ButtonSegment(value: 4, label: Text('4')),
-                    ],
-                    selected: {_sideCount},
-                    onSelectionChanged: (selection) =>
-                        setState(() => _sideCount = selection.first),
+                  PillSelector<int>(
+                    options: const [2, 3, 4],
+                    labelBuilder: (n) => '$n',
+                    value: _sideCount,
+                    onChanged: (n) => setState(() => _sideCount = n),
                   ),
                   const SizedBox(height: PlayTapSpacing.xl),
                   for (var i = 0; i < _sideCount; i++) ...[
