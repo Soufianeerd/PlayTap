@@ -7,6 +7,7 @@ import '../../app/theme/theme.dart';
 import '../../domain/models/timer_mode.dart';
 import '../../domain/models/timer_spec.dart';
 import '../shared/active_session_conflict_dialog.dart';
+import '../shared/big_action_tile.dart';
 import '../shared/session_actions.dart';
 import '../timer/timer_actions.dart';
 
@@ -15,8 +16,8 @@ class _TimerPreset {
 
   final String label;
 
-  /// Non-null for presets that start immediately (Chronomètre, Lap Timer);
-  /// null for Countdown, which needs a duration first — see `route`.
+  /// Non-null for presets that start immediately (Chronomètre, Tours);
+  /// null for Compte à rebours, which needs a duration first — see `route`.
   final TimerSpec? spec;
   final String? route;
 }
@@ -27,12 +28,18 @@ const List<_TimerPreset> _presets = [
     TimerSpec(schemaVersion: 1, mode: TimerMode.stopwatch),
     null,
   ),
-  _TimerPreset('Countdown', null, '/timer/countdown/config'),
+  _TimerPreset('Compte à rebours', null, '/timer/countdown/config'),
   _TimerPreset(
-    'Lap Timer',
+    'Tours',
     TimerSpec(schemaVersion: 1, mode: TimerMode.lapTimer),
     null,
   ),
+];
+
+const _presetIcons = [
+  Icons.timer_outlined,
+  Icons.hourglass_bottom_outlined,
+  Icons.flag_outlined,
 ];
 
 /// See docs/RELEASE_0_1.md — the three Timer modes for Release 0.1. Sprint
@@ -81,44 +88,25 @@ class _TimerPresetsPageState extends ConsumerState<TimerPresetsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).playTapColors;
-
     return Scaffold(
       appBar: AppBar(title: const Text('Timer')),
-      body: ListView.separated(
+      body: Padding(
         padding: const EdgeInsets.all(PlayTapSpacing.lg),
-        itemCount: _presets.length,
-        separatorBuilder: (_, _) => const SizedBox(height: PlayTapSpacing.sm),
-        itemBuilder: (context, index) {
-          final preset = _presets[index];
-          return Material(
-            color: colors.surface,
-            borderRadius: PlayTapRadii.mdRadius,
-            child: InkWell(
-              borderRadius: PlayTapRadii.mdRadius,
-              onTap: _starting ? null : () => _onSelect(preset),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: PlayTapSpacing.lg,
-                  vertical: PlayTapSpacing.md,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        preset.label,
-                        style: PlayTapTypography.body.copyWith(
-                          color: colors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    Icon(Icons.chevron_right, color: colors.textSecondary),
-                  ],
+        child: Column(
+          children: [
+            for (final (index, preset) in _presets.indexed) ...[
+              if (index > 0) const SizedBox(height: PlayTapSpacing.md),
+              Expanded(
+                child: BigActionTile(
+                  icon: _presetIcons[index],
+                  label: preset.label,
+                  alternate: index.isOdd,
+                  onTap: _starting ? () {} : () => _onSelect(preset),
                 ),
               ),
-            ),
-          );
-        },
+            ],
+          ],
+        ),
       ),
     );
   }

@@ -4,27 +4,16 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/theme.dart';
 
 class _ScorePreset {
-  const _ScorePreset(this.label, {this.implemented = false});
+  const _ScorePreset(this.label);
 
   final String label;
-  final bool implemented;
 }
 
-const List<_ScorePreset> _presets = [
-  _ScorePreset('Score libre', implemented: true),
-  _ScorePreset('Tennis'),
-  _ScorePreset('Padel'),
-  _ScorePreset('Tennis de table'),
-  _ScorePreset('Badminton'),
-  _ScorePreset('Pétanque'),
-  _ScorePreset('Basketball'),
-  _ScorePreset('Football / Futsal'),
-  _ScorePreset('Volleyball'),
-];
+/// PlayTap 1.0.0 scope is Score Libre only — the other sports in
+/// docs/SPORT_RULES.md return once the rest of the generic Score Engine
+/// (TARGET_SCORE, SETS, BEST_OF, WIN_BY) ships, not before.
+const List<_ScorePreset> _presets = [_ScorePreset('Score libre')];
 
-/// See docs/SPORT_RULES.md. Only "Score libre" is implemented in Phase
-/// 1B.1 — the rest are listed (so PlayTap's multi-sport identity stays
-/// visible) but honestly point to `/coming-soon`, never a fake screen.
 class ScorePresetsPage extends StatelessWidget {
   const ScorePresetsPage({super.key});
 
@@ -45,9 +34,7 @@ class ScorePresetsPage extends StatelessWidget {
             borderRadius: PlayTapRadii.mdRadius,
             child: InkWell(
               borderRadius: PlayTapRadii.mdRadius,
-              onTap: () => preset.implemented
-                  ? context.push('/score/free/config')
-                  : context.push('/coming-soon', extra: preset.label),
+              onTap: () => context.push('/score/free/config'),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: PlayTapSpacing.lg,
@@ -63,13 +50,6 @@ class ScorePresetsPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (!preset.implemented)
-                      Text(
-                        'Bientôt',
-                        style: PlayTapTypography.caption.copyWith(
-                          color: colors.textSecondary,
-                        ),
-                      ),
                     Icon(Icons.chevron_right, color: colors.textSecondary),
                   ],
                 ),

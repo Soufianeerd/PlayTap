@@ -29,7 +29,7 @@ class HomePage extends ConsumerWidget {
               ),
               const SizedBox(height: PlayTapSpacing.xs),
               Text(
-                'Tout votre sport, au poignet.',
+                'Score et chrono, prêts en un tap.',
                 style: PlayTapTypography.body.copyWith(
                   color: colors.textSecondary,
                 ),

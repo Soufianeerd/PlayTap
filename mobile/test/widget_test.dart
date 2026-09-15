@@ -54,9 +54,7 @@ Future<void> startFreeScoreSession(
   WidgetTester tester, {
   required int participantCount,
 }) async {
-  await tester.tap(find.text('Score'));
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Score libre'));
+  await tester.tap(find.text('Compter un score'));
   await tester.pumpAndSettle();
 
   await tester.tap(find.text('$participantCount'));
@@ -67,20 +65,20 @@ Future<void> startFreeScoreSession(
 }
 
 void main() {
-  testWidgets('Home shows the PlayTap title and the four sections', (
+  testWidgets('Home shows the PlayTap title and the 1.0.0 sections', (
     tester,
   ) async {
     await tester.pumpWidget(appWithFreshDb());
     await tester.pumpAndSettle();
 
     expect(find.text('PlayTap'), findsOneWidget);
-    expect(find.text('Score'), findsOneWidget);
-    expect(find.text('Timer'), findsOneWidget);
-    expect(find.text('Training'), findsOneWidget);
-    expect(find.text('Custom'), findsOneWidget);
+    expect(find.text('Compter un score'), findsOneWidget);
+    expect(find.text('Chronométrer'), findsOneWidget);
+    expect(find.text('Training'), findsNothing);
+    expect(find.text('Custom'), findsNothing);
   });
 
-  testWidgets('Bottom navigation switches between the four tabs', (
+  testWidgets('Bottom navigation switches between the three tabs', (
     tester,
   ) async {
     await tester.pumpWidget(appWithFreshDb());
@@ -88,18 +86,11 @@ void main() {
 
     await tester.tap(find.text('Activités'));
     await tester.pumpAndSettle();
-    expect(find.text('Score'), findsWidgets);
+    expect(find.text('Compter un score'), findsWidgets);
 
     await tester.tap(find.text('Historique'));
     await tester.pumpAndSettle();
-    expect(find.text('Aucune session enregistrée.'), findsOneWidget);
-
-    await tester.tap(find.text('Réglages'));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('Aucun réglage disponible pour le moment.'),
-      findsOneWidget,
-    );
+    expect(find.text('Aucune activité pour le moment.'), findsOneWidget);
   });
 
   testWidgets('Tapping Timer navigates to the Timer presets page', (
@@ -108,12 +99,12 @@ void main() {
     await tester.pumpWidget(appWithFreshDb());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Timer'));
+    await tester.tap(find.text('Chronométrer'));
     await tester.pumpAndSettle();
 
     expect(find.text('Chronomètre'), findsOneWidget);
-    expect(find.text('Countdown'), findsOneWidget);
-    expect(find.text('Lap Timer'), findsOneWidget);
+    expect(find.text('Compte à rebours'), findsOneWidget);
+    expect(find.text('Tours'), findsOneWidget);
   });
 
   testWidgets('FLOW 1 — 2 participants: score, undo, complete, history', (
@@ -154,7 +145,7 @@ void main() {
     expect(find.text('Score libre'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
 
-    await tester.tap(find.text('TERMINER'));
+    await tester.tap(find.text('VOIR L\'HISTORIQUE'));
     await tester.pumpAndSettle();
 
     // Landed on History with the completed session.
@@ -251,7 +242,7 @@ void main() {
 
       await tester.tap(find.text('Activités'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Timer'));
+      await tester.tap(find.text('Chronométrer'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Chronomètre'));
       await pumpTimer(tester); // now on the ticker-driven session page
@@ -289,7 +280,7 @@ void main() {
       expect(find.text('Chronomètre'), findsOneWidget);
       expect(find.text('00:05'), findsOneWidget);
 
-      await tester.tap(find.text('TERMINER'));
+      await tester.tap(find.text('VOIR L\'HISTORIQUE'));
       await tester.pumpAndSettle();
 
       // Landed on History with the completed session.
@@ -306,9 +297,9 @@ void main() {
 
       await tester.tap(find.text('Activités'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Timer'));
+      await tester.tap(find.text('Chronométrer'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Countdown'));
+      await tester.tap(find.text('Compte à rebours'));
       await tester.pumpAndSettle(); // config page, no live ticker yet
 
       await tester.tap(find.text('30s'));
@@ -326,7 +317,7 @@ void main() {
       // any in-flight page transition fully settle now.
       await tester.pumpAndSettle();
 
-      expect(find.text('Countdown'), findsOneWidget);
+      expect(find.text('Compte à rebours'), findsOneWidget);
       expect(find.text('00:30'), findsOneWidget); // full duration elapsed
     },
   );
@@ -340,9 +331,9 @@ void main() {
 
     await tester.tap(find.text('Activités'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Timer'));
+    await tester.tap(find.text('Chronométrer'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Lap Timer'));
+    await tester.tap(find.text('Tours'));
     await pumpTimer(tester); // now on the ticker-driven session page
 
     clock.advance(const Duration(seconds: 3));
@@ -369,11 +360,11 @@ void main() {
     // fully settle before asserting on the result.
     await tester.pumpAndSettle();
 
-    expect(find.text('Lap Timer'), findsOneWidget);
+    expect(find.text('Tours'), findsOneWidget);
     expect(find.text('00:07'), findsOneWidget);
     expect(find.text('2 laps'), findsOneWidget);
 
-    await tester.tap(find.text('TERMINER'));
+    await tester.tap(find.text('VOIR L\'HISTORIQUE'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('00:07 — 2 laps'), findsOneWidget);
@@ -391,7 +382,7 @@ void main() {
 
       await tester.tap(find.text('Activités'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Timer'));
+      await tester.tap(find.text('Chronométrer'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Chronomètre'));
       await pumpTimer(tester); // now on the ticker-driven session page

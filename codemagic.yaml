@@ -1,0 +1,51 @@
+workflows:
+  playtap-ios-release:
+    name: PlayTap iOS — App Store release
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: playtap_asc_api_key
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.playtap.app
+      vars:
+        APP_STORE_APPLE_ID: 0000000000 # TODO: replace with the real App Store Connect App Apple ID once the app record exists
+        BUNDLE_ID: com.playtap.app
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    working_directory: mobile
+    scripts:
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Get Flutter packages
+        script: flutter packages pub get
+      - name: Flutter analyze
+        script: flutter analyze
+      - name: Flutter test
+        script: flutter test
+      - name: Set build number from App Store Connect
+        script: |
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
+        working_directory: mobile/ios
+      - name: Flutter build ipa
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false

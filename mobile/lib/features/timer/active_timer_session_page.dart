@@ -152,8 +152,8 @@ class _ActiveTimerSessionPageState
 
 String _titleFor(TimerMode? mode) => switch (mode) {
   TimerMode.stopwatch => 'Chronomètre',
-  TimerMode.countdown => 'Countdown',
-  TimerMode.lapTimer => 'Lap Timer',
+  TimerMode.countdown => 'Compte à rebours',
+  TimerMode.lapTimer => 'Tours',
   TimerMode.interval || null => 'Timer',
 };
 

@@ -86,12 +86,25 @@ class HistoryPage extends ConsumerWidget {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(PlayTapSpacing.xl),
-                child: Text(
-                  'Aucune session enregistrée.',
-                  style: PlayTapTypography.body.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Aucune activité pour le moment.',
+                      style: PlayTapTypography.title.copyWith(
+                        color: colors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: PlayTapSpacing.sm),
+                    Text(
+                      'Démarre un score ou un chronomètre pour commencer.',
+                      style: PlayTapTypography.body.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             );
@@ -169,8 +182,8 @@ class _HistoryTile extends StatelessWidget {
 
 String _timerModeLabel(TimerMode mode) => switch (mode) {
   TimerMode.stopwatch => 'Chronomètre',
-  TimerMode.countdown => 'Countdown',
-  TimerMode.lapTimer => 'Lap Timer',
+  TimerMode.countdown => 'Compte à rebours',
+  TimerMode.lapTimer => 'Tours',
   TimerMode.interval => 'Interval',
 };
 
@@ -192,5 +205,16 @@ String _formatDuration(int ms) {
 
 String _durationCaption(DateTime startedAt, DateTime? endedAt) {
   final minutes = endedAt != null ? endedAt.difference(startedAt).inMinutes : 0;
-  return minutes < 1 ? 'Moins d\'une minute' : '$minutes min';
+  final duration = minutes < 1 ? 'Moins d\'une minute' : '$minutes min';
+  return '${_relativeDay(startedAt)} · $duration';
+}
+
+String _relativeDay(DateTime date) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(date.year, date.month, date.day);
+  final diff = today.difference(day).inDays;
+  if (diff == 0) return 'Aujourd\'hui';
+  if (diff == 1) return 'Hier';
+  return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
 }

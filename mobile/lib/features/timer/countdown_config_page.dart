@@ -75,63 +75,82 @@ class _CountdownConfigPageState extends ConsumerState<CountdownConfigPage> {
     final colors = Theme.of(context).playTapColors;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Countdown')),
-      body: Padding(
-        padding: const EdgeInsets.all(PlayTapSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Durée rapide',
-              style: PlayTapTypography.label.copyWith(
-                color: colors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: PlayTapSpacing.sm),
-            Wrap(
-              spacing: PlayTapSpacing.sm,
-              children: [
-                for (final seconds in _quickPresetsSeconds)
-                  ChoiceChip(
-                    label: Text(_formatQuickLabel(seconds)),
-                    selected: _durationSeconds == seconds,
-                    onSelected: (_) =>
-                        setState(() => _controller.text = seconds.toString()),
+      appBar: AppBar(title: const Text('Compte à rebours')),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(PlayTapSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Durée rapide',
+                    style: PlayTapTypography.label.copyWith(
+                      color: colors.textSecondary,
+                    ),
                   ),
-              ],
-            ),
-            const SizedBox(height: PlayTapSpacing.xl),
-            TextField(
-              controller: _controller,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Durée personnalisée (secondes)',
+                  const SizedBox(height: PlayTapSpacing.sm),
+                  Wrap(
+                    spacing: PlayTapSpacing.sm,
+                    children: [
+                      for (final seconds in _quickPresetsSeconds)
+                        ChoiceChip(
+                          label: Text(_formatQuickLabel(seconds)),
+                          selected: _durationSeconds == seconds,
+                          onSelected: (_) => setState(
+                            () => _controller.text = seconds.toString(),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: PlayTapSpacing.xl),
+                  TextField(
+                    controller: _controller,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Durée personnalisée (secondes)',
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  if (!_isValid) ...[
+                    const SizedBox(height: PlayTapSpacing.xs),
+                    Text(
+                      'Choisissez une durée supérieure à 0.',
+                      style: PlayTapTypography.caption.copyWith(
+                        color: colors.danger,
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              onChanged: (_) => setState(() {}),
             ),
-            if (!_isValid) ...[
-              const SizedBox(height: PlayTapSpacing.xs),
-              Text(
-                'Choisissez une durée supérieure à 0.',
-                style: PlayTapTypography.caption.copyWith(color: colors.danger),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PlayTapSpacing.lg,
+                0,
+                PlayTapSpacing.lg,
+                PlayTapSpacing.lg,
               ),
-            ],
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _isValid && !_starting ? _onStart : null,
-                child: _starting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('COMMENCER'),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _isValid && !_starting ? _onStart : null,
+                  child: _starting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('COMMENCER'),
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

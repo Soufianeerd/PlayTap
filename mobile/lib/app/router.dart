@@ -9,7 +9,6 @@ import '../features/home/home_page.dart';
 import '../features/score_free/active_free_score_session_page.dart';
 import '../features/score_free/free_score_config_page.dart';
 import '../features/score_free/score_summary_page.dart';
-import '../features/settings/settings_page.dart';
 import '../features/shared/coming_soon_page.dart';
 import '../features/timer/active_timer_session_page.dart';
 import '../features/timer/countdown_config_page.dart';
@@ -47,14 +46,6 @@ GoRouter createAppRouter() => GoRouter(
             GoRoute(
               path: '/history',
               builder: (context, state) => const HistoryPage(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/settings',
-              builder: (context, state) => const SettingsPage(),
             ),
           ],
         ),
@@ -136,11 +127,6 @@ class _RootScaffold extends StatelessWidget {
             icon: Icon(Icons.history_outlined),
             selectedIcon: Icon(Icons.history),
             label: 'Historique',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Réglages',
           ),
         ],
       ),

@@ -119,6 +119,17 @@ class _ScoreLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Fewer participants means more room per tile, so the score can (and
+    // should, per the release brief — "SCORE ÉNORME") get bigger: 2 players
+    // each get a half-screen tile and a very large digit; 4 players split
+    // the screen into quarters and need a more moderate size to still fit
+    // long names comfortably.
+    final scoreFontSize = switch (sides.length) {
+      2 => 120.0,
+      3 => 88.0,
+      _ => 72.0,
+    };
+
     Widget tile(int index, {bool nameFirst = true}) {
       final side = sides[index];
       return _ScoreTile(
@@ -126,6 +137,7 @@ class _ScoreLayout extends StatelessWidget {
         score: scores[side.id] ?? 0,
         nameFirst: nameFirst,
         alternate: index.isOdd,
+        fontSize: scoreFontSize,
         onTap: () => onTapSide(side.id),
       );
     }
@@ -190,6 +202,7 @@ class _ScoreTile extends StatefulWidget {
     required this.name,
     required this.score,
     required this.onTap,
+    required this.fontSize,
     this.nameFirst = true,
     this.alternate = false,
   });
@@ -197,6 +210,7 @@ class _ScoreTile extends StatefulWidget {
   final String name;
   final int score;
   final VoidCallback onTap;
+  final double fontSize;
   final bool nameFirst;
   final bool alternate;
 
@@ -240,6 +254,7 @@ class _ScoreTileState extends State<_ScoreTile>
         '${widget.score}',
         style: PlayTapTypography.scoreDisplay.copyWith(
           color: colors.textPrimary,
+          fontSize: widget.fontSize,
         ),
       ),
     );

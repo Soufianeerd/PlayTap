@@ -74,56 +74,72 @@ class _FreeScoreConfigPageState extends ConsumerState<FreeScoreConfigPage> {
     final colors = Theme.of(context).playTapColors;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Score libre')),
-      body: Padding(
-        padding: const EdgeInsets.all(PlayTapSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Nombre de participants',
-              style: PlayTapTypography.label.copyWith(
-                color: colors.textSecondary,
+      appBar: AppBar(title: const Text('Nouveau score')),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(PlayTapSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Nombre de participants',
+                    style: PlayTapTypography.label.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: PlayTapSpacing.sm),
+                  SegmentedButton<int>(
+                    segments: const [
+                      ButtonSegment(value: 2, label: Text('2')),
+                      ButtonSegment(value: 3, label: Text('3')),
+                      ButtonSegment(value: 4, label: Text('4')),
+                    ],
+                    selected: {_sideCount},
+                    onSelectionChanged: (selection) =>
+                        setState(() => _sideCount = selection.first),
+                  ),
+                  const SizedBox(height: PlayTapSpacing.xl),
+                  for (var i = 0; i < _sideCount; i++) ...[
+                    TextField(
+                      controller: _controllers[i],
+                      decoration: InputDecoration(
+                        labelText: 'Nom du participant ${i + 1}',
+                      ),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: PlayTapSpacing.md),
+                  ],
+                ],
               ),
             ),
-            const SizedBox(height: PlayTapSpacing.sm),
-            SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(value: 2, label: Text('2')),
-                ButtonSegment(value: 3, label: Text('3')),
-                ButtonSegment(value: 4, label: Text('4')),
-              ],
-              selected: {_sideCount},
-              onSelectionChanged: (selection) =>
-                  setState(() => _sideCount = selection.first),
-            ),
-            const SizedBox(height: PlayTapSpacing.xl),
-            for (var i = 0; i < _sideCount; i++) ...[
-              TextField(
-                controller: _controllers[i],
-                decoration: InputDecoration(
-                  labelText: 'Nom du participant ${i + 1}',
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PlayTapSpacing.lg,
+                0,
+                PlayTapSpacing.lg,
+                PlayTapSpacing.lg,
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _namesValid && !_starting ? _onStart : null,
+                  child: _starting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('COMMENCER'),
                 ),
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: PlayTapSpacing.md),
-            ],
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _namesValid && !_starting ? _onStart : null,
-                child: _starting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('COMMENCER'),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

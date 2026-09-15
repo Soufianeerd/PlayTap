@@ -71,7 +71,7 @@ class ScoreSummaryPage extends ConsumerWidget {
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: () => context.go('/history'),
-                    child: const Text('TERMINER'),
+                    child: const Text('VOIR L\'HISTORIQUE'),
                   ),
                 ),
               ],

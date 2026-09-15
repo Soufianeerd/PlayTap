@@ -63,7 +63,7 @@ class TimerSummaryPage extends ConsumerWidget {
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: () => context.go('/history'),
-                    child: const Text('TERMINER'),
+                    child: const Text('VOIR L\'HISTORIQUE'),
                   ),
                 ),
               ],
@@ -77,8 +77,8 @@ class TimerSummaryPage extends ConsumerWidget {
 
 String _titleFor(TimerMode mode) => switch (mode) {
   TimerMode.stopwatch => 'Chronomètre',
-  TimerMode.countdown => 'Countdown',
-  TimerMode.lapTimer => 'Lap Timer',
+  TimerMode.countdown => 'Compte à rebours',
+  TimerMode.lapTimer => 'Tours',
   TimerMode.interval => 'Timer',
 };
 
