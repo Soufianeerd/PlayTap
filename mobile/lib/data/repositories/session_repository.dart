@@ -117,7 +117,26 @@ class SessionRepository {
   Future<List<SessionSummary>> getCompletedSessions({
     SessionCategory? category,
   }) async {
-    final query = _db.select(_db.sessions)
+    final rows = await _completedSessionsQuery(category).get();
+    return rows.map(_toDomain).toList();
+  }
+
+  /// Reactive: emits again whenever the completed-sessions result set
+  /// changes (same Drift auto-watch pattern as [watchActiveSession]) — lets
+  /// Historique stay live instead of freezing on whatever was completed
+  /// first (see `features/history/history_page.dart`).
+  Stream<List<SessionSummary>> watchCompletedSessions({
+    SessionCategory? category,
+  }) {
+    return _completedSessionsQuery(
+      category,
+    ).watch().map((rows) => rows.map(_toDomain).toList());
+  }
+
+  SimpleSelectStatement<$SessionsTable, Session> _completedSessionsQuery(
+    SessionCategory? category,
+  ) {
+    return _db.select(_db.sessions)
       ..where((t) {
         final completed = t.status.equals(SessionStatus.completed.toJson());
         return category == null
@@ -125,8 +144,6 @@ class SessionRepository {
             : completed & t.category.equals(category.toJson());
       })
       ..orderBy([(t) => OrderingTerm.desc(t.startedAt)]);
-    final rows = await query.get();
-    return rows.map(_toDomain).toList();
   }
 
   SessionSummary _toDomain(Session row) => SessionSummary(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
+import '../../data/repositories/session_repository.dart';
 import '../../domain/engines/free_score_deriver.dart';
 import '../../domain/engines/timer_deriver.dart';
 import '../../domain/models/free_score_snapshot.dart';
@@ -28,44 +29,55 @@ class TimerHistoryEntry extends HistoryEntry {
 /// derived from Session + Events replay (see docs/DATA_MODEL.md,
 /// "HistoryEntry"). Never a stored `finalScore`/summary column, never
 /// fake/demo data.
-final historyProvider = FutureProvider<List<HistoryEntry>>((ref) async {
+///
+/// A [StreamProvider] driven by [SessionRepository.watchCompletedSessions]
+/// (not a one-shot [FutureProvider]) so this page reflects a session
+/// finishing while it's kept alive in the bottom-nav's `IndexedStack` —
+/// a plain `FutureProvider` here only ever resolved once and never
+/// refreshed, so Historique froze on whichever session completed first.
+final historyProvider = StreamProvider<List<HistoryEntry>>((ref) {
   final sessionRepo = ref.watch(sessionRepositoryProvider);
   final eventRepo = ref.watch(eventRepositoryProvider);
-  final sessions = await sessionRepo.getCompletedSessions();
 
-  final entries = <HistoryEntry>[];
-  for (final session in sessions) {
-    final events = await eventRepo.getEventsForSession(session.id);
-    switch (session.category) {
-      case SessionCategory.score:
-        entries.add(
-          ScoreHistoryEntry(
-            deriveFreeScoreSnapshot(
-              status: session.status,
-              startedAt: session.startedAt,
-              endedAt: session.endedAt,
-              events: events,
+  Future<List<HistoryEntry>> deriveEntries(
+    List<SessionSummary> sessions,
+  ) async {
+    final entries = <HistoryEntry>[];
+    for (final session in sessions) {
+      final events = await eventRepo.getEventsForSession(session.id);
+      switch (session.category) {
+        case SessionCategory.score:
+          entries.add(
+            ScoreHistoryEntry(
+              deriveFreeScoreSnapshot(
+                status: session.status,
+                startedAt: session.startedAt,
+                endedAt: session.endedAt,
+                events: events,
+              ),
             ),
-          ),
-        );
-      case SessionCategory.timer:
-        entries.add(
-          TimerHistoryEntry(
-            deriveTimerSnapshot(
-              sessionStatus: session.status,
-              startedAt: session.startedAt,
-              endedAt: session.endedAt,
-              events: events,
-              nowMs: DateTime.now().millisecondsSinceEpoch,
+          );
+        case SessionCategory.timer:
+          entries.add(
+            TimerHistoryEntry(
+              deriveTimerSnapshot(
+                sessionStatus: session.status,
+                startedAt: session.startedAt,
+                endedAt: session.endedAt,
+                events: events,
+                nowMs: DateTime.now().millisecondsSinceEpoch,
+              ),
             ),
-          ),
-        );
-      case SessionCategory.training:
-      case SessionCategory.custom:
-        break; // not implemented yet — nothing to show.
+          );
+        case SessionCategory.training:
+        case SessionCategory.custom:
+          break; // not implemented yet — nothing to show.
+      }
     }
+    return entries;
   }
-  return entries;
+
+  return sessionRepo.watchCompletedSessions().asyncMap(deriveEntries);
 });
 
 class HistoryPage extends ConsumerWidget {

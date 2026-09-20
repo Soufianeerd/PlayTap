@@ -411,4 +411,49 @@ void main() {
       expect(find.text('00:10.00'), findsOneWidget);
     },
   );
+
+  testWidgets('HISTORY FLOW — a second completed session appears in Historique '
+      'without restarting the app (regression: historyProvider used to '
+      'freeze on whichever session completed first)', (tester) async {
+    await tester.pumpWidget(appWithFreshDb());
+    await tester.pumpAndSettle();
+
+    // Session 1: Joueur 1 scores once, then the match is finished.
+    await startFreeScoreSession(tester, participantCount: 2);
+    await tester.tap(find.text('Joueur 1'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TERMINER LA PARTIE'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TERMINER'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('VOIR L\'HISTORIQUE'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Joueur 1 1'), findsOneWidget);
+
+    // Back to Home — Historique stays mounted the whole time in the
+    // bottom-nav's IndexedStack, which is exactly what a plain
+    // FutureProvider failed to account for.
+    await tester.tap(find.text('Accueil'));
+    await tester.pumpAndSettle();
+
+    // Session 2: a different, fresh match — Joueur 2 scores twice.
+    await startFreeScoreSession(tester, participantCount: 2);
+    await tester.tap(find.text('Joueur 2'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Joueur 2'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TERMINER LA PARTIE'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TERMINER'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('VOIR L\'HISTORIQUE'));
+    await tester.pumpAndSettle();
+
+    // Both completed sessions are visible — the bug showed only the
+    // first one until the whole app process was killed and relaunched.
+    expect(find.textContaining('Joueur 1 1'), findsOneWidget);
+    expect(find.textContaining('Joueur 2 2'), findsOneWidget);
+  });
 }

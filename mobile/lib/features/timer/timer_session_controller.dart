@@ -193,19 +193,30 @@ class TimerSessionController extends AsyncNotifier<TimerSnapshot> {
     }
   }
 
+  /// Guarded like [complete] and [checkLiveCompletion]: this calls [_load],
+  /// which can itself finalize a countdown that just hit zero — without the
+  /// same [_finalizeInFlight] guard here, a pause/resume/lap tap landing at
+  /// that exact instant could race the ticker's in-flight finalize and
+  /// double-write the terminal event (see the guard's doc comment above).
   Future<void> _appendAndReload(SessionEventType type) async {
-    await ref
-        .read(eventRepositoryProvider)
-        .appendPhoneEvent(
-          id: _uuid.v4(),
-          sessionId: sessionId,
-          type: type,
-          payload: const {},
-          timestamp: ref.read(clockProvider).now(),
-        );
-    final snapshot = await _load();
-    _resetAnchor(snapshot);
-    state = AsyncData(snapshot);
+    if (_finalizeInFlight) return;
+    _finalizeInFlight = true;
+    try {
+      await ref
+          .read(eventRepositoryProvider)
+          .appendPhoneEvent(
+            id: _uuid.v4(),
+            sessionId: sessionId,
+            type: type,
+            payload: const {},
+            timestamp: ref.read(clockProvider).now(),
+          );
+      final snapshot = await _load();
+      _resetAnchor(snapshot);
+      state = AsyncData(snapshot);
+    } finally {
+      _finalizeInFlight = false;
+    }
   }
 
   Future<void> _finalize(SessionEventType terminalType, int nowMs) async {
