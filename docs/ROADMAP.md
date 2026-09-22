@@ -177,12 +177,70 @@ catégories (Score + Timer), sans dupliquer de mécanisme.
 - [ ] Runners de conformité Swift/Kotlin (le runner Dart existe depuis
       la Phase 1B.1 — `mobile/test/conformance/`) exécutant les mêmes
       fixtures `/contracts` (voir `docs/CONFORMANCE.md`) — hors périmètre.
-- [ ] Reste du Score Engine générique : TARGET_SCORE, SEQUENTIAL_SCORE,
-      TEAM_SCORE, SETS, BEST_OF, WIN_BY (voir points d'extension déjà
-      identifiés dans `playtap-sports-rules`) — hors périmètre.
+- [ ] Reste du Score Engine générique : SEQUENTIAL_SCORE, SETS, BEST_OF
+      (voir points d'extension déjà identifiés dans `playtap-sports-rules`)
+      — hors périmètre. TARGET_SCORE, TEAM_SCORE et WIN_BY sont faits (voir
+      Phase Sports 1 ci-dessous).
 - [ ] Apple Watch Timer, Wear OS Timer, synchronisation watch — hors
       périmètre (voir la politique Xcode/CI macOS différée dans
       `CLAUDE.md`/`docs/ARCHITECTURE.md`).
+
+## Phase Sports 1 — TARGET_SCORE, TEAM_SCORE, Pétanque (statut : fait)
+
+Fondation générique du Score Engine au-delà de FREE_SCORE, et premier
+Sport Pack complet de bout en bout — voir `docs/DATA_MODEL.md` pour la
+décision de composition TARGET_SCORE + TEAM_SCORE et
+`docs/SPORT_RULES.md` pour le statut à jour par sport.
+
+- [x] `TargetScoreRule` (schemaVersion, sideIds, targetScore,
+      automaticCompletion, winBy optionnel) et `TeamScoreRule`
+      (schemaVersion, sideIds, allowedIncrements, target `ScoreTarget`
+      optionnel) — objet `ScoreTarget`/`ScoreWinBy` partagé et composable,
+      pas un troisième sous-type scellé par combinaison.
+- [x] `ScoreEngine._replayPointBased` — cœur de replay partagé par
+      TARGET_SCORE et TEAM_SCORE (fin automatique au franchissement de la
+      cible, marge WIN_BY optionnelle, undo qui rouvre le match si la mène
+      annulée est celle qui l'avait terminé). `_replayFreeScore` inchangé
+      (zéro régression FREE_SCORE).
+- [x] `ScoreState.rounds` (liste de `ScoreRound`) — une mène Pétanque =
+      un seul `POINT_SCORED`, pas de nouveau type d'event.
+      `ScoringSide.players` optionnel pour les sides à plusieurs joueurs
+      (doublette/triplette).
+- [x] Pétanque de bout en bout sur mobile : Activités → Score → Pétanque
+      → config (tête-à-tête/doublette/triplette, noms équipe + joueurs) →
+      session active (score énorme par équipe, +1..+6 par mène, "Mène N",
+      undo toujours actif) → fin automatique à 13+ → Résumé → Historique
+      (libellé et compte de mènes dédiés) → abandon manuel. Score Libre
+      non régressé (Home/Activités passent maintenant par
+      `ScorePresetsPage` puisqu'il y a 2 presets, au lieu de sauter
+      directement à sa config).
+- [x] Persistence : preset `sport.petanque` seedé (id partagé via
+      `domain/models/preset_ids.dart`, jamais dupliqué en dur),
+      `SessionRepository.reopenSession` (undo qui rouvre un match
+      auto-complété), routing par `presetRef` (Score Libre et Pétanque
+      partagent `SessionCategory.score`).
+- [x] Fixtures `/contracts/score` : `team_score_basic`, `petanque_basic`,
+      `petanque_13_completion` (dépassement de 13 dans une mène — "13 ou
+      plus", pas exactement 13), `petanque_undo`,
+      `petanque_recovery_projection`. Fixture préexistante
+      `target_score_win_by_two` (jamais exécutée avant, toujours `skip`)
+      corrigée : sa séquence à 12 events ne pouvait pas mathématiquement
+      atteindre son propre score final revendiqué (12-10) — étendue à 22
+      events cohérents, mêmes valeurs finales.
+- [x] 127 tests verts (`flutter test`), 2 skip explicites inchangés
+      (SEQUENTIAL_SCORE toujours non implémenté) — unitaires Score Engine
+      (TargetScoreRule/TeamScoreRule/composition Pétanque), DB/repositories
+      (persistence, undo/reopen, reprise après redémarrage simulé),
+      conformance, 4 flows widget Pétanque (doublette bout en bout,
+      tête-à-tête/triplette config, abandon manuel) + non-régression Score
+      Libre.
+- [x] Localisation complète (11 langues) des nouvelles chaînes Pétanque ;
+      RTL arabe non re-testé automatiquement au-delà de la couverture
+      RTL générique déjà en place (`test/app/locale_test.dart`).
+- [ ] Vérification runtime réelle sur émulateur/device Android — non
+      effectuée cette phase (pas d'environnement Android disponible),
+      voir le rapport de phase pour le détail. `flutter analyze`/`test`
+      sont la seule vérification obtenue.
 
 ## Phase 2 — Presets V1
 

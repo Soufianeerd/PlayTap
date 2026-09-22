@@ -59,5 +59,21 @@
   "today": "Oggi",
   "yesterday": "Ieri",
   "languagePageTitle": "Lingua",
-  "languageSystemOption": "Automatica"
+  "languageSystemOption": "Automatica",
+  "presetPetanque": "Petanque",
+  "petanqueConfigTitle": "Nuova partita di petanque",
+  "petanqueFormatLabel": "Formato",
+  "petanqueFormatHeadToHead": "Singolo",
+  "petanqueFormatDoublette": "Doppietta",
+  "petanqueFormatTriplette": "Tripletta",
+  "petanqueTeamSectionLabel": "Squadra {n}",
+  "petanqueTeamNameLabel": "Nome squadra",
+  "petanqueDefaultTeamName": "Squadra {n}",
+  "endNumberLabel": "Turno {n}",
+  "endsCountPlural": "{count, plural, one {{count} turno} other {{count} turni}}",
+  "undoLastRound": "Annulla ultimo turno",
+  "addRoundPointsSemantics": "Aggiungi {amount} punti a {team}",
+  "abandonGameButton": "ABBANDONA",
+  "abandonGameDialogTitle": "Abbandonare questa partita?",
+  "winnerAnnouncement": "{name} vince!"
 }

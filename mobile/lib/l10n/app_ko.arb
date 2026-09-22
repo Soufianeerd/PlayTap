@@ -59,5 +59,21 @@
   "today": "오늘",
   "yesterday": "어제",
   "languagePageTitle": "언어",
-  "languageSystemOption": "자동"
+  "languageSystemOption": "자동",
+  "presetPetanque": "페탕크",
+  "petanqueConfigTitle": "새 페탕크 게임",
+  "petanqueFormatLabel": "형식",
+  "petanqueFormatHeadToHead": "단식",
+  "petanqueFormatDoublette": "복식",
+  "petanqueFormatTriplette": "3인조",
+  "petanqueTeamSectionLabel": "팀 {n}",
+  "petanqueTeamNameLabel": "팀 이름",
+  "petanqueDefaultTeamName": "팀 {n}",
+  "endNumberLabel": "{n}엔드",
+  "endsCountPlural": "{count, plural, other {{count}엔드}}",
+  "undoLastRound": "마지막 엔드 취소",
+  "addRoundPointsSemantics": "{team}에 {amount}점 추가",
+  "abandonGameButton": "포기",
+  "abandonGameDialogTitle": "이 게임을 포기하시겠습니까?",
+  "winnerAnnouncement": "{name} 승리!"
 }

@@ -172,6 +172,8 @@ void main() {
 
     await tester.tap(find.text(l10n.categoryScore));
     await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.presetFreeScore));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('2'));
     await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.startButton));

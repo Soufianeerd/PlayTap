@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "team_score_basic",
+  "engine": "score",
+  "description": "TEAM_SCORE with Basketball-style increments {1,2,3} and no target (manual end only). Verifies allowed increments are applied and an increment outside the set is ignored, not fatal.",
+  "config": {
+    "schemaVersion": 1,
+    "mode": "TEAM_SCORE",
+    "sides": ["home", "away"],
+    "allowedIncrements": [1, 2, 3]
+  },
+  "events": [
+    { "id": "e1", "originDevice": "phone", "originSequence": 1, "tOffsetMs": 0,    "type": "POINT_SCORED", "payload": { "side": "home", "amount": 2 } },
+    { "id": "e2", "originDevice": "phone", "originSequence": 2, "tOffsetMs": 1000, "type": "POINT_SCORED", "payload": { "side": "away", "amount": 3 } },
+    { "id": "e3", "originDevice": "phone", "originSequence": 3, "tOffsetMs": 2000, "type": "POINT_SCORED", "payload": { "side": "home", "amount": 5 } },
+    { "id": "e4", "originDevice": "phone", "originSequence": 4, "tOffsetMs": 3000, "type": "POINT_SCORED", "payload": { "side": "home", "amount": 1 } }
+  ],
+  "expected": {
+    "scores": { "home": 3, "away": 3 },
+    "matchComplete": false,
+    "winner": null,
+    "appliedEventCount": 3
+  }
+}

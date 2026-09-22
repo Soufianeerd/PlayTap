@@ -6,21 +6,31 @@ import '../../app/l10n/timer_mode_label.dart';
 import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
 import '../../data/repositories/session_repository.dart';
-import '../../domain/engines/free_score_deriver.dart';
+import '../../domain/engines/score_session_deriver.dart';
 import '../../domain/engines/timer_deriver.dart';
-import '../../domain/models/free_score_snapshot.dart';
+import '../../domain/models/score_session_snapshot.dart';
 import '../../domain/models/session_category.dart';
 import '../../domain/models/timer_mode.dart';
 import '../../domain/models/timer_snapshot.dart';
 import '../../l10n/app_localizations.dart';
+import '../score_petanque/petanque_actions.dart' show petanquePresetRef;
 
 sealed class HistoryEntry {
   const HistoryEntry();
 }
 
 class ScoreHistoryEntry extends HistoryEntry {
-  const ScoreHistoryEntry(this.snapshot);
-  final FreeScoreSnapshot snapshot;
+  const ScoreHistoryEntry(this.snapshot, {required this.presetRef});
+  final ScoreSessionSnapshot snapshot;
+
+  /// Distinguishes which Score preset produced this entry — both Score
+  /// Libre and Pétanque share `SessionCategory.score`, so the category
+  /// alone can't pick the right label/headline (see
+  /// `features/shared/session_actions.dart` for the analogous routing
+  /// decision).
+  final String? presetRef;
+
+  bool get isPetanque => presetRef == petanquePresetRef;
 }
 
 class TimerHistoryEntry extends HistoryEntry {
@@ -52,12 +62,13 @@ final historyProvider = StreamProvider<List<HistoryEntry>>((ref) {
         case SessionCategory.score:
           entries.add(
             ScoreHistoryEntry(
-              deriveFreeScoreSnapshot(
+              deriveScoreSessionSnapshot(
                 status: session.status,
                 startedAt: session.startedAt,
                 endedAt: session.endedAt,
                 events: events,
               ),
+              presetRef: session.presetRef,
             ),
           );
         case SessionCategory.timer:
@@ -149,6 +160,14 @@ class _HistoryTile extends StatelessWidget {
     final colors = Theme.of(context).playTapColors;
     final l10n = AppLocalizations.of(context)!;
     final (label, headline, caption) = switch (entry) {
+      ScoreHistoryEntry(:final snapshot, :final isPetanque) when isPetanque => (
+        l10n.presetPetanque,
+        snapshot.sides
+            .map((s) => '${s.name} ${snapshot.scoreState.scores[s.id] ?? 0}')
+            .join(' — '),
+        '${l10n.endsCountPlural(snapshot.scoreState.rounds.length)} · '
+            '${_durationCaption(l10n, snapshot.startedAt, snapshot.endedAt)}',
+      ),
       ScoreHistoryEntry(:final snapshot) => (
         l10n.presetFreeScore,
         snapshot.sides

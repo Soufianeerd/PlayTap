@@ -59,5 +59,21 @@
   "today": "Hoje",
   "yesterday": "Ontem",
   "languagePageTitle": "Idioma",
-  "languageSystemOption": "Automático"
+  "languageSystemOption": "Automático",
+  "presetPetanque": "Petanca",
+  "petanqueConfigTitle": "Nova partida de petanca",
+  "petanqueFormatLabel": "Formato",
+  "petanqueFormatHeadToHead": "Individual",
+  "petanqueFormatDoublette": "Dupla",
+  "petanqueFormatTriplette": "Trinca",
+  "petanqueTeamSectionLabel": "Equipe {n}",
+  "petanqueTeamNameLabel": "Nome da equipe",
+  "petanqueDefaultTeamName": "Equipe {n}",
+  "endNumberLabel": "Rodada {n}",
+  "endsCountPlural": "{count, plural, one {{count} rodada} other {{count} rodadas}}",
+  "undoLastRound": "Desfazer última rodada",
+  "addRoundPointsSemantics": "Adicionar {amount} pontos a {team}",
+  "abandonGameButton": "ABANDONAR",
+  "abandonGameDialogTitle": "Abandonar esta partida?",
+  "winnerAnnouncement": "{name} vence!"
 }

@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import 'score_round.dart';
+
 /// Output of `ScoreEngine.replay` — always derived, never stored as a
 /// second source of truth (see `playtap-score-engine`, DATA_MODEL.md).
 @immutable
@@ -9,6 +11,7 @@ class ScoreState {
     required this.matchComplete,
     required this.winner,
     required this.appliedEventCount,
+    this.rounds = const [],
   });
 
   /// Score per side id. Every configured side is present, even at 0.
@@ -27,11 +30,19 @@ class ScoreState {
   /// fixtures (see contracts/score/free_score_basic.json).
   final int appliedEventCount;
 
+  /// Not-yet-undone scoring rounds, in application order — see
+  /// `ScoreRound`. Populated by [TargetScoreRule]/[TeamScoreRule] replay
+  /// (e.g. Pétanque "mènes"); always empty for `FreeScoreRule`, which has
+  /// no notion of a round. `rounds.length` is the current round/mène
+  /// ordinal ("Mène ${rounds.length}").
+  final List<ScoreRound> rounds;
+
   Map<String, dynamic> toJson() => {
     'scores': scores,
     'matchComplete': matchComplete,
     'winner': winner,
     'appliedEventCount': appliedEventCount,
+    'rounds': rounds.map((r) => r.toJson()).toList(),
   };
 
   @override
@@ -40,6 +51,7 @@ class ScoreState {
       matchComplete == other.matchComplete &&
       winner == other.winner &&
       appliedEventCount == other.appliedEventCount &&
+      _listEquals(rounds, other.rounds) &&
       _mapEquals(scores, other.scores);
 
   @override
@@ -47,6 +59,7 @@ class ScoreState {
     matchComplete,
     winner,
     appliedEventCount,
+    Object.hashAll(rounds),
     Object.hashAllUnordered(
       scores.entries.map((e) => Object.hash(e.key, e.value)),
     ),
@@ -56,6 +69,14 @@ class ScoreState {
     if (a.length != b.length) return false;
     for (final entry in a.entries) {
       if (b[entry.key] != entry.value) return false;
+    }
+    return true;
+  }
+
+  static bool _listEquals(List<ScoreRound> a, List<ScoreRound> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
     }
     return true;
   }

@@ -2,9 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../app/providers/database_providers.dart';
-import '../../domain/engines/free_score_deriver.dart';
+import '../../domain/engines/score_session_deriver.dart';
 import '../../domain/events/session_event.dart';
-import '../../domain/models/free_score_snapshot.dart';
+import '../../domain/models/score_session_snapshot.dart';
 import '../../domain/models/session_status.dart';
 
 const _uuid = Uuid();
@@ -12,22 +12,22 @@ const _uuid = Uuid();
 final freeScoreSessionControllerProvider =
     AsyncNotifierProvider.family<
       FreeScoreSessionController,
-      FreeScoreSnapshot,
+      ScoreSessionSnapshot,
       String
     >(FreeScoreSessionController.new);
 
 /// UI -> this controller -> event creation -> repositories -> ScoreEngine
 /// replay -> ScoreState -> UI (see CLAUDE.md / the Phase 1B.1 brief). The
 /// engine itself stays pure; only this controller knows about Riverpod.
-class FreeScoreSessionController extends AsyncNotifier<FreeScoreSnapshot> {
+class FreeScoreSessionController extends AsyncNotifier<ScoreSessionSnapshot> {
   FreeScoreSessionController(this.sessionId);
 
   final String sessionId;
 
   @override
-  Future<FreeScoreSnapshot> build() => _load();
+  Future<ScoreSessionSnapshot> build() => _load();
 
-  Future<FreeScoreSnapshot> _load() async {
+  Future<ScoreSessionSnapshot> _load() async {
     final session = await ref
         .read(sessionRepositoryProvider)
         .getSessionById(sessionId);
@@ -37,7 +37,7 @@ class FreeScoreSessionController extends AsyncNotifier<FreeScoreSnapshot> {
     final events = await ref
         .read(eventRepositoryProvider)
         .getEventsForSession(sessionId);
-    return deriveFreeScoreSnapshot(
+    return deriveScoreSessionSnapshot(
       status: session.status,
       startedAt: session.startedAt,
       endedAt: session.endedAt,

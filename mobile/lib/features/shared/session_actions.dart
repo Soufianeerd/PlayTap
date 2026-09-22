@@ -5,6 +5,7 @@ import '../../app/providers/database_providers.dart';
 import '../../data/repositories/session_repository.dart';
 import '../../domain/events/session_event.dart';
 import '../../domain/models/session_category.dart';
+import '../score_petanque/petanque_actions.dart' show petanquePresetRef;
 
 const _uuid = Uuid();
 
@@ -33,10 +34,15 @@ Future<void> abandonSession(WidgetRef ref, String sessionId) async {
 /// Where "REPRENDRE" should navigate for a given active session — see
 /// section 26/27 of the Phase 1B.2 brief: Home's resume CTA and the
 /// "session already active" dialog must route by category generically,
-/// not assume Score Libre.
+/// not assume Score Libre. Score Libre and Pétanque both use
+/// `SessionCategory.score`, so within that category routing further keys
+/// off `presetRef` (see `features/score_petanque/petanque_actions.dart`).
 String activeSessionRoute(SessionSummary session) {
   return switch (session.category) {
-    SessionCategory.score => '/score/free/session/${session.id}',
+    SessionCategory.score =>
+      session.presetRef == petanquePresetRef
+          ? '/score/petanque/session/${session.id}'
+          : '/score/free/session/${session.id}',
     SessionCategory.timer => '/timer/session/${session.id}',
     SessionCategory.training => throw UnimplementedError(
       'Training sessions do not exist yet',

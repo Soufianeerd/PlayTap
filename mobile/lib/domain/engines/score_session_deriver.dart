@@ -1,16 +1,19 @@
 import '../events/score_engine_event.dart';
 import '../events/session_event.dart';
-import '../models/free_score_snapshot.dart';
 import '../models/score_rule.dart';
+import '../models/score_session_snapshot.dart';
 import '../models/scoring_side.dart';
 import '../models/session_status.dart';
 import 'score_engine.dart';
 
-/// Turns a session's persisted event log into a [FreeScoreSnapshot] — the
-/// one place that knows how to read a `SESSION_STARTED` payload and replay
-/// the rest through [ScoreEngine]. Pure: no I/O, same inputs always produce
-/// the same snapshot (see `playtap-score-engine` — "Déterminisme").
-FreeScoreSnapshot deriveFreeScoreSnapshot({
+/// Turns a session's persisted event log into a [ScoreSessionSnapshot] —
+/// the one place that knows how to read a `SESSION_STARTED` payload and
+/// replay the rest through [ScoreEngine]. Pure: no I/O, same inputs always
+/// produce the same snapshot (see `playtap-score-engine` — "Déterminisme").
+/// Sport-agnostic: `ScoreRule.fromJson` dispatches on the persisted mode, so
+/// this one function already serves Score Libre, Pétanque, and every future
+/// Score preset — never duplicated per sport.
+ScoreSessionSnapshot deriveScoreSessionSnapshot({
   required SessionStatus status,
   required DateTime startedAt,
   required DateTime? endedAt,
@@ -34,7 +37,7 @@ FreeScoreSnapshot deriveFreeScoreSnapshot({
       .whereType<ScoreEngineEvent>()
       .toList();
 
-  return FreeScoreSnapshot(
+  return ScoreSessionSnapshot(
     sides: sides,
     scoreState: ScoreEngine.replay(rule, engineEvents),
     status: status,

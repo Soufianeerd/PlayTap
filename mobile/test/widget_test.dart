@@ -68,6 +68,8 @@ Future<void> startFreeScoreSession(
   final l10n = l10nOf(tester);
   await tester.tap(find.text(l10n.categoryScore));
   await tester.pumpAndSettle();
+  await tester.tap(find.text(l10n.presetFreeScore));
+  await tester.pumpAndSettle();
 
   await tester.tap(find.text('$participantCount'));
   await tester.pumpAndSettle();

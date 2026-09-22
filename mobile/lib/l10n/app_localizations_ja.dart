@@ -213,4 +213,69 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get languageSystemOption => '自動';
+
+  @override
+  String get presetPetanque => 'ペタンク';
+
+  @override
+  String get petanqueConfigTitle => '新しいペタンクゲーム';
+
+  @override
+  String get petanqueFormatLabel => 'フォーマット';
+
+  @override
+  String get petanqueFormatHeadToHead => 'シングル';
+
+  @override
+  String get petanqueFormatDoublette => 'ダブル';
+
+  @override
+  String get petanqueFormatTriplette => 'トリプル';
+
+  @override
+  String petanqueTeamSectionLabel(int n) {
+    return 'チーム$n';
+  }
+
+  @override
+  String get petanqueTeamNameLabel => 'チーム名';
+
+  @override
+  String petanqueDefaultTeamName(int n) {
+    return 'チーム$n';
+  }
+
+  @override
+  String endNumberLabel(int n) {
+    return '第$nエンド';
+  }
+
+  @override
+  String endsCountPlural(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countエンド',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get undoLastRound => '直前のエンドを取り消す';
+
+  @override
+  String addRoundPointsSemantics(int amount, String team) {
+    return '$teamに$amount点を追加';
+  }
+
+  @override
+  String get abandonGameButton => '中断';
+
+  @override
+  String get abandonGameDialogTitle => 'このゲームを中断しますか?';
+
+  @override
+  String winnerAnnouncement(String name) {
+    return '$nameの勝利!';
+  }
 }

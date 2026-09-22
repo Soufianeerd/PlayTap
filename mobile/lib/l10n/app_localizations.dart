@@ -469,6 +469,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Automatic'**
   String get languageSystemOption;
+
+  /// Name of the Pétanque Score preset. Used as a list item, page title, and history entry label.
+  ///
+  /// In en, this message translates to:
+  /// **'Pétanque'**
+  String get presetPetanque;
+
+  /// AppBar title for the Pétanque configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'New pétanque game'**
+  String get petanqueConfigTitle;
+
+  /// Label above the tête-à-tête/doublette/triplette format selector.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get petanqueFormatLabel;
+
+  /// Pétanque format: 1 player per side (tête-à-tête).
+  ///
+  /// In en, this message translates to:
+  /// **'Head-to-head'**
+  String get petanqueFormatHeadToHead;
+
+  /// Pétanque format: 2 players per side.
+  ///
+  /// In en, this message translates to:
+  /// **'Doublette'**
+  String get petanqueFormatDoublette;
+
+  /// Pétanque format: 3 players per side.
+  ///
+  /// In en, this message translates to:
+  /// **'Triplette'**
+  String get petanqueFormatTriplette;
+
+  /// Section header above one team's name and player fields on the Pétanque config page.
+  ///
+  /// In en, this message translates to:
+  /// **'Team {n}'**
+  String petanqueTeamSectionLabel(int n);
+
+  /// Text field label for a team's name on the Pétanque config page.
+  ///
+  /// In en, this message translates to:
+  /// **'Team name'**
+  String get petanqueTeamNameLabel;
+
+  /// Default, editable placeholder team name pre-filled in a Pétanque team name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Team {n}'**
+  String petanqueDefaultTeamName(int n);
+
+  /// Small, discreet label showing the current round number during an active Pétanque game ("mène" in French pétanque terminology).
+  ///
+  /// In en, this message translates to:
+  /// **'End {n}'**
+  String endNumberLabel(int n);
+
+  /// Standalone count of completed Pétanque rounds ("mènes"), e.g. "7 ends", shown in History and the Pétanque summary page.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} end} other {{count} ends}}'**
+  String endsCountPlural(int count);
+
+  /// Label on the compact undo bar during an active Pétanque session (undoes the whole last round/"mène", not a single point).
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last end'**
+  String get undoLastRound;
+
+  /// Accessibility label for one of a team's +1..+6 round-scoring buttons during an active Pétanque session.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {amount} points to {team}'**
+  String addRoundPointsSemantics(int amount, String team);
+
+  /// Button/tooltip that opens the abandon-game confirmation during an active Pétanque session, and its confirm action.
+  ///
+  /// In en, this message translates to:
+  /// **'ABANDON'**
+  String get abandonGameButton;
+
+  /// Confirmation dialog title when manually abandoning a Pétanque session before it's won.
+  ///
+  /// In en, this message translates to:
+  /// **'Abandon this game?'**
+  String get abandonGameDialogTitle;
+
+  /// Winner announcement on the Pétanque summary page.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wins!'**
+  String winnerAnnouncement(String name);
 }
 
 class _AppLocalizationsDelegate

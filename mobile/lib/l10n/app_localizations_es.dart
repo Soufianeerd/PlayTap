@@ -216,4 +216,70 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get languageSystemOption => 'Automático';
+
+  @override
+  String get presetPetanque => 'Petanca';
+
+  @override
+  String get petanqueConfigTitle => 'Nueva partida de petanca';
+
+  @override
+  String get petanqueFormatLabel => 'Formato';
+
+  @override
+  String get petanqueFormatHeadToHead => 'Individual';
+
+  @override
+  String get petanqueFormatDoublette => 'Dupla';
+
+  @override
+  String get petanqueFormatTriplette => 'Tripleta';
+
+  @override
+  String petanqueTeamSectionLabel(int n) {
+    return 'Equipo $n';
+  }
+
+  @override
+  String get petanqueTeamNameLabel => 'Nombre del equipo';
+
+  @override
+  String petanqueDefaultTeamName(int n) {
+    return 'Equipo $n';
+  }
+
+  @override
+  String endNumberLabel(int n) {
+    return 'Manga $n';
+  }
+
+  @override
+  String endsCountPlural(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mangas',
+      one: '$count manga',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get undoLastRound => 'Deshacer última manga';
+
+  @override
+  String addRoundPointsSemantics(int amount, String team) {
+    return 'Añadir $amount puntos a $team';
+  }
+
+  @override
+  String get abandonGameButton => 'ABANDONAR';
+
+  @override
+  String get abandonGameDialogTitle => '¿Abandonar esta partida?';
+
+  @override
+  String winnerAnnouncement(String name) {
+    return '¡$name gana!';
+  }
 }

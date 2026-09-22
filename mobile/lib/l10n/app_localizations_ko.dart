@@ -213,4 +213,69 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get languageSystemOption => '자동';
+
+  @override
+  String get presetPetanque => '페탕크';
+
+  @override
+  String get petanqueConfigTitle => '새 페탕크 게임';
+
+  @override
+  String get petanqueFormatLabel => '형식';
+
+  @override
+  String get petanqueFormatHeadToHead => '단식';
+
+  @override
+  String get petanqueFormatDoublette => '복식';
+
+  @override
+  String get petanqueFormatTriplette => '3인조';
+
+  @override
+  String petanqueTeamSectionLabel(int n) {
+    return '팀 $n';
+  }
+
+  @override
+  String get petanqueTeamNameLabel => '팀 이름';
+
+  @override
+  String petanqueDefaultTeamName(int n) {
+    return '팀 $n';
+  }
+
+  @override
+  String endNumberLabel(int n) {
+    return '$n엔드';
+  }
+
+  @override
+  String endsCountPlural(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count엔드',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get undoLastRound => '마지막 엔드 취소';
+
+  @override
+  String addRoundPointsSemantics(int amount, String team) {
+    return '$team에 $amount점 추가';
+  }
+
+  @override
+  String get abandonGameButton => '포기';
+
+  @override
+  String get abandonGameDialogTitle => '이 게임을 포기하시겠습니까?';
+
+  @override
+  String winnerAnnouncement(String name) {
+    return '$name 승리!';
+  }
 }

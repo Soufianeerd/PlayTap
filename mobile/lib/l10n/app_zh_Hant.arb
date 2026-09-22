@@ -59,5 +59,21 @@
   "today": "今天",
   "yesterday": "昨天",
   "languagePageTitle": "語言",
-  "languageSystemOption": "自動"
+  "languageSystemOption": "自動",
+  "presetPetanque": "滾球",
+  "petanqueConfigTitle": "新建滾球比賽",
+  "petanqueFormatLabel": "賽制",
+  "petanqueFormatHeadToHead": "單打",
+  "petanqueFormatDoublette": "雙打",
+  "petanqueFormatTriplette": "三人賽",
+  "petanqueTeamSectionLabel": "隊伍{n}",
+  "petanqueTeamNameLabel": "隊伍名稱",
+  "petanqueDefaultTeamName": "隊伍{n}",
+  "endNumberLabel": "第{n}局",
+  "endsCountPlural": "{count, plural, other {{count}局}}",
+  "undoLastRound": "復原上一局",
+  "addRoundPointsSemantics": "為{team}加{amount}分",
+  "abandonGameButton": "放棄",
+  "abandonGameDialogTitle": "放棄本場比賽？",
+  "winnerAnnouncement": "{name}獲勝！"
 }

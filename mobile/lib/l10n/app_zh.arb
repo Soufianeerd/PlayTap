@@ -59,5 +59,21 @@
   "today": "今天",
   "yesterday": "昨天",
   "languagePageTitle": "语言",
-  "languageSystemOption": "自动"
+  "languageSystemOption": "自动",
+  "presetPetanque": "滚球",
+  "petanqueConfigTitle": "新建滚球比赛",
+  "petanqueFormatLabel": "赛制",
+  "petanqueFormatHeadToHead": "单打",
+  "petanqueFormatDoublette": "双打",
+  "petanqueFormatTriplette": "三人赛",
+  "petanqueTeamSectionLabel": "队伍{n}",
+  "petanqueTeamNameLabel": "队伍名称",
+  "petanqueDefaultTeamName": "队伍{n}",
+  "endNumberLabel": "第{n}局",
+  "endsCountPlural": "{count, plural, other {{count}局}}",
+  "undoLastRound": "撤销上一局",
+  "addRoundPointsSemantics": "为{team}加{amount}分",
+  "abandonGameButton": "放弃",
+  "abandonGameDialogTitle": "放弃本场比赛？",
+  "winnerAnnouncement": "{name}获胜！"
 }

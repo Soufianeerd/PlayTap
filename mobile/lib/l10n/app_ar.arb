@@ -59,5 +59,21 @@
   "today": "اليوم",
   "yesterday": "أمس",
   "languagePageTitle": "اللغة",
-  "languageSystemOption": "تلقائي"
+  "languageSystemOption": "تلقائي",
+  "presetPetanque": "البيتانك",
+  "petanqueConfigTitle": "مباراة بيتانك جديدة",
+  "petanqueFormatLabel": "الصيغة",
+  "petanqueFormatHeadToHead": "فردي",
+  "petanqueFormatDoublette": "زوجي",
+  "petanqueFormatTriplette": "ثلاثي",
+  "petanqueTeamSectionLabel": "الفريق {n}",
+  "petanqueTeamNameLabel": "اسم الفريق",
+  "petanqueDefaultTeamName": "الفريق {n}",
+  "endNumberLabel": "الجولة {n}",
+  "endsCountPlural": "{count, plural, zero {{count} جولة} one {جولة واحدة} two {جولتان} few {{count} جولات} many {{count} جولة} other {{count} جولة}}",
+  "undoLastRound": "التراجع عن آخر جولة",
+  "addRoundPointsSemantics": "أضف {amount} نقاط إلى {team}",
+  "abandonGameButton": "التخلي",
+  "abandonGameDialogTitle": "هل تريد التخلي عن هذه المباراة؟",
+  "winnerAnnouncement": "{name} يفوز!"
 }

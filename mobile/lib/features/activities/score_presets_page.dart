@@ -5,16 +5,20 @@ import '../../app/theme/theme.dart';
 import '../../l10n/app_localizations.dart';
 
 class _ScorePreset {
-  const _ScorePreset(this.label);
+  const _ScorePreset(this.label, this.route);
 
   final String label;
+  final String route;
 }
 
-/// PlayTap 1.0.0 scope is Score Libre only — the other sports in
-/// docs/SPORT_RULES.md return once the rest of the generic Score Engine
-/// (TARGET_SCORE, SETS, BEST_OF, WIN_BY) ships, not before.
+/// PlayTap 1.0.0 scope was Score Libre only; Pétanque is now the first
+/// full Sport Pack built on the generic Score Engine (TARGET_SCORE +
+/// TEAM_SCORE, see `playtap-score-engine`). The remaining sports in
+/// docs/SPORT_RULES.md return once SEQUENTIAL_SCORE/SETS/BEST_OF/WIN_BY
+/// ship, not before.
 List<_ScorePreset> _presetsOf(AppLocalizations l10n) => [
-  _ScorePreset(l10n.presetFreeScore),
+  _ScorePreset(l10n.presetFreeScore, '/score/free/config'),
+  _ScorePreset(l10n.presetPetanque, '/score/petanque/config'),
 ];
 
 class ScorePresetsPage extends StatelessWidget {
@@ -39,7 +43,7 @@ class ScorePresetsPage extends StatelessWidget {
             borderRadius: PlayTapRadii.mdRadius,
             child: InkWell(
               borderRadius: PlayTapRadii.mdRadius,
-              onTap: () => context.push('/score/free/config'),
+              onTap: () => context.push(preset.route),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: PlayTapSpacing.lg,

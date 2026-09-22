@@ -203,5 +203,71 @@
   "@languagePageTitle": {"description": "AppBar title for the language settings page."},
 
   "languageSystemOption": "Automatic",
-  "@languageSystemOption": {"description": "Option that follows the phone's system language."}
+  "@languageSystemOption": {"description": "Option that follows the phone's system language."},
+
+  "presetPetanque": "Pétanque",
+  "@presetPetanque": {"description": "Name of the Pétanque Score preset. Used as a list item, page title, and history entry label."},
+
+  "petanqueConfigTitle": "New pétanque game",
+  "@petanqueConfigTitle": {"description": "AppBar title for the Pétanque configuration page."},
+
+  "petanqueFormatLabel": "Format",
+  "@petanqueFormatLabel": {"description": "Label above the tête-à-tête/doublette/triplette format selector."},
+
+  "petanqueFormatHeadToHead": "Head-to-head",
+  "@petanqueFormatHeadToHead": {"description": "Pétanque format: 1 player per side (tête-à-tête)."},
+
+  "petanqueFormatDoublette": "Doublette",
+  "@petanqueFormatDoublette": {"description": "Pétanque format: 2 players per side."},
+
+  "petanqueFormatTriplette": "Triplette",
+  "@petanqueFormatTriplette": {"description": "Pétanque format: 3 players per side."},
+
+  "petanqueTeamSectionLabel": "Team {n}",
+  "@petanqueTeamSectionLabel": {
+    "description": "Section header above one team's name and player fields on the Pétanque config page.",
+    "placeholders": {"n": {"type": "int"}}
+  },
+
+  "petanqueTeamNameLabel": "Team name",
+  "@petanqueTeamNameLabel": {"description": "Text field label for a team's name on the Pétanque config page."},
+
+  "petanqueDefaultTeamName": "Team {n}",
+  "@petanqueDefaultTeamName": {
+    "description": "Default, editable placeholder team name pre-filled in a Pétanque team name field.",
+    "placeholders": {"n": {"type": "int"}}
+  },
+
+  "endNumberLabel": "End {n}",
+  "@endNumberLabel": {
+    "description": "Small, discreet label showing the current round number during an active Pétanque game (\"mène\" in French pétanque terminology).",
+    "placeholders": {"n": {"type": "int"}}
+  },
+
+  "endsCountPlural": "{count, plural, one {{count} end} other {{count} ends}}",
+  "@endsCountPlural": {
+    "description": "Standalone count of completed Pétanque rounds (\"mènes\"), e.g. \"7 ends\", shown in History and the Pétanque summary page.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+
+  "undoLastRound": "Undo last end",
+  "@undoLastRound": {"description": "Label on the compact undo bar during an active Pétanque session (undoes the whole last round/\"mène\", not a single point)."},
+
+  "addRoundPointsSemantics": "Add {amount} points to {team}",
+  "@addRoundPointsSemantics": {
+    "description": "Accessibility label for one of a team's +1..+6 round-scoring buttons during an active Pétanque session.",
+    "placeholders": {"amount": {"type": "int"}, "team": {"type": "String"}}
+  },
+
+  "abandonGameButton": "ABANDON",
+  "@abandonGameButton": {"description": "Button/tooltip that opens the abandon-game confirmation during an active Pétanque session, and its confirm action."},
+
+  "abandonGameDialogTitle": "Abandon this game?",
+  "@abandonGameDialogTitle": {"description": "Confirmation dialog title when manually abandoning a Pétanque session before it's won."},
+
+  "winnerAnnouncement": "{name} wins!",
+  "@winnerAnnouncement": {
+    "description": "Winner announcement on the Pétanque summary page.",
+    "placeholders": {"name": {"type": "String"}}
+  }
 }

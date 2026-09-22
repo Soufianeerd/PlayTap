@@ -212,6 +212,71 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get languageSystemOption => '自动';
+
+  @override
+  String get presetPetanque => '滚球';
+
+  @override
+  String get petanqueConfigTitle => '新建滚球比赛';
+
+  @override
+  String get petanqueFormatLabel => '赛制';
+
+  @override
+  String get petanqueFormatHeadToHead => '单打';
+
+  @override
+  String get petanqueFormatDoublette => '双打';
+
+  @override
+  String get petanqueFormatTriplette => '三人赛';
+
+  @override
+  String petanqueTeamSectionLabel(int n) {
+    return '队伍$n';
+  }
+
+  @override
+  String get petanqueTeamNameLabel => '队伍名称';
+
+  @override
+  String petanqueDefaultTeamName(int n) {
+    return '队伍$n';
+  }
+
+  @override
+  String endNumberLabel(int n) {
+    return '第$n局';
+  }
+
+  @override
+  String endsCountPlural(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count局',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get undoLastRound => '撤销上一局';
+
+  @override
+  String addRoundPointsSemantics(int amount, String team) {
+    return '为$team加$amount分';
+  }
+
+  @override
+  String get abandonGameButton => '放弃';
+
+  @override
+  String get abandonGameDialogTitle => '放弃本场比赛？';
+
+  @override
+  String winnerAnnouncement(String name) {
+    return '$name获胜！';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -422,6 +487,71 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get languageSystemOption => '自动';
+
+  @override
+  String get presetPetanque => '滚球';
+
+  @override
+  String get petanqueConfigTitle => '新建滚球比赛';
+
+  @override
+  String get petanqueFormatLabel => '赛制';
+
+  @override
+  String get petanqueFormatHeadToHead => '单打';
+
+  @override
+  String get petanqueFormatDoublette => '双打';
+
+  @override
+  String get petanqueFormatTriplette => '三人赛';
+
+  @override
+  String petanqueTeamSectionLabel(int n) {
+    return '队伍$n';
+  }
+
+  @override
+  String get petanqueTeamNameLabel => '队伍名称';
+
+  @override
+  String petanqueDefaultTeamName(int n) {
+    return '队伍$n';
+  }
+
+  @override
+  String endNumberLabel(int n) {
+    return '第$n局';
+  }
+
+  @override
+  String endsCountPlural(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count局',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get undoLastRound => '撤销上一局';
+
+  @override
+  String addRoundPointsSemantics(int amount, String team) {
+    return '为$team加$amount分';
+  }
+
+  @override
+  String get abandonGameButton => '放弃';
+
+  @override
+  String get abandonGameDialogTitle => '放弃本场比赛？';
+
+  @override
+  String winnerAnnouncement(String name) {
+    return '$name获胜！';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -632,4 +762,69 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get languageSystemOption => '自動';
+
+  @override
+  String get presetPetanque => '滾球';
+
+  @override
+  String get petanqueConfigTitle => '新建滾球比賽';
+
+  @override
+  String get petanqueFormatLabel => '賽制';
+
+  @override
+  String get petanqueFormatHeadToHead => '單打';
+
+  @override
+  String get petanqueFormatDoublette => '雙打';
+
+  @override
+  String get petanqueFormatTriplette => '三人賽';
+
+  @override
+  String petanqueTeamSectionLabel(int n) {
+    return '隊伍$n';
+  }
+
+  @override
+  String get petanqueTeamNameLabel => '隊伍名稱';
+
+  @override
+  String petanqueDefaultTeamName(int n) {
+    return '隊伍$n';
+  }
+
+  @override
+  String endNumberLabel(int n) {
+    return '第$n局';
+  }
+
+  @override
+  String endsCountPlural(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count局',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get undoLastRound => '復原上一局';
+
+  @override
+  String addRoundPointsSemantics(int amount, String team) {
+    return '為$team加$amount分';
+  }
+
+  @override
+  String get abandonGameButton => '放棄';
+
+  @override
+  String get abandonGameDialogTitle => '放棄本場比賽？';
+
+  @override
+  String winnerAnnouncement(String name) {
+    return '$name獲勝！';
+  }
 }

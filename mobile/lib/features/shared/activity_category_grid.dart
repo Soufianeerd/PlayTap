@@ -13,22 +13,21 @@ class ActivityCategory {
   final String route;
 }
 
-/// PlayTap 1.0.0 scope is Score Libre + Timer only (see
-/// docs/ROADMAP.md — Training/Custom return with the Interval/Workout
-/// Engines in a later release, not before). "Score" skips straight to the
-/// Score Libre config — with a single implemented preset, a middle list
-/// screen would only add a tap for nothing (see ScorePresetsPage, kept as
-/// unlinked infrastructure for when more sports return).
+/// PlayTap 1.0.0 scope was Score Libre + Timer only; Pétanque now joins
+/// Score Libre as a second Score preset (see docs/ROADMAP.md — Training/
+/// Custom still return with the Interval/Workout Engines in a later
+/// release, not before). "Score" now goes to `ScorePresetsPage` (the
+/// preset list) rather than skipping straight to Score Libre's config,
+/// since skipping only made sense with a single preset.
 ///
-/// `Icons.exposure_plus_1` (not a racket/ball) for Score: Score Libre
-/// scores anything, and Score Libre is the only rule PlayTap 1.0.0's
-/// ScoreEngine actually implements — a sport-specific icon would promise a
-/// preset that doesn't exist yet (see the release brand brief section 9).
+/// `Icons.exposure_plus_1` (not a racket/ball) for Score: it represents
+/// scoring in general, not any one preset — Score Libre and Pétanque (and
+/// future sports) share this tile.
 List<ActivityCategory> activityCategoriesOf(AppLocalizations l10n) => [
   ActivityCategory(
     l10n.categoryScore,
     Icons.exposure_plus_1,
-    '/score/free/config',
+    '/activities/score',
   ),
   ActivityCategory(
     l10n.categoryTimer,

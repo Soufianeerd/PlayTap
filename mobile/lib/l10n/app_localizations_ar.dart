@@ -222,4 +222,74 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get languageSystemOption => 'تلقائي';
+
+  @override
+  String get presetPetanque => 'البيتانك';
+
+  @override
+  String get petanqueConfigTitle => 'مباراة بيتانك جديدة';
+
+  @override
+  String get petanqueFormatLabel => 'الصيغة';
+
+  @override
+  String get petanqueFormatHeadToHead => 'فردي';
+
+  @override
+  String get petanqueFormatDoublette => 'زوجي';
+
+  @override
+  String get petanqueFormatTriplette => 'ثلاثي';
+
+  @override
+  String petanqueTeamSectionLabel(int n) {
+    return 'الفريق $n';
+  }
+
+  @override
+  String get petanqueTeamNameLabel => 'اسم الفريق';
+
+  @override
+  String petanqueDefaultTeamName(int n) {
+    return 'الفريق $n';
+  }
+
+  @override
+  String endNumberLabel(int n) {
+    return 'الجولة $n';
+  }
+
+  @override
+  String endsCountPlural(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count جولة',
+      many: '$count جولة',
+      few: '$count جولات',
+      two: 'جولتان',
+      one: 'جولة واحدة',
+      zero: '$count جولة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get undoLastRound => 'التراجع عن آخر جولة';
+
+  @override
+  String addRoundPointsSemantics(int amount, String team) {
+    return 'أضف $amount نقاط إلى $team';
+  }
+
+  @override
+  String get abandonGameButton => 'التخلي';
+
+  @override
+  String get abandonGameDialogTitle => 'هل تريد التخلي عن هذه المباراة؟';
+
+  @override
+  String winnerAnnouncement(String name) {
+    return '$name يفوز!';
+  }
 }

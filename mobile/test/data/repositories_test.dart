@@ -6,9 +6,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtap/data/local/app_database.dart';
 import 'package:playtap/data/repositories/event_repository.dart';
 import 'package:playtap/data/repositories/session_repository.dart';
+import 'package:playtap/domain/engines/score_session_deriver.dart';
 import 'package:playtap/domain/engines/timer_deriver.dart';
 import 'package:playtap/domain/events/session_event.dart';
 import 'package:playtap/domain/models/origin_device.dart';
+import 'package:playtap/domain/models/score_rule.dart';
+import 'package:playtap/domain/models/score_target.dart';
+import 'package:playtap/domain/models/scoring_side.dart';
 import 'package:playtap/domain/models/session_category.dart';
 import 'package:playtap/domain/models/session_status.dart';
 import 'package:playtap/domain/models/timer_mode.dart';
@@ -437,6 +441,266 @@ void main() {
 
       final allEvents = await eventRepo2.getEventsForSession('t1');
       expect(allEvents.map((e) => e.originSequence), [1, 2, 3]);
+
+      await db1.close();
+    });
+  });
+
+  group('Pétanque persistence', () {
+    const petanqueRule = TeamScoreRule(
+      schemaVersion: 1,
+      sideIds: ['team_a', 'team_b'],
+      allowedIncrements: [1, 2, 3, 4, 5, 6],
+      target: ScoreTarget(targetScore: 13, automaticCompletion: true),
+    );
+
+    Future<void> createPetanqueSession(String id) => sessions.createSession(
+      id: id,
+      category: SessionCategory.score,
+      ownerDevice: OriginDevice.phone,
+      presetRef: 'sport.petanque',
+      startedAt: DateTime.utc(2026, 1, 1),
+    );
+
+    test(
+      'SESSION_STARTED payload round-trips the composed TeamScoreRule exactly',
+      () async {
+        await createPetanqueSession('p1');
+        await events.appendPhoneEvent(
+          id: 'e1',
+          sessionId: 'p1',
+          type: SessionEventType.sessionStarted,
+          payload: {
+            'scoreRule': petanqueRule.toJson(),
+            'sides': [
+              const ScoringSide(id: 'team_a', name: 'Équipe A').toJson(),
+              const ScoringSide(
+                id: 'team_b',
+                name: 'Équipe B',
+                players: ['Alex', 'Sam'],
+              ).toJson(),
+            ],
+          },
+          timestamp: DateTime.utc(2026, 1, 1),
+        );
+
+        final fetched = await events.getEventsForSession('p1');
+        final decodedRule =
+            ScoreRule.fromJson(
+                  fetched.single.payload['scoreRule'] as Map<String, dynamic>,
+                )
+                as TeamScoreRule;
+        expect(decodedRule.allowedIncrements, [1, 2, 3, 4, 5, 6]);
+        expect(decodedRule.target?.targetScore, 13);
+        final decodedSides = (fetched.single.payload['sides'] as List)
+            .cast<Map<String, dynamic>>()
+            .map(ScoringSide.fromJson)
+            .toList();
+        expect(decodedSides[1].players, ['Alex', 'Sam']);
+      },
+    );
+
+    test(
+      'several mènes replay to the correct score, undo removes a whole mène',
+      () async {
+        await createPetanqueSession('p1');
+        await events.appendPhoneEvent(
+          id: 'e0',
+          sessionId: 'p1',
+          type: SessionEventType.sessionStarted,
+          payload: {
+            'scoreRule': petanqueRule.toJson(),
+            'sides': [
+              const ScoringSide(id: 'team_a', name: 'Équipe A').toJson(),
+              const ScoringSide(id: 'team_b', name: 'Équipe B').toJson(),
+            ],
+          },
+          timestamp: DateTime.utc(2026, 1, 1),
+        );
+        await events.appendPhoneEvent(
+          id: 'e1',
+          sessionId: 'p1',
+          type: SessionEventType.pointScored,
+          payload: const {'side': 'team_a', 'amount': 3},
+          timestamp: DateTime.utc(2026, 1, 1, 0, 1),
+        );
+        await events.appendPhoneEvent(
+          id: 'e2',
+          sessionId: 'p1',
+          type: SessionEventType.pointScored,
+          payload: const {'side': 'team_b', 'amount': 2},
+          timestamp: DateTime.utc(2026, 1, 1, 0, 2),
+        );
+        await events.appendPhoneEvent(
+          id: 'e3',
+          sessionId: 'p1',
+          type: SessionEventType.undo,
+          payload: const {},
+          timestamp: DateTime.utc(2026, 1, 1, 0, 3),
+        );
+
+        final session = await sessions.getSessionById('p1');
+        final fetchedEvents = await events.getEventsForSession('p1');
+        final snapshot = deriveScoreSessionSnapshot(
+          status: session!.status,
+          startedAt: session.startedAt,
+          endedAt: session.endedAt,
+          events: fetchedEvents,
+        );
+        expect(snapshot.scoreState.scores, {'team_a': 3, 'team_b': 0});
+        expect(snapshot.scoreState.rounds, hasLength(1));
+      },
+    );
+
+    test(
+      'reaching 13 completes the session; undo reopens it via reopenSession',
+      () async {
+        await createPetanqueSession('p1');
+        await events.appendPhoneEvent(
+          id: 'e0',
+          sessionId: 'p1',
+          type: SessionEventType.sessionStarted,
+          payload: {
+            'scoreRule': petanqueRule.toJson(),
+            'sides': [
+              const ScoringSide(id: 'team_a', name: 'Équipe A').toJson(),
+              const ScoringSide(id: 'team_b', name: 'Équipe B').toJson(),
+            ],
+          },
+          timestamp: DateTime.utc(2026, 1, 1),
+        );
+        await events.appendPhoneEvent(
+          id: 'e1',
+          sessionId: 'p1',
+          type: SessionEventType.pointScored,
+          payload: const {'side': 'team_a', 'amount': 6},
+          timestamp: DateTime.utc(2026, 1, 1, 0, 1),
+        );
+        await events.appendPhoneEvent(
+          id: 'e2',
+          sessionId: 'p1',
+          type: SessionEventType.pointScored,
+          payload: const {'side': 'team_a', 'amount': 6},
+          timestamp: DateTime.utc(2026, 1, 1, 0, 2),
+        );
+        await events.appendPhoneEvent(
+          id: 'e3',
+          sessionId: 'p1',
+          type: SessionEventType.pointScored,
+          payload: const {'side': 'team_a', 'amount': 1}, // exactly 13.
+          timestamp: DateTime.utc(2026, 1, 1, 0, 3),
+        );
+
+        var session = await sessions.getSessionById('p1');
+        var fetchedEvents = await events.getEventsForSession('p1');
+        var snapshot = deriveScoreSessionSnapshot(
+          status: session!.status,
+          startedAt: session.startedAt,
+          endedAt: session.endedAt,
+          events: fetchedEvents,
+        );
+        expect(snapshot.scoreState.matchComplete, isTrue);
+
+        // Controller-equivalent: persist the derived completion.
+        await sessions.completeSession(
+          'p1',
+          endedAt: DateTime.utc(2026, 1, 1, 0, 3),
+        );
+        expect(
+          (await sessions.getSessionById('p1'))!.status,
+          SessionStatus.completed,
+        );
+
+        // Undo the winning mène: engine reopens matchComplete, and the
+        // controller reopens the session status to match.
+        await events.appendPhoneEvent(
+          id: 'e4',
+          sessionId: 'p1',
+          type: SessionEventType.undo,
+          payload: const {},
+          timestamp: DateTime.utc(2026, 1, 1, 0, 4),
+        );
+        session = await sessions.getSessionById('p1');
+        fetchedEvents = await events.getEventsForSession('p1');
+        snapshot = deriveScoreSessionSnapshot(
+          status: session!.status,
+          startedAt: session.startedAt,
+          endedAt: session.endedAt,
+          events: fetchedEvents,
+        );
+        expect(snapshot.scoreState.matchComplete, isFalse);
+        expect(snapshot.scoreState.scores['team_a'], 12);
+
+        await sessions.reopenSession('p1');
+        final reopened = await sessions.getSessionById('p1');
+        expect(reopened!.status, SessionStatus.active);
+        expect(reopened.endedAt, isNull);
+        expect(await sessions.getActiveSession(), isNotNull);
+      },
+    );
+
+    test('originSequence continues correctly for a Pétanque session after '
+        'process restart (new AppDatabase over the same executor)', () async {
+      drift.driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+      final executor = NativeDatabase.memory();
+      final db1 = AppDatabase(executor);
+      final sessionRepo1 = SessionRepository(db1);
+      final eventRepo1 = EventRepository(db1);
+
+      await sessionRepo1.createSession(
+        id: 'p1',
+        category: SessionCategory.score,
+        ownerDevice: OriginDevice.phone,
+        presetRef: 'sport.petanque',
+        startedAt: DateTime.utc(2026, 1, 1),
+      );
+      await eventRepo1.appendPhoneEvent(
+        id: 'e0',
+        sessionId: 'p1',
+        type: SessionEventType.sessionStarted,
+        payload: {
+          'scoreRule': petanqueRule.toJson(),
+          'sides': [
+            const ScoringSide(id: 'team_a', name: 'Équipe A').toJson(),
+            const ScoringSide(id: 'team_b', name: 'Équipe B').toJson(),
+          ],
+        },
+        timestamp: DateTime.utc(2026, 1, 1),
+      );
+      await eventRepo1.appendPhoneEvent(
+        id: 'e1',
+        sessionId: 'p1',
+        type: SessionEventType.pointScored,
+        payload: const {'side': 'team_a', 'amount': 4},
+        timestamp: DateTime.utc(2026, 1, 1, 0, 1),
+      );
+
+      // Simulate process death: a fresh AppDatabase over the same
+      // underlying executor (see the Recovery group below).
+      final db2 = AppDatabase(executor);
+      final sessionRepo2 = SessionRepository(db2);
+      final eventRepo2 = EventRepository(db2);
+
+      final active = await sessionRepo2.getActiveSession();
+      expect(active?.id, 'p1');
+
+      final e2 = await eventRepo2.appendPhoneEvent(
+        id: 'e2',
+        sessionId: 'p1',
+        type: SessionEventType.pointScored,
+        payload: const {'side': 'team_b', 'amount': 2},
+        timestamp: DateTime.utc(2026, 1, 1, 0, 2),
+      );
+      expect(e2.originSequence, 3); // continues from 3, not reset to 1.
+
+      final allEvents = await eventRepo2.getEventsForSession('p1');
+      final snapshot = deriveScoreSessionSnapshot(
+        status: active!.status,
+        startedAt: active.startedAt,
+        endedAt: active.endedAt,
+        events: allEvents,
+      );
+      expect(snapshot.scoreState.scores, {'team_a': 4, 'team_b': 2});
 
       await db1.close();
     });

@@ -10,6 +10,9 @@ import '../features/home/home_page.dart';
 import '../features/score_free/active_free_score_session_page.dart';
 import '../features/score_free/free_score_config_page.dart';
 import '../features/score_free/score_summary_page.dart';
+import '../features/score_petanque/active_petanque_session_page.dart';
+import '../features/score_petanque/petanque_config_page.dart';
+import '../features/score_petanque/petanque_summary_page.dart';
 import '../features/settings/language_settings_page.dart';
 import '../features/shared/coming_soon_page.dart';
 import '../features/timer/active_timer_session_page.dart';
@@ -85,6 +88,21 @@ GoRouter createAppRouter() => GoRouter(
       path: '/score/free/summary/:sessionId',
       builder: (context, state) =>
           ScoreSummaryPage(sessionId: state.pathParameters['sessionId']!),
+    ),
+    GoRoute(
+      path: '/score/petanque/config',
+      builder: (context, state) => const PetanqueConfigPage(),
+    ),
+    GoRoute(
+      path: '/score/petanque/session/:sessionId',
+      builder: (context, state) => ActivePetanqueSessionPage(
+        sessionId: state.pathParameters['sessionId']!,
+      ),
+    ),
+    GoRoute(
+      path: '/score/petanque/summary/:sessionId',
+      builder: (context, state) =>
+          PetanqueSummaryPage(sessionId: state.pathParameters['sessionId']!),
     ),
     GoRoute(
       path: '/activities/timer',

@@ -113,3 +113,17 @@ correction se fait dans cet ordre :
 Ne jamais corriger une implémentation en se basant uniquement sur "ça a
 l'air juste" sans passer par une fixture — voir la règle de vérification
 dans `CLAUDE.md`.
+
+## Note — fixture corrigée (2026-09-22)
+
+`contracts/score/target_score_win_by_two.json` avait été écrite avant
+toute implémentation réelle de TARGET_SCORE (systématiquement `skip`
+jusqu'à la Phase Sports 1) et sa séquence d'events ne pouvait
+mathématiquement pas produire le score final qu'elle revendiquait elle-même
+(12-10 à partir de 12 events à 1 point). Corrigée en étendant la séquence
+à 22 events cohérents aboutissant au même état final revendiqué à
+l'origine, exactement le processus décrit ci-dessus ("Interdiction").
+Les nouvelles fixtures `team_score_basic` et `petanque_*` (voir
+`docs/SPORT_RULES.md`, `docs/DATA_MODEL.md`) suivent le même format,
+vérifiées passantes pour de vrai (jamais un ancien `skip` transformé en
+`pass` sans implémentation réelle derrière).

@@ -59,5 +59,21 @@
   "today": "今日",
   "yesterday": "昨日",
   "languagePageTitle": "言語",
-  "languageSystemOption": "自動"
+  "languageSystemOption": "自動",
+  "presetPetanque": "ペタンク",
+  "petanqueConfigTitle": "新しいペタンクゲーム",
+  "petanqueFormatLabel": "フォーマット",
+  "petanqueFormatHeadToHead": "シングル",
+  "petanqueFormatDoublette": "ダブル",
+  "petanqueFormatTriplette": "トリプル",
+  "petanqueTeamSectionLabel": "チーム{n}",
+  "petanqueTeamNameLabel": "チーム名",
+  "petanqueDefaultTeamName": "チーム{n}",
+  "endNumberLabel": "第{n}エンド",
+  "endsCountPlural": "{count, plural, other {{count}エンド}}",
+  "undoLastRound": "直前のエンドを取り消す",
+  "addRoundPointsSemantics": "{team}に{amount}点を追加",
+  "abandonGameButton": "中断",
+  "abandonGameDialogTitle": "このゲームを中断しますか?",
+  "winnerAnnouncement": "{name}の勝利!"
 }

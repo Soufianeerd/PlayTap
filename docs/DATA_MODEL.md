@@ -52,6 +52,51 @@ HistoryEntry (vue dérivée, pas une table séparée à maintenir manuellement)
                                    // indépendamment comme source de vérité
 ```
 
+## ScoreRule — composition de TARGET_SCORE et TEAM_SCORE
+
+Voir `playtap-score-engine` pour le modèle conceptuel complet. Décision
+architecturale (Phase Pétanque, 2026-09) : TARGET_SCORE ("premier à N
+points gagne") et TEAM_SCORE ("scoring avec incréments configurables") ne
+sont pas des modes mutuellement exclusifs au même niveau que FREE_SCORE —
+Pétanque a besoin des deux à la fois (cible 13 + 1 à 6 points par mène).
+
+Plutôt que d'ajouter un troisième sous-type scellé par combinaison de
+modes, la logique "comment le match se termine" est factorisée dans un
+objet de valeur réutilisable et composable, `ScoreTarget` (+ `ScoreWinBy`
+pour la marge optionnelle) :
+
+```jsonc
+// TARGET_SCORE — toujours un ScoreTarget, incréments fixes à 1/event
+{ "schemaVersion": 1, "mode": "TARGET_SCORE", "sides": ["side_a", "side_b"],
+  "targetScore": 11, "automaticCompletion": true,
+  "winBy": { "enabled": true, "margin": 2 } }
+
+// TEAM_SCORE — incréments configurables, ScoreTarget optionnel et imbriqué
+// sous "target" (composition : présent = Pétanque, absent = Basketball/
+// Football V2, fin manuelle uniquement)
+{ "schemaVersion": 1, "mode": "TEAM_SCORE", "sides": ["team_a", "team_b"],
+  "allowedIncrements": [1, 2, 3, 4, 5, 6],
+  "target": { "targetScore": 13, "automaticCompletion": true } }
+```
+
+`ScoreEngine` partage un seul cœur de replay (`_replayPointBased`) pour
+ces deux modes — `FreeScoreRule` garde son propre chemin, inchangé, pour
+zéro risque de régression. Le `ScoreState` dérivé porte aussi `rounds:
+List<ScoreRound>` (une entrée par `POINT_SCORED` non-annulé) : pour
+Pétanque, une **mène = un seul `POINT_SCORED`** (une seule équipe marque
+par mène, voir `playtap-sports-rules`), donc son numéro est simplement la
+position de l'entrée dans `rounds` — pas de nouveau type d'event
+(`ROUND_COMPLETED`) ni de métadonnée de mène redondante. `FreeScoreRule`
+laisse toujours `rounds` vide (aucune notion de round). L'undo reste
+toujours possible, y compris pour rouvrir un match qu'une mène venait de
+terminer automatiquement (voir "Undo obligatoire" dans
+`playtap-score-engine`).
+
+`ScoringSide` porte en plus un champ optionnel `players: List<String>?` —
+un side de scoring peut contenir plusieurs joueurs (ex : Pétanque
+doublette/triplette = 2 ou 3 joueurs dans 1 side), sans introduire de
+classe `Team`/`Competitor` séparée pour ce seul besoin d'affichage.
+
 ## Principes
 
 - `Event` est la source de vérité pour tout état de session. `Session`

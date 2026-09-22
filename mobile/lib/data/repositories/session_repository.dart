@@ -111,6 +111,21 @@ class SessionRepository {
     );
   }
 
+  /// Reopens a session that was marked COMPLETED, back to ACTIVE with no
+  /// `endedAt` — used when undoing the `POINT_SCORED` round that had
+  /// auto-completed a target-based match (see `ScoreEngine._replayPointBased`
+  /// and the Pétanque brief section 14: undo must always be able to reopen
+  /// the game, not just the last point). Generic: no Score/Pétanque-specific
+  /// logic here, same as every other lifecycle transition in this class.
+  Future<void> reopenSession(String id) {
+    return (_db.update(_db.sessions)..where((t) => t.id.equals(id))).write(
+      SessionsCompanion(
+        status: Value(SessionStatus.active.toJson()),
+        endedAt: const Value(null),
+      ),
+    );
+  }
+
   /// Completed sessions, most recent first — all categories unless
   /// [category] is given (see docs/DATA_MODEL.md — HistoryEntry is a
   /// derived view, not stored here).

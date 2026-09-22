@@ -1,6 +1,7 @@
-/// Base scoring shapes from `playtap-score-engine`. Only [freeScore] is
-/// implemented (Phase 1B.1) — the others exist so `ScoreRule` can grow into
-/// them later without renaming this enum.
+/// Base scoring shapes from `playtap-score-engine`. [freeScore],
+/// [targetScore] and [teamScore] are implemented (see `FreeScoreRule`,
+/// `TargetScoreRule`, `TeamScoreRule`) — [sequentialScore] still isn't; it
+/// exists so `ScoreRule` can grow into it later without renaming this enum.
 enum ScoreMode {
   freeScore,
   targetScore,
