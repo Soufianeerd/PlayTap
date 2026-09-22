@@ -32,6 +32,15 @@ class PetanqueSessionController extends AsyncNotifier<ScoreSessionSnapshot> {
 
   final String sessionId;
 
+  /// Guards [addRoundPoints]/[undoLast] against overlapping calls — a rapid
+  /// double-tap on the same mène button fires two `onPressed` calls before
+  /// either `await` settles and the widget rebuilds, which would otherwise
+  /// append two `POINT_SCORED` events for what the user experiences as one
+  /// tap (see the Pétanque undo-from-summary review, 2026-09-22). Mirrors
+  /// `TimerSessionController._finalizeInFlight`'s shape, but here it's the
+  /// mutating actions themselves that re-enter, not a live ticker.
+  bool _mutationInFlight = false;
+
   @override
   Future<ScoreSessionSnapshot> build() => _load();
 
@@ -58,26 +67,32 @@ class PetanqueSessionController extends AsyncNotifier<ScoreSessionSnapshot> {
   /// `ScoreEngine._replayPointBased` — and this method persists that as
   /// the session's COMPLETED status so it shows up in History.
   Future<void> addRoundPoints(String sideId, int amount) async {
+    if (_mutationInFlight) return;
     final current = state.value;
     if (current == null || current.status != SessionStatus.active) return;
 
-    final now = DateTime.now().toUtc();
-    await ref
-        .read(eventRepositoryProvider)
-        .appendPhoneEvent(
-          id: _uuid.v4(),
-          sessionId: sessionId,
-          type: SessionEventType.pointScored,
-          payload: {'side': sideId, 'amount': amount},
-          timestamp: now,
-        );
-    final reloaded = await _load();
-    if (reloaded.scoreState.matchComplete) {
+    _mutationInFlight = true;
+    try {
+      final now = DateTime.now().toUtc();
       await ref
-          .read(sessionRepositoryProvider)
-          .completeSession(sessionId, endedAt: now);
+          .read(eventRepositoryProvider)
+          .appendPhoneEvent(
+            id: _uuid.v4(),
+            sessionId: sessionId,
+            type: SessionEventType.pointScored,
+            payload: {'side': sideId, 'amount': amount},
+            timestamp: now,
+          );
+      final reloaded = await _load();
+      if (reloaded.scoreState.matchComplete) {
+        await ref
+            .read(sessionRepositoryProvider)
+            .completeSession(sessionId, endedAt: now);
+      }
+      state = AsyncData(await _load());
+    } finally {
+      _mutationInFlight = false;
     }
-    state = AsyncData(await _load());
   }
 
   /// Undoes the last mène. If it was the mène that auto-completed the
@@ -85,24 +100,30 @@ class PetanqueSessionController extends AsyncNotifier<ScoreSessionSnapshot> {
   /// persisted session status to match, so play can continue (see
   /// `SessionRepository.reopenSession`).
   Future<void> undoLast() async {
+    if (_mutationInFlight) return;
     final current = state.value;
     if (current == null || !current.isUndoAvailable) return;
     final wasComplete = current.scoreState.matchComplete;
     if (current.status != SessionStatus.active && !wasComplete) return;
 
-    await ref
-        .read(eventRepositoryProvider)
-        .appendPhoneEvent(
-          id: _uuid.v4(),
-          sessionId: sessionId,
-          type: SessionEventType.undo,
-          payload: const {},
-          timestamp: DateTime.now().toUtc(),
-        );
-    final reloaded = await _load();
-    if (wasComplete && !reloaded.scoreState.matchComplete) {
-      await ref.read(sessionRepositoryProvider).reopenSession(sessionId);
+    _mutationInFlight = true;
+    try {
+      await ref
+          .read(eventRepositoryProvider)
+          .appendPhoneEvent(
+            id: _uuid.v4(),
+            sessionId: sessionId,
+            type: SessionEventType.undo,
+            payload: const {},
+            timestamp: DateTime.now().toUtc(),
+          );
+      final reloaded = await _load();
+      if (wasComplete && !reloaded.scoreState.matchComplete) {
+        await ref.read(sessionRepositoryProvider).reopenSession(sessionId);
+      }
+      state = AsyncData(await _load());
+    } finally {
+      _mutationInFlight = false;
     }
-    state = AsyncData(await _load());
   }
 }

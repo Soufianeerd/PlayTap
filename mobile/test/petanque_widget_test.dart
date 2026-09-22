@@ -3,7 +3,7 @@
 // the mirrored pattern). Duplicates the small test harness (freshTestDb/
 // appWithFreshDb/l10nOf) for the same standalone-file reason documented on
 // test/app/locale_test.dart.
-import 'package:drift/drift.dart' hide isNotNull;
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +14,7 @@ import 'package:playtap/data/local/app_database.dart';
 import 'package:playtap/data/repositories/event_repository.dart';
 import 'package:playtap/data/repositories/session_repository.dart';
 import 'package:playtap/domain/events/session_event.dart';
+import 'package:playtap/domain/models/session_status.dart';
 import 'package:playtap/l10n/app_localizations.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
@@ -279,4 +280,99 @@ void main() {
     // Abandoned sessions never appear in History (distinct from COMPLETED).
     expect(find.text(l10n.presetPetanque), findsNothing);
   });
+
+  testWidgets(
+    'FLOW — undoing the winning mène from Summary reopens the match; a '
+    'second win reaches Summary again with the correct score/history',
+    (tester) async {
+      final db = freshTestDb();
+      await tester.pumpWidget(appWithDb(db));
+      await tester.pumpAndSettle();
+      final l10n = l10nOf(tester);
+
+      await startPetanqueSession(tester, format: l10n.petanqueFormatDoublette);
+
+      // Team A to 12 (two mènes), then a winning mène to 13.
+      await tester.tap(find.text('+6').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('+6').first);
+      await tester.pumpAndSettle();
+      expect(find.text('12'), findsOneWidget);
+      await tester.tap(find.text('+1').first);
+      await tester.pumpAndSettle();
+
+      // Landed on Summary, match complete.
+      expect(find.text(l10n.summaryTitle), findsOneWidget);
+      expect(find.text('13'), findsOneWidget);
+
+      // No active session while COMPLETED — the session id comes from the
+      // completed list instead.
+      final completedBefore = await SessionRepository(
+        db,
+      ).getCompletedSessions();
+      expect(completedBefore, hasLength(1));
+      expect(await SessionRepository(db).getActiveSession(), isNull);
+      final id = completedBefore.single.id;
+      expect(completedBefore.single.endedAt, isNotNull);
+
+      // Undo the winning mène from the Summary screen.
+      await tester.tap(find.text(l10n.undoLastRound));
+      await tester.pumpAndSettle();
+
+      // Automatically back on the active session page, score reopened.
+      expect(find.text(l10n.presetPetanque), findsOneWidget);
+      expect(find.text('12'), findsOneWidget);
+
+      final reopened = await SessionRepository(db).getSessionById(id);
+      expect(reopened!.status, SessionStatus.active);
+      expect(reopened.endedAt, isNull);
+      expect(await SessionRepository(db).getActiveSession(), isNotNull);
+      expect(await SessionRepository(db).getCompletedSessions(), isEmpty);
+
+      // Play continues: another winning mène reaches Summary again.
+      await tester.tap(find.text('+1').first);
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.summaryTitle), findsOneWidget);
+      expect(find.text('13'), findsOneWidget);
+
+      final completedAfter = await SessionRepository(db).getCompletedSessions();
+      expect(completedAfter, hasLength(1)); // no duplicate history entry.
+      expect(completedAfter.single.id, id);
+
+      final events = await EventRepository(db).getEventsForSession(id);
+      // Append-only log: +6, +6, +1 (undone), UNDO, +1 (re-added) — the
+      // undone point event is never deleted, only superseded by replay.
+      final pointEvents = events.where(
+        (e) => e.type == SessionEventType.pointScored,
+      );
+      expect(pointEvents, hasLength(4));
+      expect(
+        events.where((e) => e.type == SessionEventType.undo),
+        hasLength(1),
+      );
+    },
+  );
+
+  testWidgets(
+    'FLOW — rapid double-tap on the same mène button records only one mène',
+    (tester) async {
+      await tester.pumpWidget(appWithFreshDb());
+      await tester.pumpAndSettle();
+      final l10n = l10nOf(tester);
+
+      await startPetanqueSession(tester, format: l10n.petanqueFormatDoublette);
+
+      // Two taps fired back-to-back, before the first's async body settles
+      // (no pumpAndSettle between them) — simulates a finger-bounce
+      // double-tap on the same mène button.
+      await tester.tap(find.text('+6').first);
+      await tester.tap(find.text('+6').first);
+      await tester.pumpAndSettle();
+
+      // Exactly one mène recorded, not two (would show 12 if unguarded).
+      expect(find.text('6'), findsOneWidget);
+      expect(find.text('0'), findsOneWidget);
+    },
+  );
 }

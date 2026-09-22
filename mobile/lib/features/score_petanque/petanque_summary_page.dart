@@ -6,14 +6,52 @@ import '../../app/theme/theme.dart';
 import '../../l10n/app_localizations.dart';
 import 'petanque_session_controller.dart';
 
-class PetanqueSummaryPage extends ConsumerWidget {
+class PetanqueSummaryPage extends ConsumerStatefulWidget {
   const PetanqueSummaryPage({super.key, required this.sessionId});
 
   final String sessionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncView = ref.watch(petanqueSessionControllerProvider(sessionId));
+  ConsumerState<PetanqueSummaryPage> createState() =>
+      _PetanqueSummaryPageState();
+}
+
+class _PetanqueSummaryPageState extends ConsumerState<PetanqueSummaryPage> {
+  bool _undoing = false;
+
+  /// Undoes the mène that just won the match — the engine/controller
+  /// already know how to reopen it (`ScoreEngine._replayPointBased`,
+  /// `PetanqueSessionController.undoLast`); this only wires that existing
+  /// capability up to the Summary screen, where it was previously
+  /// unreachable (see the review, 2026-09-22). No score logic duplicated
+  /// here: the post-undo state is read straight back from the controller.
+  Future<void> _undoLastRound() async {
+    if (_undoing) return;
+    setState(() => _undoing = true);
+
+    final notifier = ref.read(
+      petanqueSessionControllerProvider(widget.sessionId).notifier,
+    );
+    await notifier.undoLast();
+
+    if (!mounted) return;
+    final reloaded = ref
+        .read(petanqueSessionControllerProvider(widget.sessionId))
+        .value;
+    if (reloaded != null && !reloaded.scoreState.matchComplete) {
+      context.pushReplacement('/score/petanque/session/${widget.sessionId}');
+      return;
+    }
+    // Nothing eligible to undo (shouldn't happen from a completed match's
+    // Summary, but never leave the button silently stuck): just re-enable.
+    setState(() => _undoing = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final asyncView = ref.watch(
+      petanqueSessionControllerProvider(widget.sessionId),
+    );
     final colors = Theme.of(context).playTapColors;
     final l10n = AppLocalizations.of(context)!;
 
@@ -93,6 +131,24 @@ class PetanqueSummaryPage extends ConsumerWidget {
                   style: PlayTapTypography.body.copyWith(color: colors.muted),
                 ),
                 const Spacer(),
+                // Secondary action: reopens the match by undoing the mène
+                // that just won it. Deliberately an OutlinedButton, visually
+                // subordinate to the primary "view history" action below —
+                // see the review UX note, 2026-09-22.
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: _undoing ? null : _undoLastRound,
+                    child: _undoing
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(l10n.undoLastRound),
+                  ),
+                ),
+                const SizedBox(height: PlayTapSpacing.sm),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(

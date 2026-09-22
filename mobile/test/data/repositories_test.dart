@@ -704,6 +704,97 @@ void main() {
 
       await db1.close();
     });
+
+    test('watchCompletedSessions reflects COMPLETED -> ACTIVE (undo-reopen) '
+        '-> COMPLETED with no duplicate entries', () async {
+      await createPetanqueSession('p1');
+      await events.appendPhoneEvent(
+        id: 'e0',
+        sessionId: 'p1',
+        type: SessionEventType.sessionStarted,
+        payload: {
+          'scoreRule': petanqueRule.toJson(),
+          'sides': [
+            const ScoringSide(id: 'team_a', name: 'Équipe A').toJson(),
+            const ScoringSide(id: 'team_b', name: 'Équipe B').toJson(),
+          ],
+        },
+        timestamp: DateTime.utc(2026, 1, 1),
+      );
+
+      final emissions = <List<String>>[];
+      final sub = sessions.watchCompletedSessions().listen(
+        (list) => emissions.add(list.map((s) => s.id).toList()),
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(emissions.last, isEmpty);
+
+      // Reach 13 and mark COMPLETED (mirrors PetanqueSessionController.
+      // addRoundPoints' own completeSession call — see
+      // features/score_petanque/petanque_session_controller.dart).
+      await events.appendPhoneEvent(
+        id: 'e1',
+        sessionId: 'p1',
+        type: SessionEventType.pointScored,
+        payload: const {'side': 'team_a', 'amount': 6},
+        timestamp: DateTime.utc(2026, 1, 1, 0, 1),
+      );
+      await events.appendPhoneEvent(
+        id: 'e2',
+        sessionId: 'p1',
+        type: SessionEventType.pointScored,
+        payload: const {'side': 'team_a', 'amount': 6},
+        timestamp: DateTime.utc(2026, 1, 1, 0, 2),
+      );
+      await events.appendPhoneEvent(
+        id: 'e3',
+        sessionId: 'p1',
+        type: SessionEventType.pointScored,
+        payload: const {'side': 'team_a', 'amount': 1}, // 13, completes.
+        timestamp: DateTime.utc(2026, 1, 1, 0, 3),
+      );
+      await sessions.completeSession(
+        'p1',
+        endedAt: DateTime.utc(2026, 1, 1, 0, 3),
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(emissions.last, ['p1']);
+
+      // Undo the winning mène (mirrors PetanqueSessionController.
+      // undoLast's own reopenSession call).
+      await events.appendPhoneEvent(
+        id: 'e4',
+        sessionId: 'p1',
+        type: SessionEventType.undo,
+        payload: const {},
+        timestamp: DateTime.utc(2026, 1, 1, 0, 4),
+      );
+      await sessions.reopenSession('p1');
+      await Future<void>.delayed(Duration.zero);
+      expect(emissions.last, isEmpty);
+
+      // Play continues and completes again.
+      await events.appendPhoneEvent(
+        id: 'e5',
+        sessionId: 'p1',
+        type: SessionEventType.pointScored,
+        payload: const {'side': 'team_a', 'amount': 1}, // 13 again.
+        timestamp: DateTime.utc(2026, 1, 1, 0, 5),
+      );
+      await sessions.completeSession(
+        'p1',
+        endedAt: DateTime.utc(2026, 1, 1, 0, 5),
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(emissions.last, ['p1']); // exactly one entry, never a second.
+
+      // Never more than one row for this session across every emission.
+      for (final emission in emissions) {
+        expect(emission.where((id) => id == 'p1').length, lessThan(2));
+      }
+
+      await sub.cancel();
+    });
   });
 
   group('Recovery', () {

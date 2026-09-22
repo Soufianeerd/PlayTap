@@ -280,6 +280,40 @@ merge dans `main` — deux bugs corrigés avant validation :
       11 points/poules-cadrages = variante officielle documentée mais non
       implémentée, jamais présentée comme couverte).
 
+### Deuxième correction post-revue — Undo depuis le Résumé (2026-09-22)
+
+Bug trouvé en revue sur le même commit : `PetanqueSessionController.
+undoLast()` et `SessionRepository.reopenSession()` savaient déjà rouvrir
+une partie auto-complétée, mais `ActivePetanqueSessionPage` navigue
+immédiatement vers `PetanqueSummaryPage` dès que `matchComplete` devient
+vrai — et le Résumé n'exposait aucun Undo. La capacité existait dans le
+moteur/controller mais restait inaccessible à l'utilisateur.
+
+- [x] `PetanqueSummaryPage` propose désormais une action secondaire
+      "Annuler la dernière mène" (réutilise `l10n.undoLastRound`, déjà
+      utilisé sur la barre Undo de la session active — sémantiquement
+      identique). Au tap : appelle `undoLast()` sur le même controller
+      (`petanqueSessionControllerProvider(sessionId)`, partagé avec la
+      session active), relit l'état résultant, et si `matchComplete` est
+      bien redevenu faux, `pushReplacement` vers `/score/petanque/session/
+      $sessionId` — aucune logique de score dupliquée dans le Résumé.
+      Bouton `OutlinedButton`, visuellement secondaire au `FilledButton`
+      "Voir l'historique" qui reste l'action principale.
+- [x] **Garde de concurrence ajoutée** (`_mutationInFlight` sur
+      `PetanqueSessionController`, même forme que `TimerSessionController.
+      _finalizeInFlight`) : un double-tap rapide sur le même bouton de
+      mène — avant qu'aucun `await` ne se résolve — déclenchait deux
+      `POINT_SCORED` pour ce que l'utilisateur perçoit comme un seul tap.
+      Vérifié réel avant correction (test reproduit le double-tap sans
+      `pumpAndSettle` entre les deux `tap()`), pas un refactor spéculatif.
+- [x] Tests ajoutés : flow widget complet (12 → mène gagnante → Résumé →
+      Undo → session active à 12, `status=ACTIVE`, `endedAt=null` → nouvelle
+      mène gagnante → Résumé réapparaît, score/historique corrects, aucun
+      doublon) + flow double-tap (une seule mène enregistrée) +
+      test DB dédié `watchCompletedSessions` sur la transition COMPLETED →
+      ACTIVE → COMPLETED (aucune entrée dupliquée à aucune étape). 144
+      tests verts, 2 skip inchangés, Free Score non régressé.
+
 ## Phase 2 — Presets V1
 
 > Jalon intermédiaire : `docs/RELEASE_0_1.md` couvre déjà un sous-ensemble
