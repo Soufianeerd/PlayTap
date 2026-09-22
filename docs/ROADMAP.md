@@ -242,6 +242,44 @@ décision de composition TARGET_SCORE + TEAM_SCORE et
       voir le rapport de phase pour le détail. `flutter analyze`/`test`
       sont la seule vérification obtenue.
 
+### Corrections post-revue (2026-09-22)
+
+Revue du commit initial (`b5d5970`) sur `review/petanque-phase1` avant
+merge dans `main` — deux bugs corrigés avant validation :
+
+- [x] **Plafond par mène non respecté en tête-à-tête.** FIPJP Article 1 :
+      tête-à-tête = 1 joueur × 3 boules = 3 boules max par mène, pas 6
+      (voir la nouvelle section "Pétanque — source officielle" ci-dessus).
+      `buildPetanqueRule()` prenait toujours `allowedIncrements: [1..6]`
+      quel que soit le format, et l'UI active recalculait ses boutons
+      `+1..+6` en dur plutôt que de les dériver de la `ScoreRule`
+      persistée — deux sources de vérité. Corrigé : `PetanqueFormat.
+      allowedIncrements` (tête-à-tête `[1,2,3]`, doublette/triplette
+      `[1..6]`) alimente `buildPetanqueRule(format)`, et
+      `ScoreSessionSnapshot` porte désormais la `ScoreRule` persistée
+      elle-même — l'UI active lit `allowedIncrements` depuis là, jamais
+      recalculée.
+- [x] **Nom du joueur perdu en tête-à-tête.** `petanque_config_page.dart`
+      collectait le nom du joueur puis le jetait
+      (`players: format == headToHead ? null : players`). Corrigé : le
+      roster complet (1, 2 ou 3 joueurs selon le format) est toujours
+      persisté dans `ScoringSide.players`.
+- [x] Format récupérable sans ambiguïté après persistence/recovery, sans
+      migration DB ni `formatId` explicite : `PetanqueFormat.fromPersisted`
+      reconstruit le format à partir du roster persisté (nombre de
+      joueurs) + `TeamScoreRule.allowedIncrements`, tous deux déjà
+      persistés dans `SESSION_STARTED`.
+- [x] Tests ajoutés : `test/features/petanque_actions_test.dart` (10 tests
+      — increments par format, rejet +4/+5/+6 en tête-à-tête,
+      `fromPersisted` round-trip) + 5 nouveaux flows dans
+      `test/petanque_widget_test.dart` (boutons affichés par format, nom
+      du joueur tête-à-tête persisté et récupéré après redémarrage
+      simulé). 141 tests verts, 2 skip inchangés, Free Score non régressé.
+- [x] `docs/SPORT_RULES.md` mis en cohérence avec FIPJP Article 1 (boules
+      par joueur, plafond par mène) et Article 5 (13 points = implémenté,
+      11 points/poules-cadrages = variante officielle documentée mais non
+      implémentée, jamais présentée comme couverte).
+
 ## Phase 2 — Presets V1
 
 > Jalon intermédiaire : `docs/RELEASE_0_1.md` couvre déjà un sous-ensemble

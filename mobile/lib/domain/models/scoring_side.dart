@@ -19,9 +19,10 @@ class ScoringSide {
   /// Optional individual player names within this scoring side — a side is
   /// a `Team` of `Competitor`s (see `playtap-score-engine`: "un side de
   /// scoring peut contenir plusieurs joueurs", e.g. Pétanque doublette =
-  /// 2 players in 1 side). Null/omitted for sides with no separate player
-  /// roster (Score Libre, Pétanque tête-à-tête where the side name already
-  /// is the player's name).
+  /// 2 players in 1 side, triplette = 3, tête-à-tête = 1 — every Pétanque
+  /// format persists its full roster here, even tête-à-tête's single
+  /// player, so the player's name is never silently dropped). Null/omitted
+  /// only for sides with no separate player roster at all (Score Libre).
   final List<String>? players;
 
   ScoringSide copyWith({String? name}) => ScoringSide(

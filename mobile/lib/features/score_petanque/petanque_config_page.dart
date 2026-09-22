@@ -87,7 +87,7 @@ class _PetanqueConfigPageState extends ConsumerState<PetanqueConfigPage> {
       return ScoringSide(
         id: id,
         name: _teamNameControllers[teamIndex].text.trim(),
-        players: _format == PetanqueFormat.headToHead ? null : players,
+        players: players,
       );
     }
 
@@ -116,6 +116,7 @@ class _PetanqueConfigPageState extends ConsumerState<PetanqueConfigPage> {
 
     final sessionId = await startPetanqueSession(
       ref,
+      format: _format,
       teamA: teamA,
       teamB: teamB,
     );

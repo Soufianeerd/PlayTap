@@ -18,12 +18,15 @@ final petanqueSessionControllerProvider =
 
 /// Same UI -> controller -> events -> repositories -> ScoreEngine shape as
 /// `FreeScoreSessionController`, adapted for a round-based, variable
-/// increment (1-6) and auto-completing match — see `playtap-score-engine`
-/// and the Pétanque brief sections 10-14. The engine itself already knows
-/// how to auto-complete at 13 and reopen on undo (`ScoreEngine.
-/// _replayPointBased`); this controller's only extra responsibility is
-/// keeping the persisted `Session.status` in sync with that derived
-/// `matchComplete` flag, since status lives outside the event log.
+/// increment (format-dependent: tête-à-tête 1-3, doublette/triplette 1-6 —
+/// see `PetanqueFormat.allowedIncrements`) and auto-completing match — see
+/// `playtap-score-engine` and the Pétanque brief sections 10-14. The engine
+/// itself already knows how to auto-complete at 13, reject an amount
+/// outside the session's persisted `allowedIncrements`, and reopen on undo
+/// (`ScoreEngine._replayPointBased`); this controller's only extra
+/// responsibility is keeping the persisted `Session.status` in sync with
+/// that derived `matchComplete` flag, since status lives outside the event
+/// log.
 class PetanqueSessionController extends AsyncNotifier<ScoreSessionSnapshot> {
   PetanqueSessionController(this.sessionId);
 

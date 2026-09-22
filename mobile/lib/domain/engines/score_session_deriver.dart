@@ -39,6 +39,7 @@ ScoreSessionSnapshot deriveScoreSessionSnapshot({
 
   return ScoreSessionSnapshot(
     sides: sides,
+    scoreRule: rule,
     scoreState: ScoreEngine.replay(rule, engineEvents),
     status: status,
     startedAt: startedAt,

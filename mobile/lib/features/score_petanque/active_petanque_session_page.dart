@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/theme.dart';
+import '../../domain/models/score_rule.dart';
 import '../../domain/models/score_session_snapshot.dart';
 import '../../l10n/app_localizations.dart';
 import '../shared/session_actions.dart';
@@ -97,6 +98,12 @@ class _PetanqueBody extends ConsumerWidget {
     final scoreA = view.scoreState.scores[sideATeamId] ?? 0;
     final scoreB = view.scoreState.scores[sideBTeamId] ?? 0;
     final endNumber = view.scoreState.rounds.length + 1;
+    // Derived from the rule actually persisted in SESSION_STARTED, never
+    // recomputed from config-screen state — see the note on
+    // `ScoreSessionSnapshot.scoreRule` (a tête-à-tête session must never
+    // show +4/+5/+6, and this must hold after recovery too).
+    final allowedIncrements =
+        (view.scoreRule as TeamScoreRule).allowedIncrements;
 
     void addPoints(String sideId, int amount) => ref
         .read(petanqueSessionControllerProvider(sessionId).notifier)
@@ -150,11 +157,13 @@ class _PetanqueBody extends ConsumerWidget {
             children: [
               _TeamRoundButtons(
                 teamName: teamA.name,
+                allowedIncrements: allowedIncrements,
                 onTap: (amount) => addPoints(sideATeamId, amount),
               ),
               const SizedBox(height: PlayTapSpacing.md),
               _TeamRoundButtons(
                 teamName: teamB.name,
+                allowedIncrements: allowedIncrements,
                 onTap: (amount) => addPoints(sideBTeamId, amount),
               ),
             ],
@@ -250,9 +259,14 @@ class _TeamScorePanel extends StatelessWidget {
 }
 
 class _TeamRoundButtons extends StatelessWidget {
-  const _TeamRoundButtons({required this.teamName, required this.onTap});
+  const _TeamRoundButtons({
+    required this.teamName,
+    required this.allowedIncrements,
+    required this.onTap,
+  });
 
   final String teamName;
+  final List<int> allowedIncrements;
   final ValueChanged<int> onTap;
 
   @override
@@ -272,7 +286,7 @@ class _TeamRoundButtons extends StatelessWidget {
           spacing: PlayTapSpacing.xs,
           runSpacing: PlayTapSpacing.xs,
           children: [
-            for (var amount = 1; amount <= 6; amount++)
+            for (final amount in allowedIncrements)
               Semantics(
                 button: true,
                 label: l10n.addRoundPointsSemantics(amount, teamName),

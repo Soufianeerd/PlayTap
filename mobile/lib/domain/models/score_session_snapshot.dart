@@ -1,3 +1,4 @@
+import 'score_rule.dart';
 import 'score_state.dart';
 import 'scoring_side.dart';
 import 'session_status.dart';
@@ -11,6 +12,7 @@ import 'session_status.dart';
 class ScoreSessionSnapshot {
   const ScoreSessionSnapshot({
     required this.sides,
+    required this.scoreRule,
     required this.scoreState,
     required this.status,
     required this.startedAt,
@@ -18,6 +20,14 @@ class ScoreSessionSnapshot {
   });
 
   final List<ScoringSide> sides;
+
+  /// The rule actually persisted in `SESSION_STARTED` — the single source
+  /// of truth for what this session allows (e.g. which increments a
+  /// `TeamScoreRule` accepts). UI must read config like allowed increments
+  /// from here, never recompute a parallel rule from config-screen state:
+  /// that state doesn't survive recovery and can drift from what was
+  /// actually persisted (see the Pétanque tête-à-tête review, 2026-09-22).
+  final ScoreRule scoreRule;
   final ScoreState scoreState;
   final SessionStatus status;
   final DateTime startedAt;
