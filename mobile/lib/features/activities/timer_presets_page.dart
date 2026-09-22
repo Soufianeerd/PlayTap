@@ -6,6 +6,7 @@ import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
 import '../../domain/models/timer_mode.dart';
 import '../../domain/models/timer_spec.dart';
+import '../../l10n/app_localizations.dart';
 import '../shared/active_session_conflict_dialog.dart';
 import '../shared/big_action_tile.dart';
 import '../shared/session_actions.dart';
@@ -22,16 +23,16 @@ class _TimerPreset {
   final String? route;
 }
 
-const List<_TimerPreset> _presets = [
+List<_TimerPreset> _presetsOf(AppLocalizations l10n) => [
   _TimerPreset(
-    'Chronomètre',
-    TimerSpec(schemaVersion: 1, mode: TimerMode.stopwatch),
+    l10n.timerModeStopwatch,
+    const TimerSpec(schemaVersion: 1, mode: TimerMode.stopwatch),
     null,
   ),
-  _TimerPreset('Compte à rebours', null, '/timer/countdown/config'),
+  _TimerPreset(l10n.timerModeCountdown, null, '/timer/countdown/config'),
   _TimerPreset(
-    'Tours',
-    TimerSpec(schemaVersion: 1, mode: TimerMode.lapTimer),
+    l10n.timerModeLaps,
+    const TimerSpec(schemaVersion: 1, mode: TimerMode.lapTimer),
     null,
   ),
 ];
@@ -89,6 +90,8 @@ class _TimerPresetsPageState extends ConsumerState<TimerPresetsPage> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
+    final presets = _presetsOf(l10n);
     // Restrained brand use (release brief section 16): one neutral tile,
     // one violet, one lime — not three equally loud accent blocks.
     final brandPairs = [
@@ -98,12 +101,12 @@ class _TimerPresetsPageState extends ConsumerState<TimerPresetsPage> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Timer')),
+      appBar: AppBar(title: Text(l10n.timerSectionTitle)),
       body: Padding(
         padding: const EdgeInsets.all(PlayTapSpacing.lg),
         child: Column(
           children: [
-            for (final (index, preset) in _presets.indexed) ...[
+            for (final (index, preset) in presets.indexed) ...[
               if (index > 0) const SizedBox(height: PlayTapSpacing.md),
               Expanded(
                 child: BigActionTile(

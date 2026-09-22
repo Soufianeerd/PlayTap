@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/theme.dart';
+import '../../l10n/app_localizations.dart';
 import 'big_action_tile.dart';
 
 class ActivityCategory {
@@ -23,13 +24,17 @@ class ActivityCategory {
 /// scores anything, and Score Libre is the only rule PlayTap 1.0.0's
 /// ScoreEngine actually implements — a sport-specific icon would promise a
 /// preset that doesn't exist yet (see the release brand brief section 9).
-const List<ActivityCategory> activityCategories = [
+List<ActivityCategory> activityCategoriesOf(AppLocalizations l10n) => [
   ActivityCategory(
-    'Compter un score',
+    l10n.categoryScore,
     Icons.exposure_plus_1,
     '/score/free/config',
   ),
-  ActivityCategory('Chronométrer', Icons.timer_outlined, '/activities/timer'),
+  ActivityCategory(
+    l10n.categoryTimer,
+    Icons.timer_outlined,
+    '/activities/timer',
+  ),
 ];
 
 /// The 2-category picker used by both Home (quick access) and the Activités
@@ -43,6 +48,7 @@ class ActivityCategoryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).playTapColors;
+    final categories = activityCategoriesOf(AppLocalizations.of(context)!);
     final brandPairs = [
       (background: colors.primary, foreground: colors.onPrimary),
       (background: colors.accent, foreground: colors.onAccent),
@@ -50,7 +56,7 @@ class ActivityCategoryGrid extends StatelessWidget {
 
     return Column(
       children: [
-        for (final (index, category) in activityCategories.indexed) ...[
+        for (final (index, category) in categories.indexed) ...[
           if (index > 0) const SizedBox(height: PlayTapSpacing.md),
           Expanded(
             child: BigActionTile(

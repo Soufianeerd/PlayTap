@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart' as intl;
 
+import '../../app/l10n/timer_mode_label.dart';
 import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
 import '../../data/repositories/session_repository.dart';
@@ -10,6 +12,7 @@ import '../../domain/models/free_score_snapshot.dart';
 import '../../domain/models/session_category.dart';
 import '../../domain/models/timer_mode.dart';
 import '../../domain/models/timer_snapshot.dart';
+import '../../l10n/app_localizations.dart';
 
 sealed class HistoryEntry {
   const HistoryEntry();
@@ -86,13 +89,14 @@ class HistoryPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
     final asyncEntries = ref.watch(historyProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Historique')),
+      appBar: AppBar(title: Text(l10n.navHistory)),
       body: asyncEntries.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Erreur : $e')),
+        error: (e, st) => Center(child: Text(l10n.errorPrefix(e.toString()))),
         data: (entries) {
           if (entries.isEmpty) {
             return Center(
@@ -102,7 +106,7 @@ class HistoryPage extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Aucune activité pour le moment.',
+                      l10n.emptyHistoryTitle,
                       style: PlayTapTypography.title.copyWith(
                         color: colors.foreground,
                       ),
@@ -110,7 +114,7 @@ class HistoryPage extends ConsumerWidget {
                     ),
                     const SizedBox(height: PlayTapSpacing.sm),
                     Text(
-                      'Démarre un score ou un chronomètre pour commencer.',
+                      l10n.emptyHistorySubtitle,
                       style: PlayTapTypography.body.copyWith(
                         color: colors.muted,
                       ),
@@ -143,18 +147,19 @@ class _HistoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
     final (label, headline, caption) = switch (entry) {
       ScoreHistoryEntry(:final snapshot) => (
-        'Score libre',
+        l10n.presetFreeScore,
         snapshot.sides
             .map((s) => '${s.name} ${snapshot.scoreState.scores[s.id] ?? 0}')
             .join(' — '),
-        _durationCaption(snapshot.startedAt, snapshot.endedAt),
+        _durationCaption(l10n, snapshot.startedAt, snapshot.endedAt),
       ),
       TimerHistoryEntry(:final snapshot) => (
-        _timerModeLabel(snapshot.spec.mode),
-        _timerHeadline(snapshot),
-        _durationCaption(snapshot.startedAt, snapshot.endedAt),
+        timerModeLabel(l10n, snapshot.spec.mode),
+        _timerHeadline(l10n, snapshot),
+        _durationCaption(l10n, snapshot.startedAt, snapshot.endedAt),
       ),
     };
 
@@ -183,18 +188,10 @@ class _HistoryTile extends StatelessWidget {
   }
 }
 
-String _timerModeLabel(TimerMode mode) => switch (mode) {
-  TimerMode.stopwatch => 'Chronomètre',
-  TimerMode.countdown => 'Compte à rebours',
-  TimerMode.lapTimer => 'Tours',
-  TimerMode.interval => 'Interval',
-};
-
-String _timerHeadline(TimerSnapshot snapshot) {
+String _timerHeadline(AppLocalizations l10n, TimerSnapshot snapshot) {
   final elapsed = _formatDuration(snapshot.state.elapsedMs);
   if (snapshot.spec.mode == TimerMode.lapTimer) {
-    final lapCount = snapshot.state.laps.length;
-    return '$elapsed — $lapCount lap${lapCount == 1 ? '' : 's'}';
+    return '$elapsed — ${l10n.lapsCountPlural(snapshot.state.laps.length)}';
   }
   return elapsed;
 }
@@ -206,18 +203,24 @@ String _formatDuration(int ms) {
   return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 }
 
-String _durationCaption(DateTime startedAt, DateTime? endedAt) {
+String _durationCaption(
+  AppLocalizations l10n,
+  DateTime startedAt,
+  DateTime? endedAt,
+) {
   final minutes = endedAt != null ? endedAt.difference(startedAt).inMinutes : 0;
-  final duration = minutes < 1 ? 'Moins d\'une minute' : '$minutes min';
-  return '${_relativeDay(startedAt)} · $duration';
+  final duration = minutes < 1
+      ? l10n.lessThanAMinute
+      : l10n.minutesShort(minutes);
+  return '${_relativeDay(l10n, startedAt)} · $duration';
 }
 
-String _relativeDay(DateTime date) {
+String _relativeDay(AppLocalizations l10n, DateTime date) {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final day = DateTime(date.year, date.month, date.day);
   final diff = today.difference(day).inDays;
-  if (diff == 0) return 'Aujourd\'hui';
-  if (diff == 1) return 'Hier';
-  return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
+  if (diff == 0) return l10n.today;
+  if (diff == 1) return l10n.yesterday;
+  return intl.DateFormat.Md(l10n.localeName).format(date);
 }

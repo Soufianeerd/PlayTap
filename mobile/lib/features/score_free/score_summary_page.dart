@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/theme.dart';
+import '../../l10n/app_localizations.dart';
 import 'free_score_session_controller.dart';
 
 class ScoreSummaryPage extends ConsumerWidget {
@@ -14,12 +15,13 @@ class ScoreSummaryPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncView = ref.watch(freeScoreSessionControllerProvider(sessionId));
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Résumé')),
+      appBar: AppBar(title: Text(l10n.summaryTitle)),
       body: asyncView.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Erreur : $e')),
+        error: (e, st) => Center(child: Text(l10n.errorPrefix(e.toString()))),
         data: (view) {
           final duration = view.endedAt != null
               ? view.endedAt!.difference(view.startedAt)
@@ -36,7 +38,7 @@ class ScoreSummaryPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Score libre',
+                  l10n.presetFreeScore,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: PlayTapSpacing.xxl),
@@ -72,7 +74,9 @@ class ScoreSummaryPage extends ConsumerWidget {
                   ),
                 const SizedBox(height: PlayTapSpacing.lg),
                 Text(
-                  minutes < 1 ? 'Moins d\'une minute' : '$minutes min',
+                  minutes < 1
+                      ? l10n.lessThanAMinute
+                      : l10n.minutesShort(minutes),
                   style: PlayTapTypography.body.copyWith(color: colors.muted),
                 ),
                 const Spacer(),
@@ -80,7 +84,7 @@ class ScoreSummaryPage extends ConsumerWidget {
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: () => context.go('/history'),
-                    child: const Text('VOIR L\'HISTORIQUE'),
+                    child: Text(l10n.viewHistoryButton),
                   ),
                 ),
               ],

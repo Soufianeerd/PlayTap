@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
+import '../../l10n/app_localizations.dart';
 import '../shared/activity_category_grid.dart';
 import '../shared/session_actions.dart';
 
@@ -14,6 +15,7 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
     final activeSession = ref.watch(activeSessionProvider).value;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -26,13 +28,24 @@ class HomePage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: PlayTapSpacing.xxl),
-                Text(
-                  'PlayTap',
-                  style: Theme.of(context).textTheme.headlineMedium,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'PlayTap',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => context.push('/settings/language'),
+                      icon: const Icon(Icons.language),
+                      tooltip: l10n.languageSettingsTooltip,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: PlayTapSpacing.xs),
                 Text(
-                  'Score et chrono, prêts en un tap.',
+                  l10n.appTagline,
                   style: PlayTapTypography.body.copyWith(color: colors.muted),
                 ),
                 if (activeSession != null) ...[
@@ -42,7 +55,7 @@ class HomePage extends ConsumerWidget {
                     child: FilledButton(
                       onPressed: () =>
                           context.push(activeSessionRoute(activeSession)),
-                      child: const Text('REPRENDRE L\'ACTIVITÉ'),
+                      child: Text(l10n.resumeActivity),
                     ),
                   ),
                 ],

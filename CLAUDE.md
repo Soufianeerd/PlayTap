@@ -198,7 +198,8 @@ Voir `.claude/skills/` :
 
 Voir `docs/` : `PRODUCT_SPEC.md`, `ARCHITECTURE.md`, `DATA_MODEL.md`,
 `SPORT_RULES.md`, `WATCH_SYNC.md`, `MVP.md`, `ROADMAP.md`,
-`RELEASE_CHECKLIST.md`, `CONFORMANCE.md`, `RELEASE_0_1.md`.
+`RELEASE_CHECKLIST.md`, `CONFORMANCE.md`, `RELEASE_0_1.md`,
+`LOCALIZATION.md`.
 
 ## Contrats multi-plateformes
 

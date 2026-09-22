@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/theme.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Placeholder destination for sections that don't have a real engine yet
 /// (see `docs/ROADMAP.md`). Never shows fake data or a fake result — it
@@ -12,6 +13,7 @@ class ComingSoonPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(sectionLabel)),
       body: Padding(
@@ -27,7 +29,7 @@ class ComingSoonPage extends StatelessWidget {
               ),
               const SizedBox(height: PlayTapSpacing.lg),
               Text(
-                'En cours de construction interne',
+                l10n.comingSoonTitle,
                 style: PlayTapTypography.title.copyWith(
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
@@ -35,7 +37,7 @@ class ComingSoonPage extends StatelessWidget {
               ),
               const SizedBox(height: PlayTapSpacing.sm),
               Text(
-                '$sectionLabel n\'est pas encore implémenté.',
+                l10n.comingSoonBody(sectionLabel),
                 style: PlayTapTypography.body.copyWith(
                   color: Theme.of(context).playTapColors.muted,
                 ),

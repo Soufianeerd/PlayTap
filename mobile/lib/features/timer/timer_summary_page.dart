@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/l10n/timer_mode_label.dart';
 import '../../app/theme/theme.dart';
 import '../../domain/models/timer_mode.dart';
+import '../../l10n/app_localizations.dart';
 import 'timer_session_controller.dart';
 
 class TimerSummaryPage extends ConsumerWidget {
@@ -15,12 +17,13 @@ class TimerSummaryPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncSnapshot = ref.watch(timerSessionControllerProvider(sessionId));
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Résumé')),
+      appBar: AppBar(title: Text(l10n.summaryTitle)),
       body: asyncSnapshot.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Erreur : $e')),
+        error: (e, st) => Center(child: Text(l10n.errorPrefix(e.toString()))),
         data: (snapshot) {
           final duration = snapshot.endedAt != null
               ? snapshot.endedAt!.difference(snapshot.startedAt)
@@ -32,7 +35,7 @@ class TimerSummaryPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _titleFor(snapshot.spec.mode),
+                  timerModeLabel(l10n, snapshot.spec.mode),
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: PlayTapSpacing.xxl),
@@ -46,15 +49,15 @@ class TimerSummaryPage extends ConsumerWidget {
                 if (snapshot.spec.mode == TimerMode.lapTimer) ...[
                   const SizedBox(height: PlayTapSpacing.sm),
                   Text(
-                    '${snapshot.state.laps.length} lap${snapshot.state.laps.length == 1 ? '' : 's'}',
+                    l10n.lapsCountPlural(snapshot.state.laps.length),
                     style: PlayTapTypography.body.copyWith(color: colors.muted),
                   ),
                 ],
                 const SizedBox(height: PlayTapSpacing.lg),
                 Text(
                   duration.inMinutes < 1
-                      ? 'Moins d\'une minute'
-                      : '${duration.inMinutes} min',
+                      ? l10n.lessThanAMinute
+                      : l10n.minutesShort(duration.inMinutes),
                   style: PlayTapTypography.body.copyWith(color: colors.muted),
                 ),
                 const Spacer(),
@@ -62,7 +65,7 @@ class TimerSummaryPage extends ConsumerWidget {
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: () => context.go('/history'),
-                    child: const Text('VOIR L\'HISTORIQUE'),
+                    child: Text(l10n.viewHistoryButton),
                   ),
                 ),
               ],
@@ -73,13 +76,6 @@ class TimerSummaryPage extends ConsumerWidget {
     );
   }
 }
-
-String _titleFor(TimerMode mode) => switch (mode) {
-  TimerMode.stopwatch => 'Chronomètre',
-  TimerMode.countdown => 'Compte à rebours',
-  TimerMode.lapTimer => 'Tours',
-  TimerMode.interval => 'Timer',
-};
 
 String _formatDuration(int ms) {
   final totalSeconds = ms ~/ 1000;

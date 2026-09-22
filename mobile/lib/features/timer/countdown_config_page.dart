@@ -6,6 +6,7 @@ import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
 import '../../domain/models/timer_mode.dart';
 import '../../domain/models/timer_spec.dart';
+import '../../l10n/app_localizations.dart';
 import '../shared/active_session_conflict_dialog.dart';
 import '../shared/pill_selector.dart';
 import '../shared/session_actions.dart';
@@ -74,9 +75,14 @@ class _CountdownConfigPageState extends ConsumerState<CountdownConfigPage> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
+
+    String formatQuickLabel(int seconds) => seconds < 60
+        ? l10n.quickPresetSeconds(seconds)
+        : l10n.minutesShort(seconds ~/ 60);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Compte à rebours')),
+      appBar: AppBar(title: Text(l10n.timerModeCountdown)),
       body: Column(
         children: [
           Expanded(
@@ -86,7 +92,7 @@ class _CountdownConfigPageState extends ConsumerState<CountdownConfigPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Durée rapide',
+                    l10n.quickDurationLabel,
                     style: PlayTapTypography.label.copyWith(
                       color: colors.muted,
                     ),
@@ -94,7 +100,7 @@ class _CountdownConfigPageState extends ConsumerState<CountdownConfigPage> {
                   const SizedBox(height: PlayTapSpacing.sm),
                   PillSelector<int>(
                     options: _quickPresetsSeconds,
-                    labelBuilder: _formatQuickLabel,
+                    labelBuilder: formatQuickLabel,
                     value: _durationSeconds ?? -1,
                     onChanged: (seconds) =>
                         setState(() => _controller.text = seconds.toString()),
@@ -103,15 +109,15 @@ class _CountdownConfigPageState extends ConsumerState<CountdownConfigPage> {
                   TextField(
                     controller: _controller,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Durée personnalisée (secondes)',
+                    decoration: InputDecoration(
+                      labelText: l10n.customDurationLabel,
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
                   if (!_isValid) ...[
                     const SizedBox(height: PlayTapSpacing.xs),
                     Text(
-                      'Choisissez une durée supérieure à 0.',
+                      l10n.durationValidationError,
                       style: PlayTapTypography.caption.copyWith(
                         color: colors.danger,
                       ),
@@ -140,7 +146,7 @@ class _CountdownConfigPageState extends ConsumerState<CountdownConfigPage> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('COMMENCER'),
+                      : Text(l10n.startButton),
                 ),
               ),
             ),
@@ -149,9 +155,4 @@ class _CountdownConfigPageState extends ConsumerState<CountdownConfigPage> {
       ),
     );
   }
-}
-
-String _formatQuickLabel(int seconds) {
-  if (seconds < 60) return '${seconds}s';
-  return '${seconds ~/ 60} min';
 }

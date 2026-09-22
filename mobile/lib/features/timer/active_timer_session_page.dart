@@ -5,12 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/l10n/timer_mode_label.dart';
 import '../../app/theme/theme.dart';
 import '../../domain/models/lap_split.dart';
 import '../../domain/models/session_status.dart';
 import '../../domain/models/timer_mode.dart';
 import '../../domain/models/timer_snapshot.dart';
 import '../../domain/models/timer_status.dart';
+import '../../l10n/app_localizations.dart';
 import 'timer_session_controller.dart';
 
 /// Repaint cadence for the live display — a plain UI-layer ticker (see the
@@ -53,18 +55,19 @@ class _ActiveTimerSessionPageState
   }
 
   Future<void> _confirmComplete() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Terminer cette session ?'),
+        title: Text(l10n.finishSessionDialogTitle),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('ANNULER'),
+            child: Text(l10n.cancelButton),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('TERMINER'),
+            child: Text(l10n.finishButton),
           ),
         ],
       ),
@@ -88,13 +91,19 @@ class _ActiveTimerSessionPageState
       timerSessionControllerProvider(widget.sessionId),
     );
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(_titleFor(asyncSnapshot.value?.spec.mode))),
+      appBar: AppBar(
+        title: Text(timerModeLabel(l10n, asyncSnapshot.value?.spec.mode)),
+      ),
       body: asyncSnapshot.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(
-          child: Text('Erreur : $e', style: TextStyle(color: colors.danger)),
+          child: Text(
+            l10n.errorPrefix(e.toString()),
+            style: TextStyle(color: colors.danger),
+          ),
         ),
         data: (baseline) {
           if (baseline.sessionStatus != SessionStatus.active) {
@@ -150,13 +159,6 @@ class _ActiveTimerSessionPageState
   }
 }
 
-String _titleFor(TimerMode? mode) => switch (mode) {
-  TimerMode.stopwatch => 'Chronomètre',
-  TimerMode.countdown => 'Compte à rebours',
-  TimerMode.lapTimer => 'Tours',
-  TimerMode.interval || null => 'Timer',
-};
-
 class _ActiveTimerBody extends StatelessWidget {
   const _ActiveTimerBody({
     required this.snapshot,
@@ -173,6 +175,7 @@ class _ActiveTimerBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
     final isRunning = snapshot.state.status == TimerStatus.running;
     final displayMs = snapshot.spec.mode == TimerMode.countdown
         ? (snapshot.state.remainingMs ?? 0)
@@ -187,8 +190,9 @@ class _ActiveTimerBody extends StatelessWidget {
                 horizontal: PlayTapSpacing.lg,
               ),
               child: Semantics(
-                label:
-                    'Temps ${snapshot.spec.mode == TimerMode.countdown ? "restant" : "écoulé"}',
+                label: snapshot.spec.mode == TimerMode.countdown
+                    ? l10n.timeRemainingSemantics
+                    : l10n.timeElapsedSemantics,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
@@ -231,8 +235,14 @@ class _ActiveTimerBody extends StatelessWidget {
                       child: FilledButton(
                         onPressed: onPauseResume,
                         child: Semantics(
-                          label: isRunning ? 'Mettre en pause' : 'Reprendre',
-                          child: Text(isRunning ? 'PAUSE' : 'REPRENDRE'),
+                          label: isRunning
+                              ? l10n.pauseSemantics
+                              : l10n.resumeTimerSemantics,
+                          child: Text(
+                            isRunning
+                                ? l10n.pauseButtonLabel
+                                : l10n.resumeTimerButtonLabel,
+                          ),
                         ),
                       ),
                     ),
@@ -249,8 +259,8 @@ class _ActiveTimerBody extends StatelessWidget {
                           ),
                           onPressed: isRunning ? onLap : null,
                           child: Semantics(
-                            label: 'Enregistrer un tour',
-                            child: const Text('LAP'),
+                            label: l10n.recordLapSemantics,
+                            child: Text(l10n.lapButton),
                           ),
                         ),
                       ),
@@ -264,8 +274,8 @@ class _ActiveTimerBody extends StatelessWidget {
                 child: TextButton(
                   onPressed: onComplete,
                   child: Semantics(
-                    label: 'Terminer la session',
-                    child: const Text('TERMINER LA SESSION'),
+                    label: l10n.finishSessionButton,
+                    child: Text(l10n.finishSessionButton),
                   ),
                 ),
               ),
@@ -291,7 +301,7 @@ class _LapRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Lap ${lap.lapNumber}',
+            AppLocalizations.of(context)!.lapRowLabel(lap.lapNumber),
             style: PlayTapTypography.body.copyWith(color: colors.muted),
           ),
           Text(

@@ -10,10 +10,12 @@ import '../features/home/home_page.dart';
 import '../features/score_free/active_free_score_session_page.dart';
 import '../features/score_free/free_score_config_page.dart';
 import '../features/score_free/score_summary_page.dart';
+import '../features/settings/language_settings_page.dart';
 import '../features/shared/coming_soon_page.dart';
 import '../features/timer/active_timer_session_page.dart';
 import '../features/timer/countdown_config_page.dart';
 import '../features/timer/timer_summary_page.dart';
+import '../l10n/app_localizations.dart';
 import 'theme/theme.dart';
 
 /// Builds a fresh root navigator. Kept as a factory (not a top-level
@@ -56,8 +58,14 @@ GoRouter createAppRouter() => GoRouter(
     GoRoute(
       path: '/coming-soon',
       builder: (context, state) => ComingSoonPage(
-        sectionLabel: state.extra as String? ?? 'Cette section',
+        sectionLabel:
+            state.extra as String? ??
+            AppLocalizations.of(context)!.comingSoonDefaultSection,
       ),
+    ),
+    GoRoute(
+      path: '/settings/language',
+      builder: (context, state) => const LanguageSettingsPage(),
     ),
     GoRoute(
       path: '/activities/score',
@@ -107,6 +115,7 @@ class _RootScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: PlayTapTheme.overlayStyleOf(context),
@@ -123,21 +132,21 @@ class _RootScaffold extends StatelessWidget {
               index,
               initialLocation: index == navigationShell.currentIndex,
             ),
-            destinations: const [
+            destinations: [
               NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: 'Accueil',
+                icon: const Icon(Icons.home_outlined),
+                selectedIcon: const Icon(Icons.home),
+                label: l10n.navHome,
               ),
               NavigationDestination(
-                icon: Icon(Icons.grid_view_outlined),
-                selectedIcon: Icon(Icons.grid_view),
-                label: 'Activités',
+                icon: const Icon(Icons.grid_view_outlined),
+                selectedIcon: const Icon(Icons.grid_view),
+                label: l10n.navActivities,
               ),
               NavigationDestination(
-                icon: Icon(Icons.history_outlined),
-                selectedIcon: Icon(Icons.history),
-                label: 'Historique',
+                icon: const Icon(Icons.history_outlined),
+                selectedIcon: const Icon(Icons.history),
+                label: l10n.navHistory,
               ),
             ],
           ),

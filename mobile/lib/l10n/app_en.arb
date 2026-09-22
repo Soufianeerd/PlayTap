@@ -1,0 +1,207 @@
+{
+  "@@locale": "en",
+
+  "navHome": "Home",
+  "@navHome": {"description": "Bottom navigation label for the Home tab."},
+
+  "navActivities": "Activities",
+  "@navActivities": {"description": "Bottom navigation label for the Activities tab, and that tab's AppBar title."},
+
+  "navHistory": "History",
+  "@navHistory": {"description": "Bottom navigation label for the History tab, and that tab's AppBar title."},
+
+  "appTagline": "Score and timer, ready in one tap.",
+  "@appTagline": {"description": "Home screen subtitle under the PlayTap wordmark."},
+
+  "languageSettingsTooltip": "Language",
+  "@languageSettingsTooltip": {"description": "Tooltip/semantics label for the Home screen's language settings icon button."},
+
+  "resumeActivity": "RESUME ACTIVITY",
+  "@resumeActivity": {"description": "Button that resumes the single in-progress session. Shown on Home and in the active-session conflict dialog."},
+
+  "categoryScore": "Keep score",
+  "@categoryScore": {"description": "Activity category tile label: start a Score session."},
+
+  "categoryTimer": "Time an activity",
+  "@categoryTimer": {"description": "Activity category tile label: start a Timer session."},
+
+  "scoreSectionTitle": "Score",
+  "@scoreSectionTitle": {"description": "AppBar title for the Score presets list page."},
+
+  "presetFreeScore": "Free score",
+  "@presetFreeScore": {"description": "Name of the only Score preset in this release. Used as a list item, page title, and history entry label."},
+
+  "timerSectionTitle": "Timer",
+  "@timerSectionTitle": {"description": "AppBar title for the Timer presets page, and the generic Timer title shown when no specific mode applies."},
+
+  "timerModeStopwatch": "Stopwatch",
+  "@timerModeStopwatch": {"description": "Name of the Stopwatch timer mode."},
+
+  "timerModeCountdown": "Countdown",
+  "@timerModeCountdown": {"description": "Name of the Countdown timer mode."},
+
+  "timerModeLaps": "Laps",
+  "@timerModeLaps": {"description": "Name of the Lap Timer mode."},
+
+  "timerModeInterval": "Interval",
+  "@timerModeInterval": {"description": "Name of the Interval timer mode (not yet reachable in the UI; reserved for the future Interval Engine)."},
+
+  "newScoreTitle": "New score",
+  "@newScoreTitle": {"description": "AppBar title for the Free Score configuration page."},
+
+  "participantCountLabel": "Number of participants",
+  "@participantCountLabel": {"description": "Label above the 2/3/4 participant count selector."},
+
+  "participantNameLabel": "Participant {n} name",
+  "@participantNameLabel": {
+    "description": "Text field label for one participant's name.",
+    "placeholders": {"n": {"type": "int"}}
+  },
+
+  "defaultParticipantName": "Player {n}",
+  "@defaultParticipantName": {
+    "description": "Default, editable placeholder name pre-filled in a participant name field.",
+    "placeholders": {"n": {"type": "int"}}
+  },
+
+  "startButton": "START",
+  "@startButton": {"description": "Button that starts a new Score or Timer session."},
+
+  "finishGameDialogTitle": "Finish this game?",
+  "@finishGameDialogTitle": {"description": "Confirmation dialog title when ending a Score session."},
+
+  "finishSessionDialogTitle": "Finish this session?",
+  "@finishSessionDialogTitle": {"description": "Confirmation dialog title when ending a Timer session."},
+
+  "cancelButton": "CANCEL",
+  "@cancelButton": {"description": "Cancel action in a confirmation dialog."},
+
+  "finishButton": "FINISH",
+  "@finishButton": {"description": "Confirm action in the finish-session/finish-game dialogs."},
+
+  "undoLastPoint": "Undo last point",
+  "@undoLastPoint": {"description": "Label on the compact undo bar during an active Score session."},
+
+  "finishGameButton": "FINISH THE GAME",
+  "@finishGameButton": {"description": "Button that opens the finish-game confirmation dialog."},
+
+  "addPointSemantics": "Add a point to {name}",
+  "@addPointSemantics": {
+    "description": "Accessibility label for a participant's tappable score tile.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+
+  "errorPrefix": "Error: {error}",
+  "@errorPrefix": {
+    "description": "Generic inline error message, prefixed to the underlying error text.",
+    "placeholders": {"error": {"type": "String"}}
+  },
+
+  "summaryTitle": "Summary",
+  "@summaryTitle": {"description": "AppBar title for the Score and Timer summary pages."},
+
+  "lessThanAMinute": "Less than a minute",
+  "@lessThanAMinute": {"description": "Session duration caption shown instead of \"0 min\" for very short sessions."},
+
+  "minutesShort": "{minutes, plural, one {{minutes} min} other {{minutes} min}}",
+  "@minutesShort": {
+    "description": "Compact session duration, e.g. \"5 min\". Also reused for the countdown quick-preset minute labels.",
+    "placeholders": {"minutes": {"type": "int"}}
+  },
+
+  "viewHistoryButton": "VIEW HISTORY",
+  "@viewHistoryButton": {"description": "Button on a summary page that navigates to History."},
+
+  "activeSessionDialogTitle": "An activity is already in progress",
+  "@activeSessionDialogTitle": {"description": "Title of the dialog shown when starting a new session while one is already active."},
+
+  "activeSessionDialogContent": "You can resume the current activity or abandon it to start a new one.",
+  "@activeSessionDialogContent": {"description": "Body text of the active-session conflict dialog."},
+
+  "abandonAndStart": "ABANDON AND START",
+  "@abandonAndStart": {"description": "Button that abandons the in-progress session and starts a new one."},
+
+  "comingSoonTitle": "Under internal construction",
+  "@comingSoonTitle": {"description": "Placeholder page title for a section without an engine yet."},
+
+  "comingSoonBody": "{section} is not implemented yet.",
+  "@comingSoonBody": {
+    "description": "Placeholder page body naming the unimplemented section.",
+    "placeholders": {"section": {"type": "String"}}
+  },
+
+  "comingSoonDefaultSection": "This section",
+  "@comingSoonDefaultSection": {"description": "Fallback section name when none was passed to the placeholder page."},
+
+  "timeRemainingSemantics": "Time remaining",
+  "@timeRemainingSemantics": {"description": "Accessibility label for the big countdown display."},
+
+  "timeElapsedSemantics": "Time elapsed",
+  "@timeElapsedSemantics": {"description": "Accessibility label for the big stopwatch/lap-timer display."},
+
+  "pauseButtonLabel": "PAUSE",
+  "@pauseButtonLabel": {"description": "Button that pauses a running timer."},
+
+  "resumeTimerButtonLabel": "RESUME",
+  "@resumeTimerButtonLabel": {"description": "Button that resumes a paused timer."},
+
+  "pauseSemantics": "Pause",
+  "@pauseSemantics": {"description": "Accessibility label for the pause/resume timer button when it pauses."},
+
+  "resumeTimerSemantics": "Resume",
+  "@resumeTimerSemantics": {"description": "Accessibility label for the pause/resume timer button when it resumes."},
+
+  "lapButton": "LAP",
+  "@lapButton": {"description": "Short button that records a lap split. Keep it very short — this is a large tap target on a live timer screen."},
+
+  "recordLapSemantics": "Record a lap",
+  "@recordLapSemantics": {"description": "Accessibility label for the LAP button."},
+
+  "finishSessionButton": "FINISH SESSION",
+  "@finishSessionButton": {"description": "Button that opens the finish-session confirmation dialog."},
+
+  "lapRowLabel": "Lap {number}",
+  "@lapRowLabel": {
+    "description": "Row label in the live lap list, e.g. \"Lap 1\".",
+    "placeholders": {"number": {"type": "int"}}
+  },
+
+  "lapsCountPlural": "{count, plural, one {{count} lap} other {{count} laps}}",
+  "@lapsCountPlural": {
+    "description": "Standalone lap count, e.g. \"3 laps\", shown on the Timer summary page.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+
+  "quickDurationLabel": "Quick duration",
+  "@quickDurationLabel": {"description": "Label above the countdown quick-duration pill selector."},
+
+  "customDurationLabel": "Custom duration (seconds)",
+  "@customDurationLabel": {"description": "Text field label for a manually entered countdown duration."},
+
+  "durationValidationError": "Choose a duration greater than 0.",
+  "@durationValidationError": {"description": "Validation message shown under the custom duration field when it is invalid."},
+
+  "quickPresetSeconds": "{seconds}s",
+  "@quickPresetSeconds": {
+    "description": "Compact seconds label on a quick-duration pill, e.g. \"30s\".",
+    "placeholders": {"seconds": {"type": "int"}}
+  },
+
+  "emptyHistoryTitle": "No activity yet.",
+  "@emptyHistoryTitle": {"description": "History page empty-state headline."},
+
+  "emptyHistorySubtitle": "Start a score or a timer to get started.",
+  "@emptyHistorySubtitle": {"description": "History page empty-state supporting text."},
+
+  "today": "Today",
+  "@today": {"description": "Relative day label for a history entry started today."},
+
+  "yesterday": "Yesterday",
+  "@yesterday": {"description": "Relative day label for a history entry started yesterday."},
+
+  "languagePageTitle": "Language",
+  "@languagePageTitle": {"description": "AppBar title for the language settings page."},
+
+  "languageSystemOption": "Automatic",
+  "@languageSystemOption": {"description": "Option that follows the phone's system language."}
+}

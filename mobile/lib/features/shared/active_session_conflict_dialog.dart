@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 enum ActiveSessionChoice { resume, abandon }
 
 /// Shared "an activity is already running" dialog — see the Phase 1B.2
@@ -9,23 +11,22 @@ enum ActiveSessionChoice { resume, abandon }
 Future<ActiveSessionChoice?> showActiveSessionConflictDialog(
   BuildContext context,
 ) {
+  final l10n = AppLocalizations.of(context)!;
   return showDialog<ActiveSessionChoice>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Une activité est déjà en cours'),
-      content: const Text(
-        'Vous pouvez reprendre l\'activité en cours ou l\'abandonner pour en démarrer une nouvelle.',
-      ),
+      title: Text(l10n.activeSessionDialogTitle),
+      content: Text(l10n.activeSessionDialogContent),
       actions: [
         TextButton(
           onPressed: () =>
               Navigator.of(context).pop(ActiveSessionChoice.resume),
-          child: const Text('REPRENDRE L\'ACTIVITÉ'),
+          child: Text(l10n.resumeActivity),
         ),
         TextButton(
           onPressed: () =>
               Navigator.of(context).pop(ActiveSessionChoice.abandon),
-          child: const Text('ABANDONNER ET COMMENCER'),
+          child: Text(l10n.abandonAndStart),
         ),
       ],
     ),

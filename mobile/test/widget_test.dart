@@ -7,6 +7,9 @@ import 'package:playtap/app/app.dart';
 import 'package:playtap/app/providers/database_providers.dart';
 import 'package:playtap/core/time/app_clock.dart';
 import 'package:playtap/data/local/app_database.dart';
+import 'package:playtap/l10n/app_localizations.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 /// A fresh in-memory database per test (see the Phase 1B.1 brief, section
 /// 27 — no data persists between tests). `closeStreamsSynchronously` avoids
@@ -50,30 +53,48 @@ Future<void> pumpTimer(WidgetTester tester) async {
   }
 }
 
+/// Looks up the app's current localized strings from a pumped widget tree —
+/// tests assert against these rather than hardcoded French/English text, so
+/// they stay valid regardless of which language the app resolves to (see
+/// docs/LOCALIZATION.md "Tests"). A [Scaffold] always exists once the app
+/// has rendered its first page.
+AppLocalizations l10nOf(WidgetTester tester) =>
+    AppLocalizations.of(tester.element(find.byType(Scaffold).first))!;
+
 Future<void> startFreeScoreSession(
   WidgetTester tester, {
   required int participantCount,
 }) async {
-  await tester.tap(find.text('Compter un score'));
+  final l10n = l10nOf(tester);
+  await tester.tap(find.text(l10n.categoryScore));
   await tester.pumpAndSettle();
 
   await tester.tap(find.text('$participantCount'));
   await tester.pumpAndSettle();
 
-  await tester.tap(find.text('COMMENCER'));
+  await tester.tap(find.text(l10n.startButton));
   await tester.pumpAndSettle();
 }
 
 void main() {
+  setUp(() {
+    // The locale preference is persisted via shared_preferences (see
+    // app/locale/locale_repository.dart) — this in-memory fake avoids
+    // MissingPluginException in tests and keeps each test isolated.
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+  });
+
   testWidgets('Home shows the PlayTap title and the 1.0.0 sections', (
     tester,
   ) async {
     await tester.pumpWidget(appWithFreshDb());
     await tester.pumpAndSettle();
+    final l10n = l10nOf(tester);
 
     expect(find.text('PlayTap'), findsOneWidget);
-    expect(find.text('Compter un score'), findsOneWidget);
-    expect(find.text('Chronométrer'), findsOneWidget);
+    expect(find.text(l10n.categoryScore), findsOneWidget);
+    expect(find.text(l10n.categoryTimer), findsOneWidget);
     expect(find.text('Training'), findsNothing);
     expect(find.text('Custom'), findsNothing);
   });
@@ -83,14 +104,15 @@ void main() {
   ) async {
     await tester.pumpWidget(appWithFreshDb());
     await tester.pumpAndSettle();
+    final l10n = l10nOf(tester);
 
-    await tester.tap(find.text('Activités'));
+    await tester.tap(find.text(l10n.navActivities));
     await tester.pumpAndSettle();
-    expect(find.text('Compter un score'), findsWidgets);
+    expect(find.text(l10n.categoryScore), findsWidgets);
 
-    await tester.tap(find.text('Historique'));
+    await tester.tap(find.text(l10n.navHistory));
     await tester.pumpAndSettle();
-    expect(find.text('Aucune activité pour le moment.'), findsOneWidget);
+    expect(find.text(l10n.emptyHistoryTitle), findsOneWidget);
   });
 
   testWidgets('Tapping Timer navigates to the Timer presets page', (
@@ -98,13 +120,14 @@ void main() {
   ) async {
     await tester.pumpWidget(appWithFreshDb());
     await tester.pumpAndSettle();
+    final l10n = l10nOf(tester);
 
-    await tester.tap(find.text('Chronométrer'));
+    await tester.tap(find.text(l10n.categoryTimer));
     await tester.pumpAndSettle();
 
-    expect(find.text('Chronomètre'), findsOneWidget);
-    expect(find.text('Compte à rebours'), findsOneWidget);
-    expect(find.text('Tours'), findsOneWidget);
+    expect(find.text(l10n.timerModeStopwatch), findsOneWidget);
+    expect(find.text(l10n.timerModeCountdown), findsOneWidget);
+    expect(find.text(l10n.timerModeLaps), findsOneWidget);
   });
 
   testWidgets('FLOW 1 — 2 participants: score, undo, complete, history', (
@@ -112,66 +135,73 @@ void main() {
   ) async {
     await tester.pumpWidget(appWithFreshDb());
     await tester.pumpAndSettle();
+    final l10n = l10nOf(tester);
+    final player1 = l10n.defaultParticipantName(1);
+    final player2 = l10n.defaultParticipantName(2);
 
     await startFreeScoreSession(tester, participantCount: 2);
 
-    expect(find.text('Joueur 1'), findsOneWidget);
-    expect(find.text('Joueur 2'), findsOneWidget);
+    expect(find.text(player1), findsOneWidget);
+    expect(find.text(player2), findsOneWidget);
     expect(find.text('0'), findsNWidgets(2));
 
-    await tester.tap(find.text('Joueur 1'));
+    await tester.tap(find.text(player1));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Joueur 1'));
+    await tester.tap(find.text(player1));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Joueur 2'));
+    await tester.tap(find.text(player2));
     await tester.pumpAndSettle();
 
     expect(find.text('2'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
 
-    // Undo removes the last scoring action (Joueur 2's point).
+    // Undo removes the last scoring action (player2's point).
     await tester.tap(find.byIcon(Icons.undo));
     await tester.pumpAndSettle();
 
     expect(find.text('2'), findsOneWidget);
     expect(find.text('0'), findsOneWidget);
 
-    await tester.tap(find.text('TERMINER LA PARTIE'));
+    await tester.tap(find.text(l10n.finishGameButton));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('TERMINER'));
+    await tester.tap(find.text(l10n.finishButton));
     await tester.pumpAndSettle();
 
     // Summary screen.
-    expect(find.text('Score libre'), findsOneWidget);
+    expect(find.text(l10n.presetFreeScore), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
 
-    await tester.tap(find.text('VOIR L\'HISTORIQUE'));
+    await tester.tap(find.text(l10n.viewHistoryButton));
     await tester.pumpAndSettle();
 
     // Landed on History with the completed session.
-    expect(find.textContaining('Joueur 1 2'), findsOneWidget);
+    expect(find.textContaining('$player1 2'), findsOneWidget);
   });
 
   testWidgets('FLOW 2 — 3 participants can all be scored', (tester) async {
     await tester.pumpWidget(appWithFreshDb());
     await tester.pumpAndSettle();
+    final l10n = l10nOf(tester);
+    final player1 = l10n.defaultParticipantName(1);
+    final player2 = l10n.defaultParticipantName(2);
+    final player3 = l10n.defaultParticipantName(3);
 
     await startFreeScoreSession(tester, participantCount: 3);
 
-    expect(find.text('Joueur 1'), findsOneWidget);
-    expect(find.text('Joueur 2'), findsOneWidget);
-    expect(find.text('Joueur 3'), findsOneWidget);
+    expect(find.text(player1), findsOneWidget);
+    expect(find.text(player2), findsOneWidget);
+    expect(find.text(player3), findsOneWidget);
 
-    await tester.tap(find.text('Joueur 1'));
+    await tester.tap(find.text(player1));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Joueur 3'));
+    await tester.tap(find.text(player3));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Joueur 3'));
+    await tester.tap(find.text(player3));
     await tester.pumpAndSettle();
 
-    expect(find.text('1'), findsOneWidget); // Joueur 1
-    expect(find.text('0'), findsOneWidget); // Joueur 2
-    expect(find.text('2'), findsOneWidget); // Joueur 3
+    expect(find.text('1'), findsOneWidget); // player1
+    expect(find.text('0'), findsOneWidget); // player2
+    expect(find.text('2'), findsOneWidget); // player3
   });
 
   testWidgets(
@@ -179,14 +209,15 @@ void main() {
     (tester) async {
       await tester.pumpWidget(appWithFreshDb());
       await tester.pumpAndSettle();
+      final l10n = l10nOf(tester);
 
       await startFreeScoreSession(tester, participantCount: 4);
 
       for (var i = 1; i <= 4; i++) {
-        expect(find.text('Joueur $i'), findsOneWidget);
+        expect(find.text(l10n.defaultParticipantName(i)), findsOneWidget);
       }
 
-      await tester.tap(find.text('Joueur 4'));
+      await tester.tap(find.text(l10n.defaultParticipantName(4)));
       await tester.pumpAndSettle();
 
       expect(find.text('1'), findsOneWidget);
@@ -201,13 +232,16 @@ void main() {
 
     await tester.pumpWidget(appWithDb(db));
     await tester.pumpAndSettle();
+    final l10n = l10nOf(tester);
+    final player1 = l10n.defaultParticipantName(1);
+    final player2 = l10n.defaultParticipantName(2);
 
     await startFreeScoreSession(tester, participantCount: 2);
-    await tester.tap(find.text('Joueur 1'));
+    await tester.tap(find.text(player1));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Joueur 1'));
+    await tester.tap(find.text(player1));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Joueur 2'));
+    await tester.tap(find.text(player2));
     await tester.pumpAndSettle();
 
     // Simulate an app restart: tear the whole tree down first (otherwise
@@ -219,15 +253,15 @@ void main() {
     await tester.pumpWidget(appWithDb(db));
     await tester.pumpAndSettle();
 
-    expect(find.text('REPRENDRE L\'ACTIVITÉ'), findsOneWidget);
+    expect(find.text(l10n.resumeActivity), findsOneWidget);
 
-    await tester.tap(find.text('REPRENDRE L\'ACTIVITÉ'));
+    await tester.tap(find.text(l10n.resumeActivity));
     await tester.pumpAndSettle();
 
-    expect(find.text('2'), findsOneWidget); // Joueur 1, recovered exactly
-    expect(find.text('1'), findsOneWidget); // Joueur 2, recovered exactly
+    expect(find.text('2'), findsOneWidget); // player1, recovered exactly
+    expect(find.text('1'), findsOneWidget); // player2, recovered exactly
 
-    await tester.tap(find.text('Joueur 1'));
+    await tester.tap(find.text(player1));
     await tester.pumpAndSettle();
     expect(find.text('3'), findsOneWidget);
   });
@@ -239,12 +273,13 @@ void main() {
       final clock = FakeClock();
       await tester.pumpWidget(appWithClock(freshTestDb(), clock));
       await tester.pumpAndSettle();
+      final l10n = l10nOf(tester);
 
-      await tester.tap(find.text('Activités'));
+      await tester.tap(find.text(l10n.navActivities));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Chronométrer'));
+      await tester.tap(find.text(l10n.categoryTimer));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Chronomètre'));
+      await tester.tap(find.text(l10n.timerModeStopwatch));
       await pumpTimer(tester); // now on the ticker-driven session page
 
       expect(find.text('00:00.00'), findsOneWidget);
@@ -253,7 +288,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.text('00:03.00'), findsOneWidget);
 
-      await tester.tap(find.text('PAUSE'));
+      await tester.tap(find.text(l10n.pauseButtonLabel));
       await pumpTimer(tester);
 
       // Frozen while paused, even though the clock keeps moving.
@@ -261,26 +296,26 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.text('00:03.00'), findsOneWidget);
 
-      await tester.tap(find.text('REPRENDRE'));
+      await tester.tap(find.text(l10n.resumeTimerButtonLabel));
       await pumpTimer(tester);
 
       clock.advance(const Duration(seconds: 2));
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.text('00:05.00'), findsOneWidget);
 
-      await tester.tap(find.text('TERMINER LA SESSION'));
+      await tester.tap(find.text(l10n.finishSessionButton));
       await pumpTimer(tester); // confirmation dialog
-      await tester.tap(find.text('TERMINER'));
+      await tester.tap(find.text(l10n.finishButton));
       await pumpTimer(tester); // leaves the ticker page for good
       // The ticker is gone now — safe to let any in-flight page
       // transition fully settle before asserting on the result.
       await tester.pumpAndSettle();
 
       // Summary screen.
-      expect(find.text('Chronomètre'), findsOneWidget);
+      expect(find.text(l10n.timerModeStopwatch), findsOneWidget);
       expect(find.text('00:05'), findsOneWidget);
 
-      await tester.tap(find.text('VOIR L\'HISTORIQUE'));
+      await tester.tap(find.text(l10n.viewHistoryButton));
       await tester.pumpAndSettle();
 
       // Landed on History with the completed session.
@@ -294,17 +329,18 @@ void main() {
       final clock = FakeClock();
       await tester.pumpWidget(appWithClock(freshTestDb(), clock));
       await tester.pumpAndSettle();
+      final l10n = l10nOf(tester);
 
-      await tester.tap(find.text('Activités'));
+      await tester.tap(find.text(l10n.navActivities));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Chronométrer'));
+      await tester.tap(find.text(l10n.categoryTimer));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Compte à rebours'));
+      await tester.tap(find.text(l10n.timerModeCountdown));
       await tester.pumpAndSettle(); // config page, no live ticker yet
 
-      await tester.tap(find.text('30s'));
+      await tester.tap(find.text(l10n.quickPresetSeconds(30)));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('COMMENCER'));
+      await tester.tap(find.text(l10n.startButton));
       await pumpTimer(tester); // now on the ticker-driven session page
 
       expect(find.text('00:30.00'), findsOneWidget);
@@ -317,7 +353,7 @@ void main() {
       // any in-flight page transition fully settle now.
       await tester.pumpAndSettle();
 
-      expect(find.text('Compte à rebours'), findsOneWidget);
+      expect(find.text(l10n.timerModeCountdown), findsOneWidget);
       expect(find.text('00:30'), findsOneWidget); // full duration elapsed
     },
   );
@@ -328,46 +364,50 @@ void main() {
     final clock = FakeClock();
     await tester.pumpWidget(appWithClock(freshTestDb(), clock));
     await tester.pumpAndSettle();
+    final l10n = l10nOf(tester);
 
-    await tester.tap(find.text('Activités'));
+    await tester.tap(find.text(l10n.navActivities));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Chronométrer'));
+    await tester.tap(find.text(l10n.categoryTimer));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Tours'));
+    await tester.tap(find.text(l10n.timerModeLaps));
     await pumpTimer(tester); // now on the ticker-driven session page
 
     clock.advance(const Duration(seconds: 3));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.tap(find.text('LAP'));
+    await tester.tap(find.text(l10n.lapButton));
     await pumpTimer(tester);
 
-    expect(find.text('Lap 1'), findsOneWidget);
+    expect(find.text(l10n.lapRowLabel(1)), findsOneWidget);
     expect(find.text('00:03.00'), findsWidgets); // main display + split
 
     clock.advance(const Duration(seconds: 4));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.tap(find.text('LAP'));
+    await tester.tap(find.text(l10n.lapButton));
     await pumpTimer(tester);
 
-    expect(find.text('Lap 2'), findsOneWidget);
+    expect(find.text(l10n.lapRowLabel(2)), findsOneWidget);
     expect(find.text('00:04.00'), findsOneWidget); // split, not cumulative
 
-    await tester.tap(find.text('TERMINER LA SESSION'));
+    await tester.tap(find.text(l10n.finishSessionButton));
     await pumpTimer(tester); // confirmation dialog
-    await tester.tap(find.text('TERMINER'));
+    await tester.tap(find.text(l10n.finishButton));
     await pumpTimer(tester); // leaves the ticker page for good
     // The ticker is gone now — safe to let any in-flight page transition
     // fully settle before asserting on the result.
     await tester.pumpAndSettle();
 
-    expect(find.text('Tours'), findsOneWidget);
+    expect(find.text(l10n.timerModeLaps), findsOneWidget);
     expect(find.text('00:07'), findsOneWidget);
-    expect(find.text('2 laps'), findsOneWidget);
+    expect(find.text(l10n.lapsCountPlural(2)), findsOneWidget);
 
-    await tester.tap(find.text('VOIR L\'HISTORIQUE'));
+    await tester.tap(find.text(l10n.viewHistoryButton));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('00:07 — 2 laps'), findsOneWidget);
+    expect(
+      find.textContaining('00:07 — ${l10n.lapsCountPlural(2)}'),
+      findsOneWidget,
+    );
   });
 
   testWidgets(
@@ -379,12 +419,13 @@ void main() {
 
       await tester.pumpWidget(appWithClock(db, clock));
       await tester.pumpAndSettle();
+      final l10n = l10nOf(tester);
 
-      await tester.tap(find.text('Activités'));
+      await tester.tap(find.text(l10n.navActivities));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Chronométrer'));
+      await tester.tap(find.text(l10n.categoryTimer));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Chronomètre'));
+      await tester.tap(find.text(l10n.timerModeStopwatch));
       await pumpTimer(tester); // now on the ticker-driven session page
 
       clock.advance(const Duration(seconds: 4));
@@ -403,9 +444,9 @@ void main() {
       await tester.pumpWidget(appWithClock(db, clock));
       await tester.pumpAndSettle();
 
-      expect(find.text('REPRENDRE L\'ACTIVITÉ'), findsOneWidget);
+      expect(find.text(l10n.resumeActivity), findsOneWidget);
 
-      await tester.tap(find.text('REPRENDRE L\'ACTIVITÉ'));
+      await tester.tap(find.text(l10n.resumeActivity));
       await pumpTimer(tester); // now on the ticker-driven session page
 
       expect(find.text('00:10.00'), findsOneWidget);
@@ -417,43 +458,46 @@ void main() {
       'freeze on whichever session completed first)', (tester) async {
     await tester.pumpWidget(appWithFreshDb());
     await tester.pumpAndSettle();
+    final l10n = l10nOf(tester);
+    final player1 = l10n.defaultParticipantName(1);
+    final player2 = l10n.defaultParticipantName(2);
 
-    // Session 1: Joueur 1 scores once, then the match is finished.
+    // Session 1: player1 scores once, then the match is finished.
     await startFreeScoreSession(tester, participantCount: 2);
-    await tester.tap(find.text('Joueur 1'));
+    await tester.tap(find.text(player1));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('TERMINER LA PARTIE'));
+    await tester.tap(find.text(l10n.finishGameButton));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('TERMINER'));
+    await tester.tap(find.text(l10n.finishButton));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('VOIR L\'HISTORIQUE'));
+    await tester.tap(find.text(l10n.viewHistoryButton));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Joueur 1 1'), findsOneWidget);
+    expect(find.textContaining('$player1 1'), findsOneWidget);
 
     // Back to Home — Historique stays mounted the whole time in the
     // bottom-nav's IndexedStack, which is exactly what a plain
     // FutureProvider failed to account for.
-    await tester.tap(find.text('Accueil'));
+    await tester.tap(find.text(l10n.navHome));
     await tester.pumpAndSettle();
 
-    // Session 2: a different, fresh match — Joueur 2 scores twice.
+    // Session 2: a different, fresh match — player2 scores twice.
     await startFreeScoreSession(tester, participantCount: 2);
-    await tester.tap(find.text('Joueur 2'));
+    await tester.tap(find.text(player2));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Joueur 2'));
+    await tester.tap(find.text(player2));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('TERMINER LA PARTIE'));
+    await tester.tap(find.text(l10n.finishGameButton));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('TERMINER'));
+    await tester.tap(find.text(l10n.finishButton));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('VOIR L\'HISTORIQUE'));
+    await tester.tap(find.text(l10n.viewHistoryButton));
     await tester.pumpAndSettle();
 
     // Both completed sessions are visible — the bug showed only the
     // first one until the whole app process was killed and relaunched.
-    expect(find.textContaining('Joueur 1 1'), findsOneWidget);
-    expect(find.textContaining('Joueur 2 2'), findsOneWidget);
+    expect(find.textContaining('$player1 1'), findsOneWidget);
+    expect(find.textContaining('$player2 2'), findsOneWidget);
   });
 }

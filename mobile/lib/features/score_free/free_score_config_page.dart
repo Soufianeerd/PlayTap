@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
 import '../../domain/models/scoring_side.dart';
+import '../../l10n/app_localizations.dart';
 import '../shared/active_session_conflict_dialog.dart';
 import '../shared/pill_selector.dart';
 import '../shared/session_actions.dart';
@@ -22,9 +23,25 @@ class _FreeScoreConfigPageState extends ConsumerState<FreeScoreConfigPage> {
   int _sideCount = 2;
   final List<TextEditingController> _controllers = List.generate(
     4,
-    (i) => TextEditingController(text: 'Joueur ${i + 1}'),
+    (_) => TextEditingController(),
   );
+  bool _defaultNamesApplied = false;
   bool _starting = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Localized default names need a BuildContext, so they're applied here
+    // (once) rather than at controller construction time — see
+    // docs/LOCALIZATION.md.
+    if (!_defaultNamesApplied) {
+      final l10n = AppLocalizations.of(context)!;
+      for (var i = 0; i < _controllers.length; i++) {
+        _controllers[i].text = l10n.defaultParticipantName(i + 1);
+      }
+      _defaultNamesApplied = true;
+    }
+  }
 
   @override
   void dispose() {
@@ -73,9 +90,10 @@ class _FreeScoreConfigPageState extends ConsumerState<FreeScoreConfigPage> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Nouveau score')),
+      appBar: AppBar(title: Text(l10n.newScoreTitle)),
       body: Column(
         children: [
           Expanded(
@@ -85,7 +103,7 @@ class _FreeScoreConfigPageState extends ConsumerState<FreeScoreConfigPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Nombre de participants',
+                    l10n.participantCountLabel,
                     style: PlayTapTypography.label.copyWith(
                       color: colors.muted,
                     ),
@@ -102,7 +120,7 @@ class _FreeScoreConfigPageState extends ConsumerState<FreeScoreConfigPage> {
                     TextField(
                       controller: _controllers[i],
                       decoration: InputDecoration(
-                        labelText: 'Nom du participant ${i + 1}',
+                        labelText: l10n.participantNameLabel(i + 1),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -131,7 +149,7 @@ class _FreeScoreConfigPageState extends ConsumerState<FreeScoreConfigPage> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('COMMENCER'),
+                      : Text(l10n.startButton),
                 ),
               ),
             ),

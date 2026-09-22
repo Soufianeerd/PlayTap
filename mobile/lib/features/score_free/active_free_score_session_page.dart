@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/theme.dart';
 import '../../domain/models/scoring_side.dart';
+import '../../l10n/app_localizations.dart';
 import 'free_score_session_controller.dart';
 
 class ActiveFreeScoreSessionPage extends ConsumerWidget {
@@ -13,18 +14,19 @@ class ActiveFreeScoreSessionPage extends ConsumerWidget {
   final String sessionId;
 
   Future<void> _confirmComplete(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Terminer cette partie ?'),
+        title: Text(l10n.finishGameDialogTitle),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('ANNULER'),
+            child: Text(l10n.cancelButton),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('TERMINER'),
+            child: Text(l10n.finishButton),
           ),
         ],
       ),
@@ -43,13 +45,17 @@ class ActiveFreeScoreSessionPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncView = ref.watch(freeScoreSessionControllerProvider(sessionId));
     final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Score libre'), toolbarHeight: 44),
+      appBar: AppBar(title: Text(l10n.presetFreeScore), toolbarHeight: 44),
       body: asyncView.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(
-          child: Text('Erreur : $e', style: TextStyle(color: colors.danger)),
+          child: Text(
+            l10n.errorPrefix(e.toString()),
+            style: TextStyle(color: colors.danger),
+          ),
         ),
         data: (view) => Column(
           children: [
@@ -78,7 +84,7 @@ class ActiveFreeScoreSessionPage extends ConsumerWidget {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () => _confirmComplete(context, ref),
-                    child: const Text('TERMINER LA PARTIE'),
+                    child: Text(l10n.finishGameButton),
                   ),
                 ),
               ),
@@ -124,7 +130,7 @@ class _UndoBar extends StatelessWidget {
               Icon(Icons.undo, size: 18, color: color),
               const SizedBox(width: PlayTapSpacing.xs),
               Text(
-                'Annuler le dernier point',
+                AppLocalizations.of(context)!.undoLastPoint,
                 style: PlayTapTypography.caption.copyWith(color: color),
               ),
             ],
@@ -310,7 +316,7 @@ class _ScoreTileState extends State<_ScoreTile>
 
     return Semantics(
       button: true,
-      label: 'Ajouter un point à ${widget.name}',
+      label: AppLocalizations.of(context)!.addPointSemantics(widget.name),
       child: Material(
         color: widget.backgroundColor,
         child: InkWell(
