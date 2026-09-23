@@ -215,6 +215,92 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageSystemOption => '自動';
 
   @override
+  String get presetTennis => 'テニス';
+
+  @override
+  String get tennisConfigTitle => '新しいテニスの試合';
+
+  @override
+  String get tennisTypeLabel => '種目';
+
+  @override
+  String get tennisTypeSingles => 'シングルス';
+
+  @override
+  String get tennisTypeDoubles => 'ダブルス';
+
+  @override
+  String get tennisScoringLabel => 'スコア方式';
+
+  @override
+  String get tennisScoringAdvantage => 'アドバンテージ';
+
+  @override
+  String get tennisScoringNoAd => 'ノーアド';
+
+  @override
+  String get tennisFormatLabel => 'フォーマット';
+
+  @override
+  String get tennisFormatBestOf3 => '3セットマッチ';
+
+  @override
+  String get tennisDecidingSetLabel => '最終セット';
+
+  @override
+  String get tennisDecidingSetTieBreak => 'タイブレーク方式';
+
+  @override
+  String get tennisDecidingSetMatchTieBreak => '10ポイントマッチタイブレーク';
+
+  @override
+  String tennisSideSectionLabel(int n) {
+    return 'サイド$n';
+  }
+
+  @override
+  String get tennisInitialServerLabel => '最初のサーバー';
+
+  @override
+  String tennisSetLabel(int n) {
+    return 'セット$n';
+  }
+
+  @override
+  String get tennisSetsRowLabel => 'セット';
+
+  @override
+  String get tennisGamesRowLabel => 'ゲーム';
+
+  @override
+  String get tennisPointsRowLabel => 'ポイント';
+
+  @override
+  String tennisServerLabel(String name) {
+    return 'サーブ: $name';
+  }
+
+  @override
+  String get tennisChangeEndsLabel => 'コートチェンジ';
+
+  @override
+  String get tennisUndoLastPoint => '直前のポイントを取り消す';
+
+  @override
+  String get tennisDeuceLabel => 'デュース';
+
+  @override
+  String get tennisAdvantageLabel => 'アドバンテージ';
+
+  @override
+  String tennisPointSemantics(String name) {
+    return '$nameのポイント';
+  }
+
+  @override
+  String get tennisMatchTieBreakShort => 'マッチタイブレーク';
+
+  @override
   String get presetPetanque => 'ペタンク';
 
   @override

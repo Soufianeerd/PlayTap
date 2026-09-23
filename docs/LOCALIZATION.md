@@ -170,6 +170,17 @@ titleKey: drillBasketballShooting10
 `nameKey`/`titleKey` sont résolues via `AppLocalizations` au moment de
 l'affichage — jamais stockées traduites.
 
+**Tennis (Racket Core Phase 1, implémenté)** suit cette règle : toutes
+les chaînes visibles (Tennis, Simple/Double, Avantage/No-Ad, Set/Jeux/
+Points, Serveur, Deuce, Advantage, Changement de côté, Match Tie-Break...)
+sont des clés `AppLocalizations`, traduites dans les 11 locales. Exception
+volontaire et documentée : les compteurs de points **0/15/30/40 ne sont
+jamais traduits** — ce sont des numéraux affichés tels quels dans toutes
+les locales (comme les scores Pétanque/Basketball), pas des mots ("Love")
+nécessitant une localisation ; seuls "Deuce"/"Advantage" (des mots, pas
+des nombres) portent des clés de traduction. Voir
+`domain/engines/racket_labels.dart`.
+
 ## Cue Engine futur
 
 Le Cue Engine (signaux audio/voix pendant l'effort, prévu dans une

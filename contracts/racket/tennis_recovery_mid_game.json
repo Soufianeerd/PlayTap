@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "tennis_recovery_mid_game",
+  "engine": "racket",
+  "description": "Replaying the exact same event log after a simulated app restart reconstructs an identical mid-game state (40-15) — RacketEngine.replay has no hidden mutable state, so recovery is just replay.",
+  "config": {
+    "schemaVersion": 1,
+    "rulesetId": "tennis.itf.2026",
+    "sides": [
+      "side_a",
+      "side_b"
+    ],
+    "gameScoring": {
+      "schemaVersion": 1,
+      "advantageMode": "ADVANTAGE"
+    },
+    "setRule": {
+      "schemaVersion": 1,
+      "gamesToWin": 6,
+      "tieBreak": {
+        "schemaVersion": 1,
+        "target": 7,
+        "winBy": 2
+      }
+    },
+    "matchFormat": {
+      "schemaVersion": 1,
+      "setsToWin": 2,
+      "decidingSetFormat": {
+        "type": "REGULAR"
+      }
+    },
+    "service": {
+      "schemaVersion": 1,
+      "order": [
+        {
+          "id": "side_a",
+          "sideId": "side_a"
+        },
+        {
+          "id": "side_b",
+          "sideId": "side_b"
+        }
+      ]
+    }
+  },
+  "events": [
+    {
+      "id": "e1",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e2",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 1000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e3",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 2000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e4",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 3000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    }
+  ],
+  "expected": {
+    "currentGamePoints": {
+      "side_a": 3,
+      "side_b": 1
+    },
+    "currentServerSlotId": "side_a",
+    "matchComplete": false
+  }
+}

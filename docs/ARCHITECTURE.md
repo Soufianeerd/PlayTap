@@ -21,6 +21,7 @@
 |---|---|---|
 | Score Engine | Scoring générique tous sports | `playtap-score-engine` |
 | Match Engine | Périodes/clock/overtime pour les sports d'équipe (Basketball/Football/Futsal), composé avec le Score Engine — voir `docs/DATA_MODEL.md` "MatchRule" | `playtap-score-engine` |
+| Racket Engine | Point → jeu → set → match hiérarchique pour les sports de raquette (Tennis — Padel/Tennis de table/Badminton réutiliseront la même famille), tie-break, rotation de service — voir `docs/DATA_MODEL.md` "RacketMatchRule" | `playtap-score-engine`, `playtap-sports-rules` |
 | Shootout Engine | Tirs au but génériques (Football/Futsal), séparé du score du match | `playtap-score-engine` |
 | Timer Engine | Temps fiable — monotonic/elapsed en exécution, timestamps pour la persistence | `playtap-timer-engine` |
 | Interval Engine | Cycles work/rest | `playtap-interval-engine` |

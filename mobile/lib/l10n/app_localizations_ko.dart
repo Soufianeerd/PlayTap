@@ -215,6 +215,92 @@ class AppLocalizationsKo extends AppLocalizations {
   String get languageSystemOption => '자동';
 
   @override
+  String get presetTennis => '테니스';
+
+  @override
+  String get tennisConfigTitle => '새 테니스 경기';
+
+  @override
+  String get tennisTypeLabel => '유형';
+
+  @override
+  String get tennisTypeSingles => '단식';
+
+  @override
+  String get tennisTypeDoubles => '복식';
+
+  @override
+  String get tennisScoringLabel => '득점 방식';
+
+  @override
+  String get tennisScoringAdvantage => '어드밴티지';
+
+  @override
+  String get tennisScoringNoAd => '노애드';
+
+  @override
+  String get tennisFormatLabel => '포맷';
+
+  @override
+  String get tennisFormatBestOf3 => '3세트 2선승제';
+
+  @override
+  String get tennisDecidingSetLabel => '결정 세트';
+
+  @override
+  String get tennisDecidingSetTieBreak => '타이브레이크 세트';
+
+  @override
+  String get tennisDecidingSetMatchTieBreak => '10점 매치 타이브레이크';
+
+  @override
+  String tennisSideSectionLabel(int n) {
+    return '$n번 사이드';
+  }
+
+  @override
+  String get tennisInitialServerLabel => '첫 서버';
+
+  @override
+  String tennisSetLabel(int n) {
+    return '$n세트';
+  }
+
+  @override
+  String get tennisSetsRowLabel => '세트';
+
+  @override
+  String get tennisGamesRowLabel => '게임';
+
+  @override
+  String get tennisPointsRowLabel => '포인트';
+
+  @override
+  String tennisServerLabel(String name) {
+    return '서버: $name';
+  }
+
+  @override
+  String get tennisChangeEndsLabel => '코트 체인지';
+
+  @override
+  String get tennisUndoLastPoint => '마지막 포인트 취소';
+
+  @override
+  String get tennisDeuceLabel => '듀스';
+
+  @override
+  String get tennisAdvantageLabel => '어드밴티지';
+
+  @override
+  String tennisPointSemantics(String name) {
+    return '$name 포인트';
+  }
+
+  @override
+  String get tennisMatchTieBreakShort => '매치 타이브레이크';
+
+  @override
   String get presetPetanque => '페탕크';
 
   @override

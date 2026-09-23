@@ -205,6 +205,96 @@
   "languageSystemOption": "Automatic",
   "@languageSystemOption": {"description": "Option that follows the phone's system language."},
 
+  "presetTennis": "Tennis",
+  "@presetTennis": {"description": "Name of the Tennis Score preset. Used as a list item, page title, and history entry label."},
+
+  "tennisConfigTitle": "New tennis match",
+  "@tennisConfigTitle": {"description": "AppBar title for the Tennis configuration page."},
+
+  "tennisTypeLabel": "Type",
+  "@tennisTypeLabel": {"description": "Label above the Singles/Doubles selector on the Tennis configuration page."},
+
+  "tennisTypeSingles": "Singles",
+  "@tennisTypeSingles": {"description": "Tennis match type: 1 player per side."},
+
+  "tennisTypeDoubles": "Doubles",
+  "@tennisTypeDoubles": {"description": "Tennis match type: 2 players per side."},
+
+  "tennisScoringLabel": "Scoring",
+  "@tennisScoringLabel": {"description": "Label above the Advantage/No-Ad selector on the Tennis configuration page."},
+
+  "tennisScoringAdvantage": "Advantage",
+  "@tennisScoringAdvantage": {"description": "Standard game scoring: deuce/advantage, win by 2 points."},
+
+  "tennisScoringNoAd": "No-Ad",
+  "@tennisScoringNoAd": {"description": "No-Ad game scoring: at 40-40 the next point decides the game."},
+
+  "tennisFormatLabel": "Format",
+  "@tennisFormatLabel": {"description": "Label above the match format on the Tennis configuration page."},
+
+  "tennisFormatBestOf3": "Best of 3",
+  "@tennisFormatBestOf3": {"description": "Match format: first to win 2 sets."},
+
+  "tennisDecidingSetLabel": "Deciding set",
+  "@tennisDecidingSetLabel": {"description": "Label above the deciding-set format selector on the Tennis configuration page."},
+
+  "tennisDecidingSetTieBreak": "Tie-break set",
+  "@tennisDecidingSetTieBreak": {"description": "Deciding set format: played as a normal set with a 7-point tie-break at 6-6."},
+
+  "tennisDecidingSetMatchTieBreak": "Match Tie-Break 10",
+  "@tennisDecidingSetMatchTieBreak": {"description": "Deciding set format: replaced entirely by a single 10-point Match Tie-break."},
+
+  "tennisSideSectionLabel": "Side {n}",
+  "@tennisSideSectionLabel": {
+    "description": "Section header above one side's player name field(s) on the Tennis configuration page.",
+    "placeholders": {"n": {"type": "int"}}
+  },
+
+  "tennisInitialServerLabel": "First server",
+  "@tennisInitialServerLabel": {"description": "Label above the initial-server selector on the Tennis configuration page."},
+
+  "tennisSetLabel": "Set {n}",
+  "@tennisSetLabel": {
+    "description": "Current set indicator on the active Tennis session screen.",
+    "placeholders": {"n": {"type": "int"}}
+  },
+
+  "tennisSetsRowLabel": "Sets",
+  "@tennisSetsRowLabel": {"description": "Row label for the sets-won score row on the active Tennis session screen."},
+
+  "tennisGamesRowLabel": "Games",
+  "@tennisGamesRowLabel": {"description": "Row label for the games-won score row on the active Tennis session screen."},
+
+  "tennisPointsRowLabel": "Points",
+  "@tennisPointsRowLabel": {"description": "Row label for the current-game points row on the active Tennis session screen."},
+
+  "tennisServerLabel": "Server: {name}",
+  "@tennisServerLabel": {
+    "description": "Current server indicator, visual and semantics text, on the active Tennis session screen.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+
+  "tennisChangeEndsLabel": "Change ends",
+  "@tennisChangeEndsLabel": {"description": "Non-blocking indicator shown when players are due to change ends."},
+
+  "tennisUndoLastPoint": "Undo last point",
+  "@tennisUndoLastPoint": {"description": "Label/semantics for the undo action on the active Tennis session and Summary screens."},
+
+  "tennisDeuceLabel": "Deuce",
+  "@tennisDeuceLabel": {"description": "Point display when both sides are tied at 40-40 or later."},
+
+  "tennisAdvantageLabel": "Advantage",
+  "@tennisAdvantageLabel": {"description": "Point display for the side leading by one point past deuce."},
+
+  "tennisPointSemantics": "Point for {name}",
+  "@tennisPointSemantics": {
+    "description": "Screen reader label for a side's big tap zone on the active Tennis session screen.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+
+  "tennisMatchTieBreakShort": "Match Tie-Break",
+  "@tennisMatchTieBreakShort": {"description": "Short label prefixing a Match Tie-break's score in the sets list (Summary/History)."},
+
   "presetPetanque": "Pétanque",
   "@presetPetanque": {"description": "Name of the Pétanque Score preset. Used as a list item, page title, and history entry label."},
 

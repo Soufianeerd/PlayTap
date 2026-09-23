@@ -224,6 +224,92 @@ class AppLocalizationsAr extends AppLocalizations {
   String get languageSystemOption => 'تلقائي';
 
   @override
+  String get presetTennis => 'التنس';
+
+  @override
+  String get tennisConfigTitle => 'مباراة تنس جديدة';
+
+  @override
+  String get tennisTypeLabel => 'النوع';
+
+  @override
+  String get tennisTypeSingles => 'فردي';
+
+  @override
+  String get tennisTypeDoubles => 'زوجي';
+
+  @override
+  String get tennisScoringLabel => 'طريقة التسجيل';
+
+  @override
+  String get tennisScoringAdvantage => 'الميزة';
+
+  @override
+  String get tennisScoringNoAd => 'بدون ميزة';
+
+  @override
+  String get tennisFormatLabel => 'الصيغة';
+
+  @override
+  String get tennisFormatBestOf3 => 'أفضل 3 أشواط';
+
+  @override
+  String get tennisDecidingSetLabel => 'الشوط الفاصل';
+
+  @override
+  String get tennisDecidingSetTieBreak => 'شوط بكسر تعادل';
+
+  @override
+  String get tennisDecidingSetMatchTieBreak => 'كسر تعادل المباراة حتى 10';
+
+  @override
+  String tennisSideSectionLabel(int n) {
+    return 'الجانب $n';
+  }
+
+  @override
+  String get tennisInitialServerLabel => 'أول مرسل';
+
+  @override
+  String tennisSetLabel(int n) {
+    return 'الشوط $n';
+  }
+
+  @override
+  String get tennisSetsRowLabel => 'الأشواط';
+
+  @override
+  String get tennisGamesRowLabel => 'الألعاب';
+
+  @override
+  String get tennisPointsRowLabel => 'النقاط';
+
+  @override
+  String tennisServerLabel(String name) {
+    return 'الإرسال: $name';
+  }
+
+  @override
+  String get tennisChangeEndsLabel => 'تبديل الملعب';
+
+  @override
+  String get tennisUndoLastPoint => 'التراجع عن آخر نقطة';
+
+  @override
+  String get tennisDeuceLabel => 'تعادل';
+
+  @override
+  String get tennisAdvantageLabel => 'ميزة';
+
+  @override
+  String tennisPointSemantics(String name) {
+    return 'نقطة لـ $name';
+  }
+
+  @override
+  String get tennisMatchTieBreakShort => 'كسر تعادل المباراة';
+
+  @override
   String get presetPetanque => 'البيتانك';
 
   @override

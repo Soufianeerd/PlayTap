@@ -218,6 +218,92 @@ class AppLocalizationsFr extends AppLocalizations {
   String get languageSystemOption => 'Automatique';
 
   @override
+  String get presetTennis => 'Tennis';
+
+  @override
+  String get tennisConfigTitle => 'Nouveau match de tennis';
+
+  @override
+  String get tennisTypeLabel => 'Type';
+
+  @override
+  String get tennisTypeSingles => 'Simple';
+
+  @override
+  String get tennisTypeDoubles => 'Double';
+
+  @override
+  String get tennisScoringLabel => 'Score';
+
+  @override
+  String get tennisScoringAdvantage => 'Avantage';
+
+  @override
+  String get tennisScoringNoAd => 'Sans avantage';
+
+  @override
+  String get tennisFormatLabel => 'Format';
+
+  @override
+  String get tennisFormatBestOf3 => '3 sets gagnants';
+
+  @override
+  String get tennisDecidingSetLabel => 'Set décisif';
+
+  @override
+  String get tennisDecidingSetTieBreak => 'Set avec jeu décisif';
+
+  @override
+  String get tennisDecidingSetMatchTieBreak => 'Super jeu décisif en 10 points';
+
+  @override
+  String tennisSideSectionLabel(int n) {
+    return 'Côté $n';
+  }
+
+  @override
+  String get tennisInitialServerLabel => 'Premier serveur';
+
+  @override
+  String tennisSetLabel(int n) {
+    return 'Set $n';
+  }
+
+  @override
+  String get tennisSetsRowLabel => 'Sets';
+
+  @override
+  String get tennisGamesRowLabel => 'Jeux';
+
+  @override
+  String get tennisPointsRowLabel => 'Points';
+
+  @override
+  String tennisServerLabel(String name) {
+    return 'Service : $name';
+  }
+
+  @override
+  String get tennisChangeEndsLabel => 'Changement de côté';
+
+  @override
+  String get tennisUndoLastPoint => 'Annuler le dernier point';
+
+  @override
+  String get tennisDeuceLabel => 'Égalité';
+
+  @override
+  String get tennisAdvantageLabel => 'Avantage';
+
+  @override
+  String tennisPointSemantics(String name) {
+    return 'Point pour $name';
+  }
+
+  @override
+  String get tennisMatchTieBreakShort => 'Super jeu décisif';
+
+  @override
   String get presetPetanque => 'Pétanque';
 
   @override
