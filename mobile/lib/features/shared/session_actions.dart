@@ -4,8 +4,8 @@ import 'package:uuid/uuid.dart';
 import '../../app/providers/database_providers.dart';
 import '../../data/repositories/session_repository.dart';
 import '../../domain/events/session_event.dart';
+import '../../domain/models/preset_ids.dart';
 import '../../domain/models/session_category.dart';
-import '../score_petanque/petanque_actions.dart' show petanquePresetRef;
 
 const _uuid = Uuid();
 
@@ -39,10 +39,13 @@ Future<void> abandonSession(WidgetRef ref, String sessionId) async {
 /// off `presetRef` (see `features/score_petanque/petanque_actions.dart`).
 String activeSessionRoute(SessionSummary session) {
   return switch (session.category) {
-    SessionCategory.score =>
-      session.presetRef == petanquePresetRef
-          ? '/score/petanque/session/${session.id}'
-          : '/score/free/session/${session.id}',
+    SessionCategory.score => switch (session.presetRef) {
+      petanquePresetRef => '/score/petanque/session/${session.id}',
+      basketballPresetRef => '/score/basketball/session/${session.id}',
+      footballPresetRef => '/score/football/session/${session.id}',
+      futsalPresetRef => '/score/futsal/session/${session.id}',
+      _ => '/score/free/session/${session.id}',
+    },
     SessionCategory.timer => '/timer/session/${session.id}',
     SessionCategory.training => throw UnimplementedError(
       'Training sessions do not exist yet',

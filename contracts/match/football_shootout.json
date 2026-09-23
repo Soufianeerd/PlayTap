@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "id": "football_shootout",
+  "engine": "match",
+  "description": "Football knockout: still level after extra time -> shootout starts. Verifies only the phase transition (SHOOTOUT_IN_PROGRESS) \u2014 shootout scoring itself is ShootoutEngine's concern, covered by contracts/shootout/*.",
+  "config": {
+    "matchRule": {
+      "schemaVersion": 1,
+      "rulesetId": "football.ifab.2026_27",
+      "scoreRule": {
+        "schemaVersion": 1,
+        "mode": "TEAM_SCORE",
+        "sides": [
+          "team_a",
+          "team_b"
+        ],
+        "allowedIncrements": [
+          1
+        ]
+      },
+      "clock": "RUNNING_CLOCK",
+      "periods": [
+        {
+          "index": 0,
+          "durationMs": 2700000
+        },
+        {
+          "index": 1,
+          "durationMs": 2700000
+        }
+      ],
+      "matchEnd": {
+        "drawAllowed": false
+      },
+      "overtime": {
+        "durationMs": 900000,
+        "maxCount": 2
+      },
+      "shootout": {
+        "kicksPerRound": 5,
+        "suddenDeath": true
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "ps0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 0,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "pe0",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 2700000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps1",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 2700000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 1,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts1",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 2700000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "pe1",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 5400000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps2",
+      "originDevice": "phone",
+      "originSequence": 7,
+      "tOffsetMs": 5400000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "kind": "OVERTIME",
+        "overtimeNumber": 1
+      }
+    },
+    {
+      "id": "ts2",
+      "originDevice": "phone",
+      "originSequence": 8,
+      "tOffsetMs": 5400000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "pe2",
+      "originDevice": "phone",
+      "originSequence": 9,
+      "tOffsetMs": 6300000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps3",
+      "originDevice": "phone",
+      "originSequence": 10,
+      "tOffsetMs": 6300000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "kind": "OVERTIME",
+        "overtimeNumber": 2
+      }
+    },
+    {
+      "id": "ts3",
+      "originDevice": "phone",
+      "originSequence": 11,
+      "tOffsetMs": 6300000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "pe3",
+      "originDevice": "phone",
+      "originSequence": 12,
+      "tOffsetMs": 7200000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ss0",
+      "originDevice": "phone",
+      "originSequence": 13,
+      "tOffsetMs": 7200000,
+      "type": "SHOOTOUT_STARTED",
+      "payload": {}
+    }
+  ],
+  "expected": {
+    "phase": "SHOOTOUT_IN_PROGRESS",
+    "matchEnded": false
+  }
+}

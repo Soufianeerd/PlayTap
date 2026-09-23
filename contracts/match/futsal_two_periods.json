@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "id": "futsal_two_periods",
+  "engine": "match",
+  "description": "Futsal: 2x20min STOPPED_CLOCK periods, both auto-expiring via the TIMER_COMPLETED+PERIOD_ENDED pairing. Verifies periodIndex advances 0->1 and each period's clock is exactly 20:00, not cumulative.",
+  "config": {
+    "matchRule": {
+      "schemaVersion": 1,
+      "rulesetId": "futsal.fifa.2025_26",
+      "scoreRule": {
+        "schemaVersion": 1,
+        "mode": "TEAM_SCORE",
+        "sides": [
+          "team_a",
+          "team_b"
+        ],
+        "allowedIncrements": [
+          1
+        ]
+      },
+      "clock": "STOPPED_CLOCK",
+      "periods": [
+        {
+          "index": 0,
+          "durationMs": 1200000
+        },
+        {
+          "index": 1,
+          "durationMs": 1200000
+        }
+      ],
+      "matchEnd": {
+        "drawAllowed": false
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "ps0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 0,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "tc0",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 1200000,
+      "type": "TIMER_COMPLETED",
+      "payload": {}
+    },
+    {
+      "id": "pe0",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 1200000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps1",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 1200000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 1,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts1",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 1200000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "tc1",
+      "originDevice": "phone",
+      "originSequence": 7,
+      "tOffsetMs": 2400000,
+      "type": "TIMER_COMPLETED",
+      "payload": {}
+    },
+    {
+      "id": "pe1",
+      "originDevice": "phone",
+      "originSequence": 8,
+      "tOffsetMs": 2400000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    }
+  ],
+  "expected": {
+    "phase": "REGULATION",
+    "periodIndex": 1,
+    "matchEnded": false,
+    "clock": {
+      "status": "COMPLETED",
+      "elapsedMs": 1200000,
+      "remainingMs": 0
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "id": "shootout_undo",
+  "engine": "shootout",
+  "description": "Undoing the decisive attempt reopens the shootout \u2014 filtering the undone event out and forward-replaying the remainder, exactly like MatchEngine's own undo handling.",
+  "config": {
+    "shootoutRule": {
+      "kicksPerRound": 5,
+      "suddenDeath": true
+    },
+    "sideIds": [
+      "team_a",
+      "team_b"
+    ]
+  },
+  "events": [
+    {
+      "id": "a0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    },
+    {
+      "id": "b0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": false
+      }
+    },
+    {
+      "id": "a1",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    },
+    {
+      "id": "b1",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": false
+      }
+    },
+    {
+      "id": "a2",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    },
+    {
+      "id": "b2",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": false
+      }
+    },
+    {
+      "id": "u0",
+      "originDevice": "phone",
+      "originSequence": 7,
+      "tOffsetMs": 0,
+      "type": "UNDO",
+      "payload": {
+        "targetEventId": "b2"
+      }
+    }
+  ],
+  "expected": {
+    "scores": {
+      "team_a": 3,
+      "team_b": 0
+    },
+    "decided": false,
+    "winner": null,
+    "attemptsCount": 5
+  }
+}

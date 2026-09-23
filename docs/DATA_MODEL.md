@@ -97,6 +97,81 @@ un side de scoring peut contenir plusieurs joueurs (ex : Pétanque
 doublette/triplette = 2 ou 3 joueurs dans 1 side), sans introduire de
 classe `Team`/`Competitor` séparée pour ce seul besoin d'affichage.
 
+## MatchRule — composition pour les sports à périodes/clock/overtime
+
+Décision architecturale (Phase Sports 2, 2026-09) : Basketball, Football,
+et Futsal réutilisent `TeamScoreRule` inchangé (avec `target: null` —
+c'est exactement le slot documenté ci-dessus comme "Basketball/Football
+V2, fin manuelle uniquement") pour le score, et ajoutent une nouvelle
+configuration `MatchRule` pour tout ce que `ScoreRule` ne représente pas :
+périodes, clock (running vs. stopped), prolongation, tirs au but.
+
+`MatchRule` est **une seule classe concrète**, pas une hiérarchie scellée
+comme `ScoreRule` : la machine à états (avancer dans les périodes, faire
+tourner un clock, décider prolongation/tirs au but/nul) est identique pour
+les trois sports — seuls les nombres/booléens diffèrent. Une hiérarchie
+scellée par sport inviterait exactement le branchement `if (sport == ...)`
+que l'architecture générique interdit.
+
+```jsonc
+{
+  "schemaVersion": 1,
+  "rulesetId": "basketball.fiba.2024",       // opaque, jamais une branche
+  "scoreRule": { /* TeamScoreRule, target absent */ },
+  "clock": "STOPPED_CLOCK",                   // ou "RUNNING_CLOCK"
+  "periods": [ { "index": 0, "durationMs": 600000 }, /* ... */ ],
+  "overtime": { "durationMs": 300000 },       // maxCount absent = illimité
+  "shootout": { "kicksPerRound": 5, "suddenDeath": true }, // optionnel
+  "matchEnd": { "drawAllowed": false }
+}
+```
+
+**`OvertimeRule.maxCount` porte une double sémantique, purement
+data-driven** (voir le commentaire complet sur `overtime_rule.dart`) :
+
+- **absent (illimité)** : chaque prolongation est décisive seule — le
+  match se termine dès qu'elle n'est plus à égalité (Basketball, FIBA
+  Article 8 : jamais de match nul).
+- **présent (bloc de longueur fixe)** : exactement N prolongations sont
+  toujours jouées intégralement avant toute décision, quel que soit le
+  score en cours de route (Football/Futsal, prolongation 2×15 ou 2×5) —
+  ce n'est qu'une fois le bloc épuisé que le niveau du score est vérifié.
+
+`rulesetId` est un identifiant opaque persisté (`basketball.fiba.2024`,
+`football.ifab.2026_27`, `futsal.fifa.2025_26`) — jamais une branche dans
+l'engine, seulement une donnée de traçabilité/affichage. Le `MatchRule`
+**entièrement résolu** (pas seulement son id) est persisté dans
+`SESSION_STARTED.payload['matchRule']` au moment de la création de la
+session : une session démarrée avant un changement de règles (ex. le
+basculement FIBA 2024→2026 au 2026-10-01) rejoue à l'identique pour
+toujours, même après que l'app change son défaut — voir
+`mobile/lib/domain/rulesets/basketball_rulesets.dart`.
+
+**Undo inter-engines** : `ScoreEngine` et `MatchEngine` (+ `ShootoutEngine`
+une fois les tirs au but commencés) rejouent chacun le même log filtré à
+son propre sous-ensemble d'events. Un `UNDO` sans cible explicite serait
+ambigu entre les trois — le contrôleur (jamais un engine pur) résout donc
+toujours "l'event le plus récent significatif" dans le log brut
+(`resolveMatchUndoTarget`) et l'annule via `targetEventId`, jamais via le
+fallback implicite "dernier point" (réservé à Pétanque/Score libre, où
+l'ambiguïté ne peut pas exister).
+
+**Nouveaux `SessionEventType`** (voir `session_event.dart`) : `PERIOD_
+STARTED`, `PERIOD_ENDED`, `ADDED_TIME_ANNOUNCED`, `SHOOTOUT_STARTED`,
+`SHOOTOUT_ATTEMPT`, `SHOOTOUT_COMPLETED`. Réutilisés sans changement (même
+sens réel) : `SESSION_STARTED`/`SESSION_COMPLETED` (début/fin de match),
+`POINT_SCORED`/`UNDO`, `TIMER_STARTED`/`TIMER_PAUSED`/`TIMER_RESUMED`/
+`TIMER_COMPLETED` (start/pause/resume/expiration du clock de match, toujours
+en paire avec `PERIOD_STARTED`/`PERIOD_ENDED`). Aucun event nommé par
+sport (jamais `BASKETBALL_POINT`/`FOOTBALL_GOAL`) ; la prolongation est
+repliée dans le payload de `PERIOD_STARTED` (`kind: "OVERTIME"`) plutôt
+que d'être un type d'event séparé.
+
+**Périmètre v1 explicitement différé** : temps morts, fautes cumulées
+(Futsal), fautes d'équipe/bonus (Basketball) — voir
+`docs/SPORT_RULES.md`. `MatchRule` ne déclare simplement pas ces champs ;
+les ajouter sera additif (pas de bump de `schemaVersion`).
+
 ## Principes
 
 - `Event` est la source de vérité pour tout état de session. `Session`
@@ -122,6 +197,7 @@ Chaque format qui peut évoluer indépendamment porte son propre
 |---|---|
 | `Preset.config` (conteneur) | champ `schemaVersion` sur `Preset` |
 | `ScoreRule` | champ `schemaVersion` dans le config lui-même |
+| `MatchRule` | champ `schemaVersion` dans le config lui-même |
 | `TimerSpec` | champ `schemaVersion` dans le config lui-même |
 | `IntervalProgram` | champ `schemaVersion` dans le config lui-même |
 | `WorkoutSequence` | champ `schemaVersion` dans le config lui-même |

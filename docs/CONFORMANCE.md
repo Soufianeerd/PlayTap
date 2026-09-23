@@ -25,7 +25,16 @@ Swift et Kotlin passent tous les mêmes fixtures, ils sont garantis
 ## Format général
 
 Chaque fixture est un fichier JSON dans `/contracts/<engine>/<id>.json` où
-`<engine>` ∈ {`score`, `timer`, `interval`, `workout`}.
+`<engine>` ∈ {`score`, `timer`, `interval`, `workout`, `match`,
+`shootout`}.
+
+`match` et `shootout` (Phase Sports 2 — Basketball/Football/Futsal)
+peuvent utiliser **soit** `expected` (état final unique, pour vérifier des
+transitions de phase/période — comme `score`) **soit**
+`expectedCheckpoints` (plusieurs instants `atMs` — comme `timer`), selon
+ce que le cas vérifie : une fixture `match` de recovery/pause/background
+veut plusieurs checkpoints temporels, une fixture de transition de phase
+(ex. égalité → prolongation → décision) veut un état final unique.
 
 Structure commune :
 
@@ -62,8 +71,11 @@ Structure commune :
 - Chaque fixture porte son propre `schemaVersion` (le format de la
   fixture elle-même).
 - Chaque `config` embarqué porte le `schemaVersion` de son propre type
-  (`ScoreRule`, `TimerSpec`, `IntervalProgram`, `WorkoutSequence` — voir
-  `docs/DATA_MODEL.md`).
+  (`ScoreRule`, `MatchRule`, `TimerSpec`, `IntervalProgram`,
+  `WorkoutSequence` — voir `docs/DATA_MODEL.md`). Une fixture `match`
+  embarque `config.matchRule` (le `MatchRule` complet, incluant son propre
+  `scoreRule`) ; une fixture `shootout` embarque `config.shootoutRule` +
+  `config.sideIds`.
 - Une évolution incompatible d'un format de `config` nécessite
   d'incrémenter son `schemaVersion` et de fournir soit une migration, soit
   de nouvelles fixtures versionnées côte à côte (jamais de fixture

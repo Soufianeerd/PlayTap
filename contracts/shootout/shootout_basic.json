@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "id": "shootout_basic",
+  "engine": "shootout",
+  "description": "Standard alternating shootout, decided after the full initial round (5 each, not level). (decided after the 9th kick, a4 \u2014 b4 is never taken since the shootout is already mathematically settled by then: 4 > 2+1.)",
+  "config": {
+    "shootoutRule": {
+      "kicksPerRound": 5,
+      "suddenDeath": true
+    },
+    "sideIds": [
+      "team_a",
+      "team_b"
+    ]
+  },
+  "events": [
+    {
+      "id": "a0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    },
+    {
+      "id": "b0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": true
+      }
+    },
+    {
+      "id": "a1",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    },
+    {
+      "id": "b1",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": false
+      }
+    },
+    {
+      "id": "a2",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    },
+    {
+      "id": "b2",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": true
+      }
+    },
+    {
+      "id": "a3",
+      "originDevice": "phone",
+      "originSequence": 7,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": false
+      }
+    },
+    {
+      "id": "b3",
+      "originDevice": "phone",
+      "originSequence": 8,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": false
+      }
+    },
+    {
+      "id": "a4",
+      "originDevice": "phone",
+      "originSequence": 9,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    },
+    {
+      "id": "b4",
+      "originDevice": "phone",
+      "originSequence": 10,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": false
+      }
+    }
+  ],
+  "expected": {
+    "scores": {
+      "team_a": 4,
+      "team_b": 2
+    },
+    "decided": true,
+    "winner": "team_a",
+    "attemptsCount": 9
+  }
+}

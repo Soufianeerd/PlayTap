@@ -1,13 +1,29 @@
 import '../models/origin_device.dart';
+import 'match_engine_event.dart';
 import 'score_engine_event.dart';
+import 'shootout_engine_event.dart';
 import 'timer_engine_event.dart';
 
 /// Full set of event types persisted for a session — a superset of
-/// [ScoreEngineEventType]/[TimerEngineEventType] that also covers
-/// lifecycle markers shared across categories. Lifecycle events are still
-/// part of the append-only log (so the log alone fully describes what
-/// happened to a session), but each pure engine only ever consumes its own
-/// subset — see `toScoreEngineEvent`/`toTimerEngineEvent`.
+/// [ScoreEngineEventType]/[TimerEngineEventType]/[MatchEngineEventType]/
+/// [ShootoutEngineEventType] that also covers lifecycle markers shared
+/// across categories. Lifecycle events are still part of the append-only
+/// log (so the log alone fully describes what happened to a session), but
+/// each pure engine only ever consumes its own subset — see
+/// `toScoreEngineEvent`/`toTimerEngineEvent`/`toMatchEngineEvent`/
+/// `toShootoutEngineEvent`.
+///
+/// Team-match additions (Basketball/Football/Futsal — see
+/// `playtap-score-engine`'s `MatchRule` composition note) stay generic on
+/// purpose: no `BASKETBALL_POINT`/`FOOTBALL_GOAL`/`FUTSAL_GOAL`, and
+/// overtime reuses [periodStarted]'s payload (`kind: OVERTIME`) rather
+/// than a separate `OVERTIME_STARTED` type. Reused unchanged for the same
+/// real-world meaning: [sessionStarted] (match start), [pointScored]/
+/// [undo] (scoring), [sessionCompleted] (match end — decided, drawn, or
+/// resolved by shootout), [timerStarted]/[timerPaused]/[timerResumed]/
+/// [timerCompleted] (the match clock's start/pause/resume/period-expiry —
+/// paired with [periodStarted]/[periodEnded], see
+/// `features/score_team_match/team_match_actions.dart`).
 enum SessionEventType {
   sessionStarted,
   pointScored,
@@ -18,7 +34,13 @@ enum SessionEventType {
   timerPaused,
   timerResumed,
   lapRecorded,
-  timerCompleted;
+  timerCompleted,
+  periodStarted,
+  periodEnded,
+  addedTimeAnnounced,
+  shootoutStarted,
+  shootoutAttempt,
+  shootoutCompleted;
 
   String toJson() => switch (this) {
     SessionEventType.sessionStarted => 'SESSION_STARTED',
@@ -31,6 +53,12 @@ enum SessionEventType {
     SessionEventType.timerResumed => 'TIMER_RESUMED',
     SessionEventType.lapRecorded => 'LAP_RECORDED',
     SessionEventType.timerCompleted => 'TIMER_COMPLETED',
+    SessionEventType.periodStarted => 'PERIOD_STARTED',
+    SessionEventType.periodEnded => 'PERIOD_ENDED',
+    SessionEventType.addedTimeAnnounced => 'ADDED_TIME_ANNOUNCED',
+    SessionEventType.shootoutStarted => 'SHOOTOUT_STARTED',
+    SessionEventType.shootoutAttempt => 'SHOOTOUT_ATTEMPT',
+    SessionEventType.shootoutCompleted => 'SHOOTOUT_COMPLETED',
   };
 
   static SessionEventType fromJson(String value) => switch (value) {
@@ -44,6 +72,12 @@ enum SessionEventType {
     'TIMER_RESUMED' => SessionEventType.timerResumed,
     'LAP_RECORDED' => SessionEventType.lapRecorded,
     'TIMER_COMPLETED' => SessionEventType.timerCompleted,
+    'PERIOD_STARTED' => SessionEventType.periodStarted,
+    'PERIOD_ENDED' => SessionEventType.periodEnded,
+    'ADDED_TIME_ANNOUNCED' => SessionEventType.addedTimeAnnounced,
+    'SHOOTOUT_STARTED' => SessionEventType.shootoutStarted,
+    'SHOOTOUT_ATTEMPT' => SessionEventType.shootoutAttempt,
+    'SHOOTOUT_COMPLETED' => SessionEventType.shootoutCompleted,
     _ => throw ArgumentError.value(value, 'value', 'Unknown SessionEventType'),
   };
 }
@@ -91,5 +125,29 @@ class SessionEvent {
       type: engineType,
       atMs: timestamp.millisecondsSinceEpoch,
     );
+  }
+
+  /// Converts to the pure shape `MatchEngine.replay` accepts, or null for
+  /// events the Match Engine doesn't need to see (`SESSION_STARTED`,
+  /// `POINT_SCORED`, `SESSION_ABANDONED`, `LAP_RECORDED`,
+  /// `SHOOTOUT_ATTEMPT`) — see `domain/engines/match_engine.dart`.
+  MatchEngineEvent? toMatchEngineEvent() {
+    final engineType = MatchEngineEventType.tryFromJson(type.toJson());
+    if (engineType == null) return null;
+    return MatchEngineEvent(
+      id: id,
+      type: engineType,
+      atMs: timestamp.millisecondsSinceEpoch,
+      payload: payload,
+    );
+  }
+
+  /// Converts to the pure shape `ShootoutEngine.replay` accepts, or null
+  /// for events the Shootout Engine doesn't need to see — see
+  /// `domain/engines/shootout_engine.dart`.
+  ShootoutEngineEvent? toShootoutEngineEvent() {
+    final engineType = ShootoutEngineEventType.tryFromJson(type.toJson());
+    if (engineType == null) return null;
+    return ShootoutEngineEvent(id: id, type: engineType, payload: payload);
   }
 }

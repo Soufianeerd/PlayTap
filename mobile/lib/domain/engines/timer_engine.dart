@@ -1,3 +1,4 @@
+import 'clock_engine.dart';
 import '../events/timer_engine_event.dart';
 import '../models/lap_split.dart';
 import '../models/timer_mode.dart';
@@ -11,43 +12,38 @@ import '../models/timer_status.dart';
 /// plain function of its three arguments (`spec`, `events`, `nowMs`).
 /// `state = replay(events, now)` must hold for any prefix or full replay,
 /// every time — never `remaining--` or `elapsed++` per tick.
+///
+/// The running-since/accumulated-ms bookkeeping itself lives in
+/// [ClockAccumulator] (`clock_engine.dart`), shared with `MatchEngine`'s
+/// per-period clock — this class only adds what's specific to a standalone
+/// Timer session: lap splits and COUNTDOWN clamping (`_finalize`).
 abstract final class TimerEngine {
   static TimerState replay(
     TimerSpec spec,
     List<TimerEngineEvent> events, {
     required int nowMs,
   }) {
-    int? runningSinceMs; // set while running; null while paused/not started
-    var accumulatedMs = 0;
-    var started = false;
-    var completed = false;
+    var clock = const ClockAccumulator();
     final laps = <LapSplit>[];
     final seenEventIds = <String>{};
 
     for (final event in events) {
-      if (completed) break; // a completed timer ignores anything after.
+      if (clock.completed) break; // a completed timer ignores anything after.
       if (!seenEventIds.add(event.id)) continue; // duplicate id: no-op.
 
       switch (event.type) {
         case TimerEngineEventType.started:
-          if (started) continue; // ignore a duplicate start.
-          started = true;
-          runningSinceMs = event.atMs;
+          clock = clock.apply(ClockCommandType.started, event.atMs);
 
         case TimerEngineEventType.paused:
-          if (!started || runningSinceMs == null) continue; // not running.
-          accumulatedMs += event.atMs - runningSinceMs;
-          runningSinceMs = null;
+          clock = clock.apply(ClockCommandType.paused, event.atMs);
 
         case TimerEngineEventType.resumed:
-          if (!started || runningSinceMs != null) continue; // not paused.
-          runningSinceMs = event.atMs;
+          clock = clock.apply(ClockCommandType.resumed, event.atMs);
 
         case TimerEngineEventType.lapRecorded:
-          if (!started) continue;
-          final cumulative =
-              accumulatedMs +
-              (runningSinceMs != null ? event.atMs - runningSinceMs : 0);
+          if (!clock.started) continue;
+          final cumulative = clock.elapsedAt(event.atMs);
           final previous = laps.isEmpty ? 0 : laps.last.cumulativeElapsedMs;
           laps.add(
             LapSplit(
@@ -59,16 +55,11 @@ abstract final class TimerEngine {
           );
 
         case TimerEngineEventType.completed:
-          if (!started) continue;
-          if (runningSinceMs != null) {
-            accumulatedMs += event.atMs - runningSinceMs;
-            runningSinceMs = null;
-          }
-          completed = true;
+          clock = clock.apply(ClockCommandType.completed, event.atMs);
       }
     }
 
-    if (!started) {
+    if (!clock.started) {
       return TimerState(
         status: TimerStatus.paused,
         elapsedMs: 0,
@@ -77,12 +68,12 @@ abstract final class TimerEngine {
       );
     }
 
-    final elapsedMs = completed || runningSinceMs == null
-        ? accumulatedMs
-        : accumulatedMs + (nowMs - runningSinceMs);
-    final rawStatus = completed
+    final elapsedMs = clock.elapsedAt(nowMs);
+    final rawStatus = clock.completed
         ? TimerStatus.completed
-        : (runningSinceMs == null ? TimerStatus.paused : TimerStatus.running);
+        : (clock.runningSinceMs == null
+              ? TimerStatus.paused
+              : TimerStatus.running);
 
     return _finalize(spec, rawStatus, elapsedMs, laps);
   }

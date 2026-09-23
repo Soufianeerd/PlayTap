@@ -278,4 +278,110 @@ class AppLocalizationsKo extends AppLocalizations {
   String winnerAnnouncement(String name) {
     return '$name 승리!';
   }
+
+  @override
+  String get presetBasketball => '농가';
+
+  @override
+  String get presetFootball => '축게';
+
+  @override
+  String get presetFutsal => '푸살';
+
+  @override
+  String get basketballConfigTitle => '새 농가 게임';
+
+  @override
+  String get footballConfigTitle => '새 축게 경기';
+
+  @override
+  String get futsalConfigTitle => '새 푸살 경기';
+
+  @override
+  String get teamMatchFormatLabel => '형식';
+
+  @override
+  String get teamMatchFormatLeague => '리거';
+
+  @override
+  String get teamMatchFormatKnockout => '토대전';
+
+  @override
+  String teamMatchTeamSectionLabel(int n) {
+    return '팀 $n';
+  }
+
+  @override
+  String get teamMatchTeamNameLabel => '팀 이맄';
+
+  @override
+  String teamMatchDefaultTeamName(int n) {
+    return '팀 $n';
+  }
+
+  @override
+  String periodLabelQuarter(int n) {
+    return '$n쿼트';
+  }
+
+  @override
+  String get periodLabelFirstHalf => '전반';
+
+  @override
+  String get periodLabelSecondHalf => '후반';
+
+  @override
+  String overtimeLabel(int n) {
+    return '연장 $n';
+  }
+
+  @override
+  String addedTimeBadge(int minutes) {
+    return '+$minutes';
+  }
+
+  @override
+  String get undoLastActionLabel => '취소';
+
+  @override
+  String get moreActionsButton => '더보기';
+
+  @override
+  String get endPeriodManuallyButton => '하이플란/쿼트 종려';
+
+  @override
+  String get endPeriodDialogTitle => '지금 이 구간을 종려하겠습니까?';
+
+  @override
+  String get announceAddedTimeButton => '추가 시간';
+
+  @override
+  String get addedTimeDialogTitle => '추가 시간';
+
+  @override
+  String addedTimeMinutesOption(int n) {
+    return '+$n분';
+  }
+
+  @override
+  String get shootoutLabel => '승부쬨';
+
+  @override
+  String get shootoutScoreButton => '성공';
+
+  @override
+  String get shootoutMissButton => '실패';
+
+  @override
+  String shootoutNextKickerLabel(String team) {
+    return '$team 쬨';
+  }
+
+  @override
+  String shootoutScoreLine(int scoreA, int scoreB) {
+    return '승부쬨: $scoreA – $scoreB';
+  }
+
+  @override
+  String get matchDrawResultLabel => '무승부';
 }

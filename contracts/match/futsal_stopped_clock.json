@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "futsal_stopped_clock",
+  "engine": "match",
+  "description": "Futsal STOPPED_CLOCK never counts past its period duration even if asked for a much later `nowMs` (no TIMER_COMPLETED/PERIOD_ENDED persisted yet) \u2014 verifies the clamp-at-duration behavior MatchEngine.isUnfinalizedStoppedPeriodCompletion relies on the controller to detect and finalize.",
+  "config": {
+    "matchRule": {
+      "schemaVersion": 1,
+      "rulesetId": "futsal.fifa.2025_26",
+      "scoreRule": {
+        "schemaVersion": 1,
+        "mode": "TEAM_SCORE",
+        "sides": [
+          "team_a",
+          "team_b"
+        ],
+        "allowedIncrements": [
+          1
+        ]
+      },
+      "clock": "STOPPED_CLOCK",
+      "periods": [
+        {
+          "index": 0,
+          "durationMs": 1200000
+        },
+        {
+          "index": 1,
+          "durationMs": 1200000
+        }
+      ],
+      "matchEnd": {
+        "drawAllowed": false
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "ps0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 0,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    }
+  ],
+  "expectedCheckpoints": [
+    {
+      "atMs": 600000,
+      "clock": {
+        "status": "RUNNING",
+        "elapsedMs": 600000,
+        "remainingMs": 600000
+      }
+    },
+    {
+      "atMs": 1200000,
+      "clock": {
+        "status": "COMPLETED",
+        "elapsedMs": 1200000,
+        "remainingMs": 0
+      }
+    },
+    {
+      "atMs": 9999999,
+      "clock": {
+        "status": "COMPLETED",
+        "elapsedMs": 1200000,
+        "remainingMs": 0
+      }
+    }
+  ]
+}

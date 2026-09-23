@@ -282,4 +282,110 @@ class AppLocalizationsDe extends AppLocalizations {
   String winnerAnnouncement(String name) {
     return '$name gewinnt!';
   }
+
+  @override
+  String get presetBasketball => 'Basketball';
+
+  @override
+  String get presetFootball => 'Fußball';
+
+  @override
+  String get presetFutsal => 'Futsal';
+
+  @override
+  String get basketballConfigTitle => 'Neues Basketballspiel';
+
+  @override
+  String get footballConfigTitle => 'Neues Fußballspiel';
+
+  @override
+  String get futsalConfigTitle => 'Neues Futsalspiel';
+
+  @override
+  String get teamMatchFormatLabel => 'Format';
+
+  @override
+  String get teamMatchFormatLeague => 'Liga';
+
+  @override
+  String get teamMatchFormatKnockout => 'K.-o.-Runde';
+
+  @override
+  String teamMatchTeamSectionLabel(int n) {
+    return 'Team $n';
+  }
+
+  @override
+  String get teamMatchTeamNameLabel => 'Teamname';
+
+  @override
+  String teamMatchDefaultTeamName(int n) {
+    return 'Team $n';
+  }
+
+  @override
+  String periodLabelQuarter(int n) {
+    return 'V$n';
+  }
+
+  @override
+  String get periodLabelFirstHalf => '1. Halbzeit';
+
+  @override
+  String get periodLabelSecondHalf => '2. Halbzeit';
+
+  @override
+  String overtimeLabel(int n) {
+    return 'Verlängerung $n';
+  }
+
+  @override
+  String addedTimeBadge(int minutes) {
+    return '+$minutes';
+  }
+
+  @override
+  String get undoLastActionLabel => 'Rückgängig';
+
+  @override
+  String get moreActionsButton => 'Mehr';
+
+  @override
+  String get endPeriodManuallyButton => 'Abschnitt beenden';
+
+  @override
+  String get endPeriodDialogTitle => 'Diesen Abschnitt jetzt beenden?';
+
+  @override
+  String get announceAddedTimeButton => 'Nachspielzeit';
+
+  @override
+  String get addedTimeDialogTitle => 'Nachspielzeit';
+
+  @override
+  String addedTimeMinutesOption(int n) {
+    return '+$n Min.';
+  }
+
+  @override
+  String get shootoutLabel => 'Elfmeterschießen';
+
+  @override
+  String get shootoutScoreButton => 'TOR';
+
+  @override
+  String get shootoutMissButton => 'VERSCHOSSEN';
+
+  @override
+  String shootoutNextKickerLabel(String team) {
+    return '$team schießt';
+  }
+
+  @override
+  String shootoutScoreLine(int scoreA, int scoreB) {
+    return 'Elfmeterschießen: $scoreA – $scoreB';
+  }
+
+  @override
+  String get matchDrawResultLabel => 'Unentschieden';
 }

@@ -11,14 +11,19 @@ class _ScorePreset {
   final String route;
 }
 
-/// PlayTap 1.0.0 scope was Score Libre only; Pétanque is now the first
-/// full Sport Pack built on the generic Score Engine (TARGET_SCORE +
-/// TEAM_SCORE, see `playtap-score-engine`). The remaining sports in
-/// docs/SPORT_RULES.md return once SEQUENTIAL_SCORE/SETS/BEST_OF/WIN_BY
-/// ship, not before.
+/// PlayTap 1.0.0 scope was Score Libre only; Pétanque was the first full
+/// Sport Pack built on the generic Score Engine (TARGET_SCORE + TEAM_
+/// SCORE). Basketball/Football/Futsal (Phase Sports 2) are the first Sport
+/// Packs built on the generic Match Engine (periods/clock/overtime/
+/// shootout, composed with the same TEAM_SCORE — see `MatchRule`). The
+/// remaining sports in docs/SPORT_RULES.md return once SEQUENTIAL_SCORE/
+/// SETS/BEST_OF/WIN_BY ship, not before.
 List<_ScorePreset> _presetsOf(AppLocalizations l10n) => [
   _ScorePreset(l10n.presetFreeScore, '/score/free/config'),
   _ScorePreset(l10n.presetPetanque, '/score/petanque/config'),
+  _ScorePreset(l10n.presetBasketball, '/score/basketball/config'),
+  _ScorePreset(l10n.presetFootball, '/score/football/config'),
+  _ScorePreset(l10n.presetFutsal, '/score/futsal/config'),
 ];
 
 class ScorePresetsPage extends StatelessWidget {

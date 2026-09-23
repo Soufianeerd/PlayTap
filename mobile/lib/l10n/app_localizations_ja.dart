@@ -278,4 +278,110 @@ class AppLocalizationsJa extends AppLocalizations {
   String winnerAnnouncement(String name) {
     return '$nameの勝利!';
   }
+
+  @override
+  String get presetBasketball => 'バスケットフットボール';
+
+  @override
+  String get presetFootball => 'サッカー';
+
+  @override
+  String get presetFutsal => 'フットサル';
+
+  @override
+  String get basketballConfigTitle => '新しいバスケットフットボールの試合';
+
+  @override
+  String get footballConfigTitle => '新しいサッカーの試合';
+
+  @override
+  String get futsalConfigTitle => '新しいフットサルの試合';
+
+  @override
+  String get teamMatchFormatLabel => '形式';
+
+  @override
+  String get teamMatchFormatLeague => 'リーグ';
+
+  @override
+  String get teamMatchFormatKnockout => 'ノックアドト';
+
+  @override
+  String teamMatchTeamSectionLabel(int n) {
+    return 'チーム$n';
+  }
+
+  @override
+  String get teamMatchTeamNameLabel => 'チーム名';
+
+  @override
+  String teamMatchDefaultTeamName(int n) {
+    return 'チーム$n';
+  }
+
+  @override
+  String periodLabelQuarter(int n) {
+    return 'Q$n';
+  }
+
+  @override
+  String get periodLabelFirstHalf => '前半';
+
+  @override
+  String get periodLabelSecondHalf => '後半';
+
+  @override
+  String overtimeLabel(int n) {
+    return '延長$n';
+  }
+
+  @override
+  String addedTimeBadge(int minutes) {
+    return '+$minutes';
+  }
+
+  @override
+  String get undoLastActionLabel => '元に戻す';
+
+  @override
+  String get moreActionsButton => 'もっと';
+
+  @override
+  String get endPeriodManuallyButton => 'ピリオドを終了';
+
+  @override
+  String get endPeriodDialogTitle => 'このピリオドを今終了しますか？';
+
+  @override
+  String get announceAddedTimeButton => 'アディショナレタイム';
+
+  @override
+  String get addedTimeDialogTitle => 'アディショナレタイム';
+
+  @override
+  String addedTimeMinutesOption(int n) {
+    return '+$n分';
+  }
+
+  @override
+  String get shootoutLabel => 'PK戦';
+
+  @override
+  String get shootoutScoreButton => '成功';
+
+  @override
+  String get shootoutMissButton => '失敗';
+
+  @override
+  String shootoutNextKickerLabel(String team) {
+    return '$teamのキッカー';
+  }
+
+  @override
+  String shootoutScoreLine(int scoreA, int scoreB) {
+    return 'PK戦：$scoreA – $scoreB';
+  }
+
+  @override
+  String get matchDrawResultLabel => 'ドロー';
 }

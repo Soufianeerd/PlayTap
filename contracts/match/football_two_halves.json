@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "id": "football_two_halves",
+  "engine": "match",
+  "description": "Football: RUNNING_CLOCK never auto-expires \u2014 both halves end only via an explicit PERIOD_ENDED (the referee's whistle), each including some added time beyond the nominal 45:00. Verifies periodIndex advances and each half's clock is measured from its own PERIOD_STARTED.",
+  "config": {
+    "matchRule": {
+      "schemaVersion": 1,
+      "rulesetId": "football.ifab.2026_27",
+      "scoreRule": {
+        "schemaVersion": 1,
+        "mode": "TEAM_SCORE",
+        "sides": [
+          "team_a",
+          "team_b"
+        ],
+        "allowedIncrements": [
+          1
+        ]
+      },
+      "clock": "RUNNING_CLOCK",
+      "periods": [
+        {
+          "index": 0,
+          "durationMs": 2700000
+        },
+        {
+          "index": 1,
+          "durationMs": 2700000
+        }
+      ],
+      "matchEnd": {
+        "drawAllowed": true
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "ps0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 0,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "pe0",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 2820000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps1",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 2820000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 1,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts1",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 2820000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "pe1",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 5580000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    }
+  ],
+  "expected": {
+    "phase": "REGULATION",
+    "periodIndex": 1,
+    "matchEnded": false,
+    "clock": {
+      "status": "COMPLETED",
+      "elapsedMs": 2760000
+    }
+  }
+}

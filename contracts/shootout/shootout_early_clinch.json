@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "id": "shootout_early_clinch",
+  "engine": "shootout",
+  "description": "Early termination: decided before all 5 kicks each once the trailing side's maximum possible remaining score can no longer catch up (team_b's 2 remaining kicks can't overcome a 3-0 deficit).",
+  "config": {
+    "shootoutRule": {
+      "kicksPerRound": 5,
+      "suddenDeath": true
+    },
+    "sideIds": [
+      "team_a",
+      "team_b"
+    ]
+  },
+  "events": [
+    {
+      "id": "a0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    },
+    {
+      "id": "b0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": false
+      }
+    },
+    {
+      "id": "a1",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    },
+    {
+      "id": "b1",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": false
+      }
+    },
+    {
+      "id": "a2",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    },
+    {
+      "id": "b2",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_b",
+        "scored": false
+      }
+    },
+    {
+      "id": "a3",
+      "originDevice": "phone",
+      "originSequence": 7,
+      "tOffsetMs": 0,
+      "type": "SHOOTOUT_ATTEMPT",
+      "payload": {
+        "side": "team_a",
+        "scored": true
+      }
+    }
+  ],
+  "expected": {
+    "scores": {
+      "team_a": 3,
+      "team_b": 0
+    },
+    "decided": true,
+    "winner": "team_a",
+    "attemptsCount": 6
+  }
+}

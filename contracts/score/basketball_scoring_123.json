@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "basketball_scoring_123",
+  "engine": "score",
+  "description": "Basketball-style TEAM_SCORE: +1/+2/+3 all accepted, no target (manual end only, the match/period/overtime engine decides the end, never a score number). An out-of-range amount is ignored, not fatal.",
+  "config": {
+    "schemaVersion": 1,
+    "mode": "TEAM_SCORE",
+    "sides": [
+      "team_a",
+      "team_b"
+    ],
+    "allowedIncrements": [
+      1,
+      2,
+      3
+    ]
+  },
+  "events": [
+    {
+      "id": "e1",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "team_a",
+        "amount": 2
+      }
+    },
+    {
+      "id": "e2",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 1000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "team_b",
+        "amount": 3
+      }
+    },
+    {
+      "id": "e3",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 2000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "team_a",
+        "amount": 1
+      }
+    },
+    {
+      "id": "e4",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 3000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "team_a",
+        "amount": 5
+      }
+    }
+  ],
+  "expected": {
+    "scores": {
+      "team_a": 3,
+      "team_b": 3
+    },
+    "matchComplete": false,
+    "winner": null,
+    "appliedEventCount": 3
+  }
+}

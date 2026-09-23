@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "id": "basketball_four_quarters",
+  "engine": "match",
+  "description": "Basketball: Q1 through Q4 played in full via the STOPPED_CLOCK auto-expiry pairing (TIMER_COMPLETED + PERIOD_ENDED). Verifies the clock resets to a fresh 10:00 at each PERIOD_STARTED and periodIndex advances 0->3. The controller's overtime/shootout decision is out of scope here (see decideNextPhase's own unit tests) \u2014 this only verifies MatchEngine.replay's period/clock bookkeeping.",
+  "config": {
+    "matchRule": {
+      "schemaVersion": 1,
+      "rulesetId": "basketball.fiba.2024",
+      "scoreRule": {
+        "schemaVersion": 1,
+        "mode": "TEAM_SCORE",
+        "sides": [
+          "team_a",
+          "team_b"
+        ],
+        "allowedIncrements": [
+          1,
+          2,
+          3
+        ]
+      },
+      "clock": "STOPPED_CLOCK",
+      "periods": [
+        {
+          "index": 0,
+          "durationMs": 600000
+        },
+        {
+          "index": 1,
+          "durationMs": 600000
+        },
+        {
+          "index": 2,
+          "durationMs": 600000
+        },
+        {
+          "index": 3,
+          "durationMs": 600000
+        }
+      ],
+      "matchEnd": {
+        "drawAllowed": false
+      },
+      "overtime": {
+        "durationMs": 300000
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "ps0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 0,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "tc0",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 600000,
+      "type": "TIMER_COMPLETED",
+      "payload": {}
+    },
+    {
+      "id": "pe0",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 600000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps1",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 600000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 1,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts1",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 600000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "tc1",
+      "originDevice": "phone",
+      "originSequence": 7,
+      "tOffsetMs": 1200000,
+      "type": "TIMER_COMPLETED",
+      "payload": {}
+    },
+    {
+      "id": "pe1",
+      "originDevice": "phone",
+      "originSequence": 8,
+      "tOffsetMs": 1200000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps2",
+      "originDevice": "phone",
+      "originSequence": 9,
+      "tOffsetMs": 1200000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 2,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts2",
+      "originDevice": "phone",
+      "originSequence": 10,
+      "tOffsetMs": 1200000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "tc2",
+      "originDevice": "phone",
+      "originSequence": 11,
+      "tOffsetMs": 1800000,
+      "type": "TIMER_COMPLETED",
+      "payload": {}
+    },
+    {
+      "id": "pe2",
+      "originDevice": "phone",
+      "originSequence": 12,
+      "tOffsetMs": 1800000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps3",
+      "originDevice": "phone",
+      "originSequence": 13,
+      "tOffsetMs": 1800000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 3,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts3",
+      "originDevice": "phone",
+      "originSequence": 14,
+      "tOffsetMs": 1800000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "tc3",
+      "originDevice": "phone",
+      "originSequence": 15,
+      "tOffsetMs": 2400000,
+      "type": "TIMER_COMPLETED",
+      "payload": {}
+    },
+    {
+      "id": "pe3",
+      "originDevice": "phone",
+      "originSequence": 16,
+      "tOffsetMs": 2400000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    }
+  ],
+  "expected": {
+    "phase": "REGULATION",
+    "periodIndex": 3,
+    "isOvertimePeriod": false,
+    "matchEnded": false,
+    "clock": {
+      "status": "COMPLETED",
+      "elapsedMs": 600000,
+      "remainingMs": 0
+    }
+  }
+}

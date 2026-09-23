@@ -292,4 +292,110 @@ class AppLocalizationsAr extends AppLocalizations {
   String winnerAnnouncement(String name) {
     return '$name يفوز!';
   }
+
+  @override
+  String get presetBasketball => 'كرة السلة';
+
+  @override
+  String get presetFootball => 'كرة القدم';
+
+  @override
+  String get presetFutsal => 'كرة القدم القاعونية';
+
+  @override
+  String get basketballConfigTitle => 'مباراة كرة السلة جديدة';
+
+  @override
+  String get footballConfigTitle => 'مباراة كرة قدم جديدة';
+
+  @override
+  String get futsalConfigTitle => 'مباراة كرة قدم قاعونية جديدة';
+
+  @override
+  String get teamMatchFormatLabel => 'الصيفة';
+
+  @override
+  String get teamMatchFormatLeague => 'دوري';
+
+  @override
+  String get teamMatchFormatKnockout => 'إقصاء مباشر';
+
+  @override
+  String teamMatchTeamSectionLabel(int n) {
+    return 'الفريق $n';
+  }
+
+  @override
+  String get teamMatchTeamNameLabel => 'اسم الفريق';
+
+  @override
+  String teamMatchDefaultTeamName(int n) {
+    return 'الفريق $n';
+  }
+
+  @override
+  String periodLabelQuarter(int n) {
+    return 'ر$n';
+  }
+
+  @override
+  String get periodLabelFirstHalf => 'الشوط الأول';
+
+  @override
+  String get periodLabelSecondHalf => 'الشوط الثاني';
+
+  @override
+  String overtimeLabel(int n) {
+    return 'الوقت الإضافي $n';
+  }
+
+  @override
+  String addedTimeBadge(int minutes) {
+    return '+$minutes';
+  }
+
+  @override
+  String get undoLastActionLabel => 'تراجع';
+
+  @override
+  String get moreActionsButton => 'المزيد';
+
+  @override
+  String get endPeriodManuallyButton => 'إنهاء الشوط';
+
+  @override
+  String get endPeriodDialogTitle => 'هل تريد إنهاء هذا الشوط الآن؟';
+
+  @override
+  String get announceAddedTimeButton => 'الوقت المحتسب';
+
+  @override
+  String get addedTimeDialogTitle => 'الوقت المحتسب';
+
+  @override
+  String addedTimeMinutesOption(int n) {
+    return '+$n د';
+  }
+
+  @override
+  String get shootoutLabel => 'ركلات الترجيح';
+
+  @override
+  String get shootoutScoreButton => 'هدف';
+
+  @override
+  String get shootoutMissButton => 'مضيعة';
+
+  @override
+  String shootoutNextKickerLabel(String team) {
+    return '$team يركل';
+  }
+
+  @override
+  String shootoutScoreLine(int scoreA, int scoreB) {
+    return 'ركلات الترجيح: $scoreA – $scoreB';
+  }
+
+  @override
+  String get matchDrawResultLabel => 'تعادل';
 }

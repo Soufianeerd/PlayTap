@@ -277,6 +277,112 @@ class AppLocalizationsZh extends AppLocalizations {
   String winnerAnnouncement(String name) {
     return '$name获胜！';
   }
+
+  @override
+  String get presetBasketball => '篮球';
+
+  @override
+  String get presetFootball => '足球';
+
+  @override
+  String get presetFutsal => '室内五人制足球';
+
+  @override
+  String get basketballConfigTitle => '新篮球比赛';
+
+  @override
+  String get footballConfigTitle => '新足球比赛';
+
+  @override
+  String get futsalConfigTitle => '新五人制足球比赛';
+
+  @override
+  String get teamMatchFormatLabel => '赛制';
+
+  @override
+  String get teamMatchFormatLeague => '联赛';
+
+  @override
+  String get teamMatchFormatKnockout => '知出赛';
+
+  @override
+  String teamMatchTeamSectionLabel(int n) {
+    return '队伍$n';
+  }
+
+  @override
+  String get teamMatchTeamNameLabel => '队伍名称';
+
+  @override
+  String teamMatchDefaultTeamName(int n) {
+    return '队伍$n';
+  }
+
+  @override
+  String periodLabelQuarter(int n) {
+    return '第$n节';
+  }
+
+  @override
+  String get periodLabelFirstHalf => '上半场';
+
+  @override
+  String get periodLabelSecondHalf => '下半场';
+
+  @override
+  String overtimeLabel(int n) {
+    return '加时$n';
+  }
+
+  @override
+  String addedTimeBadge(int minutes) {
+    return '+$minutes';
+  }
+
+  @override
+  String get undoLastActionLabel => '撤销';
+
+  @override
+  String get moreActionsButton => '更多';
+
+  @override
+  String get endPeriodManuallyButton => '结束本节';
+
+  @override
+  String get endPeriodDialogTitle => '现在结束本节吗？';
+
+  @override
+  String get announceAddedTimeButton => '伤添补时';
+
+  @override
+  String get addedTimeDialogTitle => '伤添补时';
+
+  @override
+  String addedTimeMinutesOption(int n) {
+    return '+$n分钟';
+  }
+
+  @override
+  String get shootoutLabel => '点球大战';
+
+  @override
+  String get shootoutScoreButton => '命中';
+
+  @override
+  String get shootoutMissButton => '未命中';
+
+  @override
+  String shootoutNextKickerLabel(String team) {
+    return '$team下一个主射';
+  }
+
+  @override
+  String shootoutScoreLine(int scoreA, int scoreB) {
+    return '点球大战：$scoreA – $scoreB';
+  }
+
+  @override
+  String get matchDrawResultLabel => '平局';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -552,6 +658,112 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String winnerAnnouncement(String name) {
     return '$name获胜！';
   }
+
+  @override
+  String get presetBasketball => '篮球';
+
+  @override
+  String get presetFootball => '足球';
+
+  @override
+  String get presetFutsal => '室内五人制足球';
+
+  @override
+  String get basketballConfigTitle => '新篮球比赛';
+
+  @override
+  String get footballConfigTitle => '新足球比赛';
+
+  @override
+  String get futsalConfigTitle => '新五人制足球比赛';
+
+  @override
+  String get teamMatchFormatLabel => '赛制';
+
+  @override
+  String get teamMatchFormatLeague => '联赛';
+
+  @override
+  String get teamMatchFormatKnockout => '知出赛';
+
+  @override
+  String teamMatchTeamSectionLabel(int n) {
+    return '队伍$n';
+  }
+
+  @override
+  String get teamMatchTeamNameLabel => '队伍名称';
+
+  @override
+  String teamMatchDefaultTeamName(int n) {
+    return '队伍$n';
+  }
+
+  @override
+  String periodLabelQuarter(int n) {
+    return '第$n节';
+  }
+
+  @override
+  String get periodLabelFirstHalf => '上半场';
+
+  @override
+  String get periodLabelSecondHalf => '下半场';
+
+  @override
+  String overtimeLabel(int n) {
+    return '加时$n';
+  }
+
+  @override
+  String addedTimeBadge(int minutes) {
+    return '+$minutes';
+  }
+
+  @override
+  String get undoLastActionLabel => '撤销';
+
+  @override
+  String get moreActionsButton => '更多';
+
+  @override
+  String get endPeriodManuallyButton => '结束本节';
+
+  @override
+  String get endPeriodDialogTitle => '现在结束本节吗？';
+
+  @override
+  String get announceAddedTimeButton => '伤添补时';
+
+  @override
+  String get addedTimeDialogTitle => '伤添补时';
+
+  @override
+  String addedTimeMinutesOption(int n) {
+    return '+$n分钟';
+  }
+
+  @override
+  String get shootoutLabel => '点球大战';
+
+  @override
+  String get shootoutScoreButton => '命中';
+
+  @override
+  String get shootoutMissButton => '未命中';
+
+  @override
+  String shootoutNextKickerLabel(String team) {
+    return '$team下一个主射';
+  }
+
+  @override
+  String shootoutScoreLine(int scoreA, int scoreB) {
+    return '点球大战：$scoreA – $scoreB';
+  }
+
+  @override
+  String get matchDrawResultLabel => '平局';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -827,4 +1039,110 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String winnerAnnouncement(String name) {
     return '$name獲勝！';
   }
+
+  @override
+  String get presetBasketball => '籃球';
+
+  @override
+  String get presetFootball => '足球';
+
+  @override
+  String get presetFutsal => '室內五人制足球';
+
+  @override
+  String get basketballConfigTitle => '新籃球比賽';
+
+  @override
+  String get footballConfigTitle => '新足球比賽';
+
+  @override
+  String get futsalConfigTitle => '新五人制足球比賽';
+
+  @override
+  String get teamMatchFormatLabel => '賽制';
+
+  @override
+  String get teamMatchFormatLeague => '聯賽';
+
+  @override
+  String get teamMatchFormatKnockout => '知出賽';
+
+  @override
+  String teamMatchTeamSectionLabel(int n) {
+    return '隊伍$n';
+  }
+
+  @override
+  String get teamMatchTeamNameLabel => '隊伍名稱';
+
+  @override
+  String teamMatchDefaultTeamName(int n) {
+    return '隊伍$n';
+  }
+
+  @override
+  String periodLabelQuarter(int n) {
+    return '第$n節';
+  }
+
+  @override
+  String get periodLabelFirstHalf => '上半場';
+
+  @override
+  String get periodLabelSecondHalf => '下半場';
+
+  @override
+  String overtimeLabel(int n) {
+    return '加時$n';
+  }
+
+  @override
+  String addedTimeBadge(int minutes) {
+    return '+$minutes';
+  }
+
+  @override
+  String get undoLastActionLabel => '撤銷';
+
+  @override
+  String get moreActionsButton => '更多';
+
+  @override
+  String get endPeriodManuallyButton => '結束本節';
+
+  @override
+  String get endPeriodDialogTitle => '現在結束本節嗎？';
+
+  @override
+  String get announceAddedTimeButton => '傷添補時';
+
+  @override
+  String get addedTimeDialogTitle => '傷添補時';
+
+  @override
+  String addedTimeMinutesOption(int n) {
+    return '+$n分鐘';
+  }
+
+  @override
+  String get shootoutLabel => '點球大戰';
+
+  @override
+  String get shootoutScoreButton => '命中';
+
+  @override
+  String get shootoutMissButton => '未命中';
+
+  @override
+  String shootoutNextKickerLabel(String team) {
+    return '$team下一個主射';
+  }
+
+  @override
+  String shootoutScoreLine(int scoreA, int scoreB) {
+    return '點球大戰：$scoreA – $scoreB';
+  }
+
+  @override
+  String get matchDrawResultLabel => '平手';
 }

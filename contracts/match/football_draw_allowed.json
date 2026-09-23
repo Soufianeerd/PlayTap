@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "id": "football_draw_allowed",
+  "engine": "match",
+  "description": "Football league match: level after both halves, no overtime/shootout configured, drawAllowed true -> the match ends in a draw rather than the engine forcing a decision. Verifies matchEnded/endReason only (score-levelness itself is the controller's decideNextPhase concern, unit-tested separately).",
+  "config": {
+    "matchRule": {
+      "schemaVersion": 1,
+      "rulesetId": "football.ifab.2026_27",
+      "scoreRule": {
+        "schemaVersion": 1,
+        "mode": "TEAM_SCORE",
+        "sides": [
+          "team_a",
+          "team_b"
+        ],
+        "allowedIncrements": [
+          1
+        ]
+      },
+      "clock": "RUNNING_CLOCK",
+      "periods": [
+        {
+          "index": 0,
+          "durationMs": 2700000
+        },
+        {
+          "index": 1,
+          "durationMs": 2700000
+        }
+      ],
+      "matchEnd": {
+        "drawAllowed": true
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "ps0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 0,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "pe0",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 2700000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps1",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 2700000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 1,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts1",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 2700000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "pe1",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 5400000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "sc1",
+      "originDevice": "phone",
+      "originSequence": 7,
+      "tOffsetMs": 5400000,
+      "type": "SESSION_COMPLETED",
+      "payload": {
+        "endReason": "REGULATION_DRAW"
+      }
+    }
+  ],
+  "expected": {
+    "phase": "ENDED",
+    "matchEnded": true,
+    "endReason": "REGULATION_DRAW"
+  }
+}

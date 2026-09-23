@@ -7,12 +7,17 @@ import '../features/activities/score_presets_page.dart';
 import '../features/activities/timer_presets_page.dart';
 import '../features/history/history_page.dart';
 import '../features/home/home_page.dart';
+import '../features/score_basketball/basketball_config_page.dart';
+import '../features/score_football/football_config_page.dart';
 import '../features/score_free/active_free_score_session_page.dart';
 import '../features/score_free/free_score_config_page.dart';
 import '../features/score_free/score_summary_page.dart';
+import '../features/score_futsal/futsal_config_page.dart';
 import '../features/score_petanque/active_petanque_session_page.dart';
 import '../features/score_petanque/petanque_config_page.dart';
 import '../features/score_petanque/petanque_summary_page.dart';
+import '../features/score_team_match/active_team_match_session_page.dart';
+import '../features/score_team_match/team_match_summary_page.dart';
 import '../features/settings/language_settings_page.dart';
 import '../features/shared/coming_soon_page.dart';
 import '../features/timer/active_timer_session_page.dart';
@@ -103,6 +108,66 @@ GoRouter createAppRouter() => GoRouter(
       path: '/score/petanque/summary/:sessionId',
       builder: (context, state) =>
           PetanqueSummaryPage(sessionId: state.pathParameters['sessionId']!),
+    ),
+    GoRoute(
+      path: '/score/basketball/config',
+      builder: (context, state) => const BasketballConfigPage(),
+    ),
+    GoRoute(
+      path: '/score/basketball/session/:sessionId',
+      builder: (context, state) => ActiveTeamMatchSessionPage(
+        sessionId: state.pathParameters['sessionId']!,
+        summaryRoute:
+            '/score/basketball/summary/${state.pathParameters['sessionId']}',
+      ),
+    ),
+    GoRoute(
+      path: '/score/basketball/summary/:sessionId',
+      builder: (context, state) => TeamMatchSummaryPage(
+        sessionId: state.pathParameters['sessionId']!,
+        sessionRoute:
+            '/score/basketball/session/${state.pathParameters['sessionId']}',
+      ),
+    ),
+    GoRoute(
+      path: '/score/football/config',
+      builder: (context, state) => const FootballConfigPage(),
+    ),
+    GoRoute(
+      path: '/score/football/session/:sessionId',
+      builder: (context, state) => ActiveTeamMatchSessionPage(
+        sessionId: state.pathParameters['sessionId']!,
+        summaryRoute:
+            '/score/football/summary/${state.pathParameters['sessionId']}',
+      ),
+    ),
+    GoRoute(
+      path: '/score/football/summary/:sessionId',
+      builder: (context, state) => TeamMatchSummaryPage(
+        sessionId: state.pathParameters['sessionId']!,
+        sessionRoute:
+            '/score/football/session/${state.pathParameters['sessionId']}',
+      ),
+    ),
+    GoRoute(
+      path: '/score/futsal/config',
+      builder: (context, state) => const FutsalConfigPage(),
+    ),
+    GoRoute(
+      path: '/score/futsal/session/:sessionId',
+      builder: (context, state) => ActiveTeamMatchSessionPage(
+        sessionId: state.pathParameters['sessionId']!,
+        summaryRoute:
+            '/score/futsal/summary/${state.pathParameters['sessionId']}',
+      ),
+    ),
+    GoRoute(
+      path: '/score/futsal/summary/:sessionId',
+      builder: (context, state) => TeamMatchSummaryPage(
+        sessionId: state.pathParameters['sessionId']!,
+        sessionRoute:
+            '/score/futsal/session/${state.pathParameters['sessionId']}',
+      ),
     ),
     GoRoute(
       path: '/activities/timer',

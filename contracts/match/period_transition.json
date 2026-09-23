@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "id": "period_transition",
+  "engine": "match",
+  "description": "The clock resets to a fresh 0 at the next PERIOD_STARTED \u2014 Q1's elapsed time never leaks into Q2, verified at a checkpoint shortly after Q2 begins.",
+  "config": {
+    "matchRule": {
+      "schemaVersion": 1,
+      "rulesetId": "basketball.fiba.2024",
+      "scoreRule": {
+        "schemaVersion": 1,
+        "mode": "TEAM_SCORE",
+        "sides": [
+          "team_a",
+          "team_b"
+        ],
+        "allowedIncrements": [
+          1,
+          2,
+          3
+        ]
+      },
+      "clock": "STOPPED_CLOCK",
+      "periods": [
+        {
+          "index": 0,
+          "durationMs": 600000
+        },
+        {
+          "index": 1,
+          "durationMs": 600000
+        },
+        {
+          "index": 2,
+          "durationMs": 600000
+        },
+        {
+          "index": 3,
+          "durationMs": 600000
+        }
+      ],
+      "matchEnd": {
+        "drawAllowed": false
+      },
+      "overtime": {
+        "durationMs": 300000
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "ps0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 0,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "tc0",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 600000,
+      "type": "TIMER_COMPLETED",
+      "payload": {}
+    },
+    {
+      "id": "pe0",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 600000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps1",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 600000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 1,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts1",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 600000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    }
+  ],
+  "expectedCheckpoints": [
+    {
+      "atMs": 610000,
+      "periodIndex": 1,
+      "clock": {
+        "elapsedMs": 10000
+      }
+    }
+  ]
+}

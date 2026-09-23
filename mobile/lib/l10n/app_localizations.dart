@@ -565,6 +565,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} wins!'**
   String winnerAnnouncement(String name);
+
+  /// Name of the Basketball Score preset. Used as a list item, page title, and history entry label. FIBA is a brand name and is never translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Basketball'**
+  String get presetBasketball;
+
+  /// Name of the Football Score preset. Used as a list item, page title, and history entry label.
+  ///
+  /// In en, this message translates to:
+  /// **'Football'**
+  String get presetFootball;
+
+  /// Name of the Futsal Score preset. Used as a list item, page title, and history entry label. FIFA is a brand name and is never translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Futsal'**
+  String get presetFutsal;
+
+  /// AppBar title for the Basketball configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'New basketball match'**
+  String get basketballConfigTitle;
+
+  /// AppBar title for the Football configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'New football match'**
+  String get footballConfigTitle;
+
+  /// AppBar title for the Futsal configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'New futsal match'**
+  String get futsalConfigTitle;
+
+  /// Label above the league/knockout format selector on the Football/Futsal configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get teamMatchFormatLabel;
+
+  /// Match format: a draw is allowed, no extra time or shootout.
+  ///
+  /// In en, this message translates to:
+  /// **'League'**
+  String get teamMatchFormatLeague;
+
+  /// Match format: extra time then a penalty shootout if still level — never ends in a draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Knockout'**
+  String get teamMatchFormatKnockout;
+
+  /// Section header above one team's name field on the Basketball/Football/Futsal configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'Team {n}'**
+  String teamMatchTeamSectionLabel(int n);
+
+  /// Text field label for a team's name on the Basketball/Football/Futsal configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'Team name'**
+  String get teamMatchTeamNameLabel;
+
+  /// Default, editable placeholder team name pre-filled in a Basketball/Football/Futsal team name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Team {n}'**
+  String teamMatchDefaultTeamName(int n);
+
+  /// Current-period label for a 4-quarter sport (Basketball).
+  ///
+  /// In en, this message translates to:
+  /// **'Q{n}'**
+  String periodLabelQuarter(int n);
+
+  /// Current-period label for the first half of a 2-half sport (Football, Futsal).
+  ///
+  /// In en, this message translates to:
+  /// **'1st half'**
+  String get periodLabelFirstHalf;
+
+  /// Current-period label for the second half of a 2-half sport (Football, Futsal).
+  ///
+  /// In en, this message translates to:
+  /// **'2nd half'**
+  String get periodLabelSecondHalf;
+
+  /// Current-period label while playing overtime/extra time.
+  ///
+  /// In en, this message translates to:
+  /// **'OT {n}'**
+  String overtimeLabel(int n);
+
+  /// Small badge next to a running match clock showing the referee-announced added time, in minutes (e.g. "+3").
+  ///
+  /// In en, this message translates to:
+  /// **'+{minutes}'**
+  String addedTimeBadge(int minutes);
+
+  /// Label on the compact undo bar during an active Basketball/Football/Futsal session (undoes the single most recent point, period ending, or shootout attempt).
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undoLastActionLabel;
+
+  /// Tooltip/label for the secondary actions ("...") menu during an active match.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get moreActionsButton;
+
+  /// Secondary-menu action that manually ends the current period on a running-clock sport (Football) — nothing auto-expires a running clock.
+  ///
+  /// In en, this message translates to:
+  /// **'End period'**
+  String get endPeriodManuallyButton;
+
+  /// Confirmation dialog title before manually ending the current period.
+  ///
+  /// In en, this message translates to:
+  /// **'End this period now?'**
+  String get endPeriodDialogTitle;
+
+  /// Secondary-menu action that opens the added-time picker on a running-clock sport (Football).
+  ///
+  /// In en, this message translates to:
+  /// **'Added time'**
+  String get announceAddedTimeButton;
+
+  /// Title of the dialog offering added-time minute options.
+  ///
+  /// In en, this message translates to:
+  /// **'Added time'**
+  String get addedTimeDialogTitle;
+
+  /// One selectable added-time option, in minutes (e.g. "+3 min").
+  ///
+  /// In en, this message translates to:
+  /// **'+{n} min'**
+  String addedTimeMinutesOption(int n);
+
+  /// Title shown once a match enters the penalty shootout phase.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty shootout'**
+  String get shootoutLabel;
+
+  /// Button recording a scored penalty-shootout attempt.
+  ///
+  /// In en, this message translates to:
+  /// **'SCORED'**
+  String get shootoutScoreButton;
+
+  /// Button recording a missed penalty-shootout attempt.
+  ///
+  /// In en, this message translates to:
+  /// **'MISSED'**
+  String get shootoutMissButton;
+
+  /// Indicates which team takes the next penalty-shootout attempt.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} to kick'**
+  String shootoutNextKickerLabel(String team);
+
+  /// Shootout score shown on the summary page, kept separate from the match score it never merges into.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty shootout: {scoreA} – {scoreB}'**
+  String shootoutScoreLine(int scoreA, int scoreB);
+
+  /// Result label on the summary page when a league match ends level.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw'**
+  String get matchDrawResultLabel;
 }
 
 class _AppLocalizationsDelegate

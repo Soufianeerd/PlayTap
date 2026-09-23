@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "id": "basketball_overtime",
+  "engine": "match",
+  "description": "Basketball: tied at the end of Q4 (the last regulation period), an uncapped OT1 is played and decides it (FIBA Article 8 \u2014 never a draw). Verifies overtimeCount, isOvertimePeriod, and matchEnded/endReason after the controller appends SESSION_COMPLETED.",
+  "config": {
+    "matchRule": {
+      "schemaVersion": 1,
+      "rulesetId": "basketball.fiba.2024",
+      "scoreRule": {
+        "schemaVersion": 1,
+        "mode": "TEAM_SCORE",
+        "sides": [
+          "team_a",
+          "team_b"
+        ],
+        "allowedIncrements": [
+          1,
+          2,
+          3
+        ]
+      },
+      "clock": "STOPPED_CLOCK",
+      "periods": [
+        {
+          "index": 0,
+          "durationMs": 600000
+        },
+        {
+          "index": 1,
+          "durationMs": 600000
+        },
+        {
+          "index": 2,
+          "durationMs": 600000
+        },
+        {
+          "index": 3,
+          "durationMs": 600000
+        }
+      ],
+      "matchEnd": {
+        "drawAllowed": false
+      },
+      "overtime": {
+        "durationMs": 300000
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "ps0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 3,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "tc0",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 600000,
+      "type": "TIMER_COMPLETED",
+      "payload": {}
+    },
+    {
+      "id": "pe0",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 600000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "ps1",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 600000,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "kind": "OVERTIME",
+        "overtimeNumber": 1
+      }
+    },
+    {
+      "id": "ts1",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 600000,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    },
+    {
+      "id": "tc1",
+      "originDevice": "phone",
+      "originSequence": 7,
+      "tOffsetMs": 900000,
+      "type": "TIMER_COMPLETED",
+      "payload": {}
+    },
+    {
+      "id": "pe1",
+      "originDevice": "phone",
+      "originSequence": 8,
+      "tOffsetMs": 900000,
+      "type": "PERIOD_ENDED",
+      "payload": {}
+    },
+    {
+      "id": "sc1",
+      "originDevice": "phone",
+      "originSequence": 9,
+      "tOffsetMs": 900000,
+      "type": "SESSION_COMPLETED",
+      "payload": {
+        "endReason": "DECIDED_IN_OVERTIME"
+      }
+    }
+  ],
+  "expected": {
+    "phase": "ENDED",
+    "isOvertimePeriod": true,
+    "overtimeCount": 1,
+    "matchEnded": true,
+    "endReason": "DECIDED_IN_OVERTIME"
+  }
+}

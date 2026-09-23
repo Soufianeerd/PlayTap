@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "running_clock_background",
+  "engine": "match",
+  "description": "Football RUNNING_CLOCK: elapsed time at a checkpoint far in the future (simulating the app being backgrounded for a long gap) is derived purely from the PERIOD_STARTED/TIMER_STARTED timestamp, never from a ticker \u2014 and never clamped, unlike a STOPPED_CLOCK.",
+  "config": {
+    "matchRule": {
+      "schemaVersion": 1,
+      "rulesetId": "football.ifab.2026_27",
+      "scoreRule": {
+        "schemaVersion": 1,
+        "mode": "TEAM_SCORE",
+        "sides": [
+          "team_a",
+          "team_b"
+        ],
+        "allowedIncrements": [
+          1
+        ]
+      },
+      "clock": "RUNNING_CLOCK",
+      "periods": [
+        {
+          "index": 0,
+          "durationMs": 2700000
+        },
+        {
+          "index": 1,
+          "durationMs": 2700000
+        }
+      ],
+      "matchEnd": {
+        "drawAllowed": true
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "ps0",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "PERIOD_STARTED",
+      "payload": {
+        "periodIndex": 0,
+        "kind": "REGULATION"
+      }
+    },
+    {
+      "id": "ts0",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 0,
+      "type": "TIMER_STARTED",
+      "payload": {}
+    }
+  ],
+  "expectedCheckpoints": [
+    {
+      "atMs": 5000000,
+      "clock": {
+        "status": "RUNNING",
+        "elapsedMs": 5000000,
+        "remainingMs": null
+      }
+    }
+  ]
+}

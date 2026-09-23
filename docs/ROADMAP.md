@@ -314,6 +314,69 @@ moteur/controller mais restait inaccessible à l'utilisateur.
       ACTIVE → COMPLETED (aucune entrée dupliquée à aucune étape). 144
       tests verts, 2 skip inchangés, Free Score non régressé.
 
+## Phase Sports 2 — Basketball, Football, Futsal (statut : fait — score/périodes/clock/overtime/shootout ; timeouts/fautes cumulées différés v2)
+
+Basketball/Football/Futsal, construits sur un nouveau Match Engine
+générique (périodes/clock running-vs-stopped/overtime/shootout) composé
+avec le TEAM_SCORE existant — voir `docs/DATA_MODEL.md` "MatchRule" pour
+l'architecture complète et `docs/SPORT_RULES.md` pour les sources
+officielles (FIBA/IFAB/FIFA) et le périmètre v1 explicitement différé.
+
+- [x] `ClockEngine`/`ClockAccumulator` extrait de `TimerEngine` (refactor
+      pur, zéro changement de comportement — 144 tests existants +
+      fixtures `contracts/timer/*` inchangés avant tout nouveau code).
+- [x] `MatchEngine` (periodStarted/periodEnded/timerStarted/Paused/
+      Resumed/Completed/addedTimeAnnounced/shootoutStarted/Completed/undo/
+      sessionCompleted), `decideNextPhase` (fonction pure, data-driven,
+      aucune branche par sport — gère les deux sémantiques de
+      `OvertimeRule.maxCount`, illimité vs. bloc de longueur fixe).
+- [x] `ShootoutEngine` générique (Football/Football), early clinch et mort
+      subite calculés depuis `kicksPerRound`, jamais un "5" en dur ; undo
+      via filtre-puis-rejoue, comme `MatchEngine`.
+- [x] `SessionEventType` étendu (`PERIOD_STARTED`, `PERIOD_ENDED`,
+      `ADDED_TIME_ANNOUNCED`, `SHOOTOUT_STARTED`, `SHOOTOUT_ATTEMPT`,
+      `SHOOTOUT_COMPLETED`) ; `TIMER_STARTED`/`SESSION_STARTED`/
+      `SESSION_COMPLETED`/`POINT_SCORED`/`UNDO` réutilisés sans changement.
+- [x] Rulesets versionnés (`domain/rulesets/`) : `basketball.fiba.2024`/
+      `2026` (bascule 2026-10-01, valeurs identiques — id seul diffère),
+      `football.ifab.2026_27`, `futsal.fifa.2025_26` — résolus une seule
+      fois à la création de session, persistés en entier dans
+      `SESSION_STARTED`, jamais recalculés plus tard.
+- [x] Scaffold UI partagé `features/score_team_match/` (actions,
+      controller, page active, page résumé, panneau tirs au but) + config
+      minces par sport (`score_basketball/`, `score_football/`,
+      `score_futsal/`) ; routing (9 routes), liste de presets, résolution
+      de reprise de session par `presetRef`.
+- [x] Contrats de conformité : `contracts/match/*` (12 fixtures),
+      `contracts/shootout/*` (4 fixtures), `contracts/score/
+      basketball_scoring_123.json` + 2 nouveaux runners
+      (`match_conformance_test.dart`, `shootout_conformance_test.dart`).
+- [x] Tests : ~100 nouveaux tests (engines purs, rulesets, deriver, 2
+      suites de flow widget bout-en-bout — Basketball config→score→clock→
+      Q1-Q4→égalité→prolongation→décision→résumé ; Football clock qui
+      tourne→temps additionnel→mi-temps manuelle→prolongation bloc
+      fixe→tirs au but→nul/décision). 245 tests verts, 2 skip inchangés
+      (SEQUENTIAL_SCORE, non lié à cette phase).
+- [x] **Décision de scope** : temps morts, fautes cumulées (Futsal),
+      fautes d'équipe/bonus (Basketball) explicitement différés à une
+      phase ultérieure (voir la justification dans
+      `docs/SPORT_RULES.md`) — `MatchRule` ne déclare pas ces champs en
+      v1, les ajouter sera additif.
+- [ ] Build/tests natifs iOS/watchOS — différé à l'environnement macOS
+      CI/build (Xcode non installé localement, décision produit déjà
+      prise — voir CLAUDE.md "Stratégie Apple").
+- [ ] QA runtime Android/simulateur réel — non exécutée dans cette session
+      (pas d'environnement mobile disponible) ; à faire avant release.
+
+Bug trouvé pendant l'implémentation (corrigé avant tout test de flow) :
+`MatchEngine.projectLiveElapsed` reconstruisait un `ClockAccumulator` sans
+`runningSinceMs`, ce qui le faisait lire comme "en pause" plutôt que "en
+cours" pendant la projection en direct — le bouton START/PAUSE restait
+bloqué sur "REPRENDRE" après un tap. Détecté par le premier flow widget
+Basketball (pas par les tests unitaires purs, qui ne testaient pas
+explicitement `projectLiveElapsed` en état "running") ; un test unitaire
+dédié a été ajouté pour ce cas précis avant de continuer.
+
 ## Phase 2 — Presets V1
 
 > Jalon intermédiaire : `docs/RELEASE_0_1.md` couvre déjà un sous-ensemble

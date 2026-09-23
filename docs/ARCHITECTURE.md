@@ -20,6 +20,8 @@
 | Moteur | Rôle | Skill |
 |---|---|---|
 | Score Engine | Scoring générique tous sports | `playtap-score-engine` |
+| Match Engine | Périodes/clock/overtime pour les sports d'équipe (Basketball/Football/Futsal), composé avec le Score Engine — voir `docs/DATA_MODEL.md` "MatchRule" | `playtap-score-engine` |
+| Shootout Engine | Tirs au but génériques (Football/Futsal), séparé du score du match | `playtap-score-engine` |
 | Timer Engine | Temps fiable — monotonic/elapsed en exécution, timestamps pour la persistence | `playtap-timer-engine` |
 | Interval Engine | Cycles work/rest | `playtap-interval-engine` |
 | Workout Sequence Engine | Séquences d'étapes hétérogènes | `playtap-workout-engine` |
@@ -31,6 +33,13 @@ Les moteurs "transverses" (Session, Event, History) ne sont pas des
 modules séparés isolés mais des responsabilités partagées par Score/
 Timer/Interval/Workout — un `ScoreEvent` et une transition d'`Interval`
 utilisent le même mécanisme d'event sourcing sous-jacent.
+
+Le Match Engine ne duplique pas la logique de clock du Timer Engine : les
+deux partagent une primitive pure extraite, `ClockAccumulator`
+(`mobile/lib/domain/engines/clock_engine.dart`) — running-since/
+accumulated-ms, indépendante de tout event/session/sport. Le Timer Engine
+l'utilise pour Stopwatch/Countdown/Lap Timer ; le Match Engine l'utilise
+pour le clock de chaque période, remis à zéro à chaque `PERIOD_STARTED`.
 
 ## Où vit la logique métier
 
