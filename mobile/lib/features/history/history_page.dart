@@ -6,14 +6,18 @@ import '../../app/l10n/timer_mode_label.dart';
 import '../../app/providers/database_providers.dart';
 import '../../app/theme/theme.dart';
 import '../../data/repositories/session_repository.dart';
+import '../../domain/engines/racket_session_deriver.dart';
 import '../../domain/engines/score_session_deriver.dart';
 import '../../domain/engines/timer_deriver.dart';
+import '../../domain/models/racket_session_snapshot.dart';
 import '../../domain/models/score_session_snapshot.dart';
 import '../../domain/models/session_category.dart';
 import '../../domain/models/timer_mode.dart';
 import '../../domain/models/timer_snapshot.dart';
 import '../../l10n/app_localizations.dart';
 import '../score_petanque/petanque_actions.dart' show petanquePresetRef;
+import '../score_tennis/tennis_actions.dart' show tennisPresetRef;
+import '../score_tennis/tennis_set_line.dart';
 
 sealed class HistoryEntry {
   const HistoryEntry();
@@ -31,6 +35,11 @@ class ScoreHistoryEntry extends HistoryEntry {
   final String? presetRef;
 
   bool get isPetanque => presetRef == petanquePresetRef;
+}
+
+class RacketHistoryEntry extends HistoryEntry {
+  const RacketHistoryEntry(this.snapshot);
+  final RacketSessionSnapshot snapshot;
 }
 
 class TimerHistoryEntry extends HistoryEntry {
@@ -60,6 +69,19 @@ final historyProvider = StreamProvider<List<HistoryEntry>>((ref) {
       final events = await eventRepo.getEventsForSession(session.id);
       switch (session.category) {
         case SessionCategory.score:
+          if (session.presetRef == tennisPresetRef) {
+            entries.add(
+              RacketHistoryEntry(
+                deriveRacketSessionSnapshot(
+                  status: session.status,
+                  startedAt: session.startedAt,
+                  endedAt: session.endedAt,
+                  events: events,
+                ),
+              ),
+            );
+            break;
+          }
           entries.add(
             ScoreHistoryEntry(
               deriveScoreSessionSnapshot(
@@ -174,6 +196,14 @@ class _HistoryTile extends StatelessWidget {
             .map((s) => '${s.name} ${snapshot.scoreState.scores[s.id] ?? 0}')
             .join(' — '),
         _durationCaption(l10n, snapshot.startedAt, snapshot.endedAt),
+      ),
+      RacketHistoryEntry(:final snapshot) => (
+        l10n.presetTennis,
+        snapshot.sides
+            .map((s) => '${s.name} ${snapshot.matchState.setsWon[s.id] ?? 0}')
+            .join(' — '),
+        '${snapshot.matchState.completedSets.map((s) => tennisSetLine(l10n, s)).join(', ')} · '
+            '${_durationCaption(l10n, snapshot.startedAt, snapshot.endedAt)}',
       ),
       TimerHistoryEntry(:final snapshot) => (
         timerModeLabel(l10n, snapshot.spec.mode),

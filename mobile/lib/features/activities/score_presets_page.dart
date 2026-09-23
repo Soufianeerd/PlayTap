@@ -15,11 +15,14 @@ class _ScorePreset {
 /// Sport Pack built on the generic Score Engine (TARGET_SCORE + TEAM_
 /// SCORE). Basketball/Football/Futsal (Phase Sports 2) are the first Sport
 /// Packs built on the generic Match Engine (periods/clock/overtime/
-/// shootout, composed with the same TEAM_SCORE — see `MatchRule`). The
-/// remaining sports in docs/SPORT_RULES.md return once SEQUENTIAL_SCORE/
-/// SETS/BEST_OF/WIN_BY ship, not before.
+/// shootout, composed with the same TEAM_SCORE — see `MatchRule`). Tennis
+/// (Racket Core Phase 1) is the first Sport Pack built on the generic
+/// Racket Engine (point/game/set/match, tie-break, service rotation — see
+/// `RacketMatchRule`) — Padel/Table Tennis/Badminton return once their own
+/// V1 config screens ship, not before (CLAUDE.md scope note).
 List<_ScorePreset> _presetsOf(AppLocalizations l10n) => [
   _ScorePreset(l10n.presetFreeScore, '/score/free/config'),
+  _ScorePreset(l10n.presetTennis, '/score/tennis/config'),
   _ScorePreset(l10n.presetPetanque, '/score/petanque/config'),
   _ScorePreset(l10n.presetBasketball, '/score/basketball/config'),
   _ScorePreset(l10n.presetFootball, '/score/football/config'),

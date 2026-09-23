@@ -44,6 +44,7 @@ String activeSessionRoute(SessionSummary session) {
       basketballPresetRef => '/score/basketball/session/${session.id}',
       footballPresetRef => '/score/football/session/${session.id}',
       futsalPresetRef => '/score/futsal/session/${session.id}',
+      tennisPresetRef => '/score/tennis/session/${session.id}',
       _ => '/score/free/session/${session.id}',
     },
     SessionCategory.timer => '/timer/session/${session.id}',

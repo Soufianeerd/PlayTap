@@ -172,6 +172,108 @@ que d'être un type d'event séparé.
 "ShotClockRule/TimeoutRule/TeamFoulRule" ci-dessous pour leur ajout
 (Phase Sports 2B, additif, pas de bump de `schemaVersion`).
 
+## RacketMatchRule — composition pour les sports hiérarchiques (point/jeu/set/match)
+
+Décision architecturale (Racket Core Phase 1, 2026-09) : Tennis ne peut pas
+être exprimé comme un mode `ScoreRule` supplémentaire (`SEQUENTIAL_SCORE`/
+`SETS`/`BEST_OF`/`WIN_BY`, l'approche envisagée par l'audit initial — voir
+`docs/ROADMAP.md`) parce que `ScoreEngine.replay` est un réducteur *plat*
+(`Map<String, int>`) : il ne peut pas représenter une hiérarchie point →
+jeu → set → match sans devenir un second moteur déguisé en `ScoreRule`.
+
+À la place, un nouveau moteur générique et sport-agnostique — le **Racket
+Engine** — est introduit, parallèle à `ScoreEngine`/`MatchEngine`, avec sa
+propre configuration `RacketMatchRule`. Comme `MatchRule`, `RacketMatchRule`
+est **une seule classe concrète**, pas une hiérarchie scellée : la machine
+à états (avancer point → jeu → set, décider un tie-break, faire tourner le
+service) est identique pour tout sport de raquette futur (Padel, Tennis de
+table, Badminton) — seuls les nombres/booléens/sous-règles diffèrent.
+
+```jsonc
+{
+  "schemaVersion": 1,
+  "rulesetId": "tennis.itf.2026",          // opaque, jamais une branche
+  "sides": ["side_a", "side_b"],            // toujours 2, simple ou double
+  "gameScoring": { "schemaVersion": 1, "advantageMode": "ADVANTAGE" }, // ou "NO_AD"
+  "setRule": {
+    "schemaVersion": 1,
+    "gamesToWin": 6,
+    "tieBreak": { "schemaVersion": 1, "target": 7, "winBy": 2 } // absent = set à avantage, jamais de tie-break
+  },
+  "matchFormat": {
+    "schemaVersion": 1,
+    "setsToWin": 2,                         // Best of 3 — jamais supposé "toujours 2" par le moteur
+    "decidingSetFormat": { "type": "REGULAR" } // ou { "type": "MATCH_TIE_BREAK", "matchTieBreak": {...} }
+  },
+  "service": {
+    "schemaVersion": 1,
+    "order": [
+      { "id": "side_a", "sideId": "side_a" },
+      { "id": "side_b", "sideId": "side_b" }
+    ]                                        // 2 entrées en simple, 4 en double (avec playerIndex)
+  }
+}
+```
+
+**Points de conception clés** :
+
+- **Compteurs de points bruts, jamais des labels.** `RacketMatchState.
+  currentGamePoints` stocke des entiers (0,1,2,3,4...), jamais `"15"/"30"/
+  "40"`. Le label affiché ("Deuce", "Advantage") est dérivé séparément par
+  `RacketLabels.gamePointLabels` (côté domaine, sans dépendance à la
+  localisation) puis traduit par l'UI — voir CLAUDE.md brief section 4/21.
+- **Condition de victoire d'un jeu unifiée.** `points >= 4 && (points -
+  adversaire) >= marginNeeded` (marginNeeded = 1 en No-Ad, 2 en Advantage)
+  gère correctement deuce/avantage/no-ad avec une seule formule, sans
+  cas particulier pour deuce — voir `RacketEngine._simulate`.
+- **`SetRule.tieBreak` optionnel** compose "set à tie-break" (présent) vs
+  "set à avantage, aucun plafond" (absent, ex: 9-7) — jamais deux modes
+  scellés séparés.
+- **`decidingSetFormat`** distingue un set décisif classique
+  (`RegularDecidingSet`, utilise `setRule` comme tout autre set) d'un
+  Match Tie-Break (`MatchTieBreakDecidingSet`, remplace entièrement le set
+  décisif par un tie-break à 10 points) — jamais une variante bricolée
+  dans l'UI seule.
+- **Service persisté, jamais recalculé.** `ServiceRule.order` (2 ou 4
+  `ServiceSlot`) est décidé une fois à la création de la session et
+  persisté en entier — le rang de service tourne d'un cran par jeu
+  complété (un tie-break comptant pour exactement un jeu), en continu à
+  travers les sets. Au tie-break, le service alterne : 1 point pour le
+  joueur du rang courant, puis 2 points par bloc en alternance — jamais
+  approximé comme une simple alternance par point (voir CLAUDE.md brief
+  section 13, `RacketEngine._tieBreakServerSlot`).
+- **Undo par re-simulation complète, pas incrémentale.** Contrairement à
+  `ScoreEngine` (un score plat s'annule par simple soustraction),
+  `RacketEngine.replay` résout d'abord la liste ordonnée des points
+  survivants (après application des `UNDO`), puis re-simule la machine à
+  états point/jeu/set/match en entier depuis zéro sur cette liste — seule
+  façon correcte de gérer l'annulation d'un point non-terminal. Reste bon
+  marché : un match de tennis ne dépasse jamais quelques centaines de
+  points. `appliedEventCount` et le blocage des points post-complétion
+  restent calculés en un seul passage sur le flux brut d'events, à
+  l'identique de `ScoreEngine._replayPointBased`.
+- **`GAME_COMPLETED`/`SET_COMPLETED` ne sont jamais persistés** — games et
+  sets sont des projections dérivées des seuls `POINT_SCORED`, exactement
+  comme pour les mènes Pétanque (voir composition `ScoreRule` ci-dessus).
+- **Réutilise `POINT_SCORED`/`UNDO`/`SESSION_STARTED`/`SESSION_COMPLETED`
+  sans changement** — aucun nouveau `SessionEventType` introduit. Le
+  Racket Engine a son propre type d'event pur (`RacketEngineEvent`/
+  `RacketEngineEventType`), miroir exact de `ScoreEngineEvent`, pour la
+  même raison que chaque moteur a le sien (`MatchEngineEvent`,
+  `ShootoutEngineEvent`, ...) : chaque moteur pur ne dépend que de sa
+  propre forme d'event.
+- **Compatibilité Padel évaluée.** Padel (15/30/40, avantage, variantes
+  golden-point, sets, tie-break, double, ordre de service) est exprimable
+  avec exactement les mêmes `RacketMatchRule`/`RacketEngine` par simple
+  configuration (un `AdvantageMode` supplémentaire type "golden point"
+  s'ajouterait comme une troisième valeur d'enum, pas une réécriture) —
+  aucun changement d'architecture requis pour l'ajouter plus tard (non
+  implémenté dans cette phase, voir CLAUDE.md).
+
+`RacketSessionSnapshot` (mirroir de `ScoreSessionSnapshot`/
+`MatchSessionSnapshot`) compose `sides` + `RacketMatchRule` persisté +
+`RacketMatchState` dérivé — voir `domain/engines/racket_session_deriver.dart`.
+
 ## ShotClockRule / TimeoutRule / TeamFoulRule — Phase Sports 2B
 
 Trois champs optionnels supplémentaires sur `MatchRule`

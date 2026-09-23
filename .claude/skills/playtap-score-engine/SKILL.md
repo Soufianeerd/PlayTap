@@ -8,8 +8,18 @@ description: Modèle générique du moteur de score PlayTap (ScoreRule, Competit
 ## Principe
 
 Un seul moteur de score générique, paramétré par sport via `ScoreRule`.
-Aucun sport ne doit avoir sa propre logique de score dupliquée. Padel et
-Tennis partagent la même famille de règles ; seuls les paramètres changent.
+Aucun sport ne doit avoir sa propre logique de score dupliquée.
+
+**Exception délibérée — sports de raquette (Tennis, et plus tard Padel/
+Tennis de table/Badminton) : un second moteur générique, le Racket
+Engine (`RacketMatchRule`/`RacketEngine`), pas un mode `ScoreRule`.**
+Leur hiérarchie point → jeu → set → match ne peut pas s'exprimer dans le
+réducteur plat de `ScoreEngine` (`Map<String, int>`) sans que celui-ci
+devienne un second moteur déguisé — voir docs/DATA_MODEL.md
+"RacketMatchRule" pour la justification complète et
+`domain/engines/racket_engine.dart`. Padel et Tennis partagent la même
+famille de règles Racket Engine ; seuls les paramètres changent (comme
+`ScoreRule` pour tout le reste).
 
 ## Modèle conceptuel
 
@@ -38,15 +48,17 @@ la reprise de session triviaux et fiables.
 |---|---|---|
 | `TARGET_SCORE` | Premier à N points gagne | Tennis de table (11), Badminton (21) |
 | `FREE_SCORE` | Compteur libre sans fin définie | Score libre, pétanque en mode libre |
-| `SEQUENTIAL_SCORE` | Séquence de scoring non numérique | Tennis (0/15/30/40/Game) |
-| `SETS` | Le match se joue en plusieurs manches | Tennis, Padel, Volleyball, Tennis de table |
+| `SEQUENTIAL_SCORE` | Séquence de scoring non numérique | Non implémenté — Tennis n'utilise plus ce mode, voir Racket Engine ci-dessus |
+| `SETS` | Le match se joue en plusieurs manches | Volleyball, Tennis de table (Tennis utilise `SetRule`/Racket Engine, pas ce mode) |
 | `BEST_OF` | Nombre de sets à gagner pour remporter le match | Best of 3, Best of 5 |
 | `WIN_BY` | Écart minimum requis pour gagner | Win by 2 (volleyball, ping-pong) |
 | `TEAM_SCORE` | Scoring par équipe avec incréments variables | Basketball (1/2/3), Football (1 par but) |
 
 Un sport combine plusieurs de ces modes. Exemple :
-- **Tennis** = `SEQUENTIAL_SCORE` (jeu) + `SETS` + `BEST_OF` + `WIN_BY` (deuce)
 - **Basketball** = `TEAM_SCORE` avec incréments {1, 2, 3}, pas de sets
+- **Tennis** (Racket Engine, pas `ScoreRule`) = `GameScoringRule` (0/15/30/
+  40, deuce/avantage ou No-Ad) + `SetRule` (6 jeux, tie-break optionnel) +
+  `MatchFormatRule` (Best of N, set décisif classique ou Match Tie-break)
 - **Pétanque** = `TARGET_SCORE` (13) + `TEAM_SCORE`
 
 ## Règles obligatoires

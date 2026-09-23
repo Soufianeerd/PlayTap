@@ -18,6 +18,9 @@ import '../features/score_petanque/petanque_config_page.dart';
 import '../features/score_petanque/petanque_summary_page.dart';
 import '../features/score_team_match/active_team_match_session_page.dart';
 import '../features/score_team_match/team_match_summary_page.dart';
+import '../features/score_tennis/active_tennis_session_page.dart';
+import '../features/score_tennis/tennis_config_page.dart';
+import '../features/score_tennis/tennis_summary_page.dart';
 import '../features/settings/language_settings_page.dart';
 import '../features/shared/coming_soon_page.dart';
 import '../features/timer/active_timer_session_page.dart';
@@ -108,6 +111,21 @@ GoRouter createAppRouter() => GoRouter(
       path: '/score/petanque/summary/:sessionId',
       builder: (context, state) =>
           PetanqueSummaryPage(sessionId: state.pathParameters['sessionId']!),
+    ),
+    GoRoute(
+      path: '/score/tennis/config',
+      builder: (context, state) => const TennisConfigPage(),
+    ),
+    GoRoute(
+      path: '/score/tennis/session/:sessionId',
+      builder: (context, state) => ActiveTennisSessionPage(
+        sessionId: state.pathParameters['sessionId']!,
+      ),
+    ),
+    GoRoute(
+      path: '/score/tennis/summary/:sessionId',
+      builder: (context, state) =>
+          TennisSummaryPage(sessionId: state.pathParameters['sessionId']!),
     ),
     GoRoute(
       path: '/score/basketball/config',

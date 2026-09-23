@@ -9,3 +9,4 @@ const petanquePresetRef = 'sport.petanque';
 const basketballPresetRef = 'sport.basketball';
 const footballPresetRef = 'sport.football';
 const futsalPresetRef = 'sport.futsal';
+const tennisPresetRef = 'sport.tennis';

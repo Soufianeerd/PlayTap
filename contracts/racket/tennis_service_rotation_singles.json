@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "id": "tennis_service_rotation_singles",
+  "engine": "racket",
+  "description": "Singles: server rotates by exactly one slot every completed game, continuously — after 3 games, the server is order[3 % 2].",
+  "config": {
+    "schemaVersion": 1,
+    "rulesetId": "tennis.itf.2026",
+    "sides": [
+      "side_a",
+      "side_b"
+    ],
+    "gameScoring": {
+      "schemaVersion": 1,
+      "advantageMode": "ADVANTAGE"
+    },
+    "setRule": {
+      "schemaVersion": 1,
+      "gamesToWin": 6,
+      "tieBreak": {
+        "schemaVersion": 1,
+        "target": 7,
+        "winBy": 2
+      }
+    },
+    "matchFormat": {
+      "schemaVersion": 1,
+      "setsToWin": 2,
+      "decidingSetFormat": {
+        "type": "REGULAR"
+      }
+    },
+    "service": {
+      "schemaVersion": 1,
+      "order": [
+        {
+          "id": "side_a",
+          "sideId": "side_a"
+        },
+        {
+          "id": "side_b",
+          "sideId": "side_b"
+        }
+      ]
+    }
+  },
+  "events": [
+    {
+      "id": "e1",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e2",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 1000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e3",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 2000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e4",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 3000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e5",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 4000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e6",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 5000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e7",
+      "originDevice": "phone",
+      "originSequence": 7,
+      "tOffsetMs": 6000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e8",
+      "originDevice": "phone",
+      "originSequence": 8,
+      "tOffsetMs": 7000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e9",
+      "originDevice": "phone",
+      "originSequence": 9,
+      "tOffsetMs": 8000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e10",
+      "originDevice": "phone",
+      "originSequence": 10,
+      "tOffsetMs": 9000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e11",
+      "originDevice": "phone",
+      "originSequence": 11,
+      "tOffsetMs": 10000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e12",
+      "originDevice": "phone",
+      "originSequence": 12,
+      "tOffsetMs": 11000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    }
+  ],
+  "expected": {
+    "currentServerSlotId": "side_b",
+    "gamesWonInCurrentSet": {
+      "side_a": 2,
+      "side_b": 1
+    }
+  }
+}

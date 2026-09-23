@@ -26,7 +26,7 @@ Swift et Kotlin passent tous les mêmes fixtures, ils sont garantis
 
 Chaque fixture est un fichier JSON dans `/contracts/<engine>/<id>.json` où
 `<engine>` ∈ {`score`, `timer`, `interval`, `workout`, `match`,
-`shootout`}.
+`shootout`, `racket`}.
 
 `match` et `shootout` (Phase Sports 2 — Basketball/Football/Futsal)
 peuvent utiliser **soit** `expected` (état final unique, pour vérifier des
@@ -35,6 +35,17 @@ transitions de phase/période — comme `score`) **soit**
 ce que le cas vérifie : une fixture `match` de recovery/pause/background
 veut plusieurs checkpoints temporels, une fixture de transition de phase
 (ex. égalité → prolongation → décision) veut un état final unique.
+
+`racket` (Racket Core Phase 1 — Tennis) suit le même principe avec sa
+propre clé de checkpoint : `expected` pour un état final unique (la
+majorité des cas — jeu/set/tie-break/match/undo/recovery), ou
+`expectedCheckpoints` avec `afterPointNumber` (nombre d'events du tableau
+`events` à rejouer, 1-indexé — pas seulement le nombre de points de
+tie-break, l'index porte sur le tableau `events` complet) plutôt qu'un
+`atMs`, pour vérifier un déroulé point par point sans dépendre d'un état
+final unique (ex. `tennis_tiebreak_service_rotation` : rotation du
+service vérifiée à chaque point du tie-break). Voir
+`mobile/test/conformance/racket_conformance_test.dart`.
 
 Structure commune :
 
@@ -139,3 +150,22 @@ Les nouvelles fixtures `team_score_basic` et `petanque_*` (voir
 `docs/SPORT_RULES.md`, `docs/DATA_MODEL.md`) suivent le même format,
 vérifiées passantes pour de vrai (jamais un ancien `skip` transformé en
 `pass` sans implémentation réelle derrière).
+
+## Note — fixtures Tennis déplacées vers `/contracts/racket` (Racket Core Phase 1)
+
+`contracts/score/tennis_basic_progression.json` et
+`contracts/score/tennis_deuce_advantage.json` avaient été écrites avant
+toute implémentation réelle de Tennis, avec un `config.mode:
+"SEQUENTIAL_SCORE"` jamais implémenté — systématiquement `skip` par
+`score_conformance_test.dart`, jamais un vrai `pass`. La décision
+architecturale de Racket Core Phase 1 (voir `docs/DATA_MODEL.md`
+"RacketMatchRule") retient que Tennis n'est pas un mode `ScoreRule` mais
+un moteur séparé (`RacketMatchRule`/`RacketEngine`) : ces deux fixtures
+ont donc été retirées de `/contracts/score` (leur `config` n'a plus de
+sens dans ce dossier) plutôt qu'adaptées sur place, et remplacées par 16
+fixtures dans le nouveau dossier `/contracts/racket` couvrant les mêmes
+cas (progression 0/15/30/40, deuce/avantage) et bien plus (No-Ad, sets,
+tie-break, Match Tie-break, Best of, service simple/double, rotation de
+service au tie-break, undo à chaque niveau, recovery) — toutes vérifiées
+passantes pour de vrai par `racket_conformance_test.dart`, exactement le
+processus décrit ci-dessus ("Interdiction").

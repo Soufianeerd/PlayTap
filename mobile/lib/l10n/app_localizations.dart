@@ -470,6 +470,162 @@ abstract class AppLocalizations {
   /// **'Automatic'**
   String get languageSystemOption;
 
+  /// Name of the Tennis Score preset. Used as a list item, page title, and history entry label.
+  ///
+  /// In en, this message translates to:
+  /// **'Tennis'**
+  String get presetTennis;
+
+  /// AppBar title for the Tennis configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'New tennis match'**
+  String get tennisConfigTitle;
+
+  /// Label above the Singles/Doubles selector on the Tennis configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get tennisTypeLabel;
+
+  /// Tennis match type: 1 player per side.
+  ///
+  /// In en, this message translates to:
+  /// **'Singles'**
+  String get tennisTypeSingles;
+
+  /// Tennis match type: 2 players per side.
+  ///
+  /// In en, this message translates to:
+  /// **'Doubles'**
+  String get tennisTypeDoubles;
+
+  /// Label above the Advantage/No-Ad selector on the Tennis configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring'**
+  String get tennisScoringLabel;
+
+  /// Standard game scoring: deuce/advantage, win by 2 points.
+  ///
+  /// In en, this message translates to:
+  /// **'Advantage'**
+  String get tennisScoringAdvantage;
+
+  /// No-Ad game scoring: at 40-40 the next point decides the game.
+  ///
+  /// In en, this message translates to:
+  /// **'No-Ad'**
+  String get tennisScoringNoAd;
+
+  /// Label above the match format on the Tennis configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get tennisFormatLabel;
+
+  /// Match format: first to win 2 sets.
+  ///
+  /// In en, this message translates to:
+  /// **'Best of 3'**
+  String get tennisFormatBestOf3;
+
+  /// Label above the deciding-set format selector on the Tennis configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'Deciding set'**
+  String get tennisDecidingSetLabel;
+
+  /// Deciding set format: played as a normal set with a 7-point tie-break at 6-6.
+  ///
+  /// In en, this message translates to:
+  /// **'Tie-break set'**
+  String get tennisDecidingSetTieBreak;
+
+  /// Deciding set format: replaced entirely by a single 10-point Match Tie-break.
+  ///
+  /// In en, this message translates to:
+  /// **'Match Tie-Break 10'**
+  String get tennisDecidingSetMatchTieBreak;
+
+  /// Section header above one side's player name field(s) on the Tennis configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'Side {n}'**
+  String tennisSideSectionLabel(int n);
+
+  /// Label above the initial-server selector on the Tennis configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'First server'**
+  String get tennisInitialServerLabel;
+
+  /// Current set indicator on the active Tennis session screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Set {n}'**
+  String tennisSetLabel(int n);
+
+  /// Row label for the sets-won score row on the active Tennis session screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets'**
+  String get tennisSetsRowLabel;
+
+  /// Row label for the games-won score row on the active Tennis session screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Games'**
+  String get tennisGamesRowLabel;
+
+  /// Row label for the current-game points row on the active Tennis session screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get tennisPointsRowLabel;
+
+  /// Current server indicator, visual and semantics text, on the active Tennis session screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Server: {name}'**
+  String tennisServerLabel(String name);
+
+  /// Non-blocking indicator shown when players are due to change ends.
+  ///
+  /// In en, this message translates to:
+  /// **'Change ends'**
+  String get tennisChangeEndsLabel;
+
+  /// Label/semantics for the undo action on the active Tennis session and Summary screens.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last point'**
+  String get tennisUndoLastPoint;
+
+  /// Point display when both sides are tied at 40-40 or later.
+  ///
+  /// In en, this message translates to:
+  /// **'Deuce'**
+  String get tennisDeuceLabel;
+
+  /// Point display for the side leading by one point past deuce.
+  ///
+  /// In en, this message translates to:
+  /// **'Advantage'**
+  String get tennisAdvantageLabel;
+
+  /// Screen reader label for a side's big tap zone on the active Tennis session screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Point for {name}'**
+  String tennisPointSemantics(String name);
+
+  /// Short label prefixing a Match Tie-break's score in the sets list (Summary/History).
+  ///
+  /// In en, this message translates to:
+  /// **'Match Tie-Break'**
+  String get tennisMatchTieBreakShort;
+
   /// Name of the Pétanque Score preset. Used as a list item, page title, and history entry label.
   ///
   /// In en, this message translates to:

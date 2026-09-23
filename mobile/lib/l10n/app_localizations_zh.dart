@@ -214,6 +214,92 @@ class AppLocalizationsZh extends AppLocalizations {
   String get languageSystemOption => '自动';
 
   @override
+  String get presetTennis => '网球';
+
+  @override
+  String get tennisConfigTitle => '新网球比赛';
+
+  @override
+  String get tennisTypeLabel => '类型';
+
+  @override
+  String get tennisTypeSingles => '单打';
+
+  @override
+  String get tennisTypeDoubles => '双打';
+
+  @override
+  String get tennisScoringLabel => '计分方式';
+
+  @override
+  String get tennisScoringAdvantage => '占先制';
+
+  @override
+  String get tennisScoringNoAd => '无占先制';
+
+  @override
+  String get tennisFormatLabel => '赛制';
+
+  @override
+  String get tennisFormatBestOf3 => '三盘两胜';
+
+  @override
+  String get tennisDecidingSetLabel => '决胜盘';
+
+  @override
+  String get tennisDecidingSetTieBreak => '抢七决胜盘';
+
+  @override
+  String get tennisDecidingSetMatchTieBreak => '10分制胜局';
+
+  @override
+  String tennisSideSectionLabel(int n) {
+    return '$n方';
+  }
+
+  @override
+  String get tennisInitialServerLabel => '首个发球方';
+
+  @override
+  String tennisSetLabel(int n) {
+    return '第$n盘';
+  }
+
+  @override
+  String get tennisSetsRowLabel => '盘数';
+
+  @override
+  String get tennisGamesRowLabel => '局数';
+
+  @override
+  String get tennisPointsRowLabel => '分数';
+
+  @override
+  String tennisServerLabel(String name) {
+    return '发球方：$name';
+  }
+
+  @override
+  String get tennisChangeEndsLabel => '交换场地';
+
+  @override
+  String get tennisUndoLastPoint => '撤销上一分';
+
+  @override
+  String get tennisDeuceLabel => '平分';
+
+  @override
+  String get tennisAdvantageLabel => '占先';
+
+  @override
+  String tennisPointSemantics(String name) {
+    return '$name得分';
+  }
+
+  @override
+  String get tennisMatchTieBreakShort => '制胜局';
+
+  @override
   String get presetPetanque => '滚球';
 
   @override
@@ -623,6 +709,92 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get languageSystemOption => '自动';
 
   @override
+  String get presetTennis => '网球';
+
+  @override
+  String get tennisConfigTitle => '新网球比赛';
+
+  @override
+  String get tennisTypeLabel => '类型';
+
+  @override
+  String get tennisTypeSingles => '单打';
+
+  @override
+  String get tennisTypeDoubles => '双打';
+
+  @override
+  String get tennisScoringLabel => '计分方式';
+
+  @override
+  String get tennisScoringAdvantage => '占先制';
+
+  @override
+  String get tennisScoringNoAd => '无占先制';
+
+  @override
+  String get tennisFormatLabel => '赛制';
+
+  @override
+  String get tennisFormatBestOf3 => '三盘两胜';
+
+  @override
+  String get tennisDecidingSetLabel => '决胜盘';
+
+  @override
+  String get tennisDecidingSetTieBreak => '抢七决胜盘';
+
+  @override
+  String get tennisDecidingSetMatchTieBreak => '10分制胜局';
+
+  @override
+  String tennisSideSectionLabel(int n) {
+    return '$n方';
+  }
+
+  @override
+  String get tennisInitialServerLabel => '首个发球方';
+
+  @override
+  String tennisSetLabel(int n) {
+    return '第$n盘';
+  }
+
+  @override
+  String get tennisSetsRowLabel => '盘数';
+
+  @override
+  String get tennisGamesRowLabel => '局数';
+
+  @override
+  String get tennisPointsRowLabel => '分数';
+
+  @override
+  String tennisServerLabel(String name) {
+    return '发球方：$name';
+  }
+
+  @override
+  String get tennisChangeEndsLabel => '交换场地';
+
+  @override
+  String get tennisUndoLastPoint => '撤销上一分';
+
+  @override
+  String get tennisDeuceLabel => '平分';
+
+  @override
+  String get tennisAdvantageLabel => '占先';
+
+  @override
+  String tennisPointSemantics(String name) {
+    return '$name得分';
+  }
+
+  @override
+  String get tennisMatchTieBreakShort => '制胜局';
+
+  @override
   String get presetPetanque => '滚球';
 
   @override
@@ -1030,6 +1202,92 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get languageSystemOption => '自動';
+
+  @override
+  String get presetTennis => '網球';
+
+  @override
+  String get tennisConfigTitle => '新網球比賽';
+
+  @override
+  String get tennisTypeLabel => '類型';
+
+  @override
+  String get tennisTypeSingles => '單打';
+
+  @override
+  String get tennisTypeDoubles => '雙打';
+
+  @override
+  String get tennisScoringLabel => '計分方式';
+
+  @override
+  String get tennisScoringAdvantage => '佔先制';
+
+  @override
+  String get tennisScoringNoAd => '無佔先制';
+
+  @override
+  String get tennisFormatLabel => '賽制';
+
+  @override
+  String get tennisFormatBestOf3 => '三盤兩勝';
+
+  @override
+  String get tennisDecidingSetLabel => '決勝盤';
+
+  @override
+  String get tennisDecidingSetTieBreak => '搶七決勝盤';
+
+  @override
+  String get tennisDecidingSetMatchTieBreak => '10分制勝局';
+
+  @override
+  String tennisSideSectionLabel(int n) {
+    return '$n方';
+  }
+
+  @override
+  String get tennisInitialServerLabel => '首個發球方';
+
+  @override
+  String tennisSetLabel(int n) {
+    return '第$n盤';
+  }
+
+  @override
+  String get tennisSetsRowLabel => '盤數';
+
+  @override
+  String get tennisGamesRowLabel => '局數';
+
+  @override
+  String get tennisPointsRowLabel => '分數';
+
+  @override
+  String tennisServerLabel(String name) {
+    return '發球方：$name';
+  }
+
+  @override
+  String get tennisChangeEndsLabel => '交換場地';
+
+  @override
+  String get tennisUndoLastPoint => '撤銷上一分';
+
+  @override
+  String get tennisDeuceLabel => '平分';
+
+  @override
+  String get tennisAdvantageLabel => '佔先';
+
+  @override
+  String tennisPointSemantics(String name) {
+    return '$name得分';
+  }
+
+  @override
+  String get tennisMatchTieBreakShort => '制勝局';
 
   @override
   String get presetPetanque => '滾球';

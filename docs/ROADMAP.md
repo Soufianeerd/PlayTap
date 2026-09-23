@@ -429,6 +429,74 @@ détecté).
 - [ ] Build/tests natifs iOS/watchOS et QA runtime Android : mêmes
       réserves que la Phase Sports 2A (environnement non disponible ici).
 
+## Phase Racket Core 1 — Racket Engine générique + Tennis (statut : fait)
+
+- [x] **Racket Engine** générique (`RacketMatchRule`/`RacketEngine`),
+      parallèle à `ScoreEngine`/`MatchEngine` — pas une extension
+      `SEQUENTIAL_SCORE`/`SETS`/`BEST_OF`/`WIN_BY` de `ScoreRule` comme
+      envisagé par l'audit initial (voir Phase 1 ci-dessus) : la
+      hiérarchie point → jeu → set → match ne peut pas s'exprimer dans le
+      réducteur plat de `ScoreEngine` sans en faire un second moteur
+      déguisé. Voir `docs/DATA_MODEL.md` "RacketMatchRule" pour la
+      décision complète.
+- [x] Tennis (`tennis.itf.2026`, ITF *Rules of Tennis 2026*) implémenté
+      de bout en bout : jeu standard (0/15/30/40, deuce/avantage), No-Ad,
+      sets (6 jeux, win-by-2, tie-break optionnel ou set à l'avantage),
+      tie-break (7 points, win-by-2, sans plafond), Match Tie-break (10
+      points, win-by-2), Best of 3 (architecture prête pour Best of 5),
+      simple/double, service (2 ou 4 rangs persistés, rotation continue
+      à travers les sets, rotation officielle au tie-break vérifiée point
+      par point), undo (re-simulation complète depuis la liste de points
+      survivante, jamais une décrémentation), recovery (replay pur, sans
+      état caché), historique, écran de configuration minimal (Type/
+      Scoring/Format/Set décisif), UI active "ultra tap" (grandes zones,
+      haptics, indicateur de changement de côté non-bloquant).
+- [x] `GAME_COMPLETED`/`SET_COMPLETED` jamais persistés — dérivés des
+      seuls `POINT_SCORED`, comme les mènes Pétanque. Aucun nouveau
+      `SessionEventType` : `POINT_SCORED`/`UNDO`/`SESSION_STARTED`/
+      `SESSION_COMPLETED` réutilisés tels quels.
+- [x] `contracts/racket/` : 16 fixtures de conformité (progression de jeu,
+      deuce/avantage, undo, sets 6-4/7-5, tie-break 7-5/8-6, Match
+      Tie-break 10-8/11-9, Best of 3, rotation de service simple/double,
+      rotation de service au tie-break point par point, recovery mi-jeu/
+      mi-tie-break, undo du point de match) + nouveau runner Dart
+      `mobile/test/conformance/racket_conformance_test.dart`. Les deux
+      anciennes fixtures `contracts/score/tennis_*.json` (jamais
+      exécutables, `SEQUENTIAL_SCORE` non implémenté) sont retirées —
+      remplacées par ces fixtures réellement vertes, jamais un ancien
+      `skip` transformé en `pass` sans implémentation derrière.
+- [x] Tests : `racket_engine_test.dart` (jeu standard, No-Ad, sets,
+      tie-break, Match Tie-break, Best of, service simple/double/rotation
+      tie-break, undo à chaque niveau, recovery, JSON round-trip),
+      `tennis_rulesets_test.dart`, `tennis_actions_test.dart`
+      (service order simple/double, mapping deciding-set), 4 flows widget
+      (`tennis_widget_test.dart` : simple avec deuce/avantage/undo jusqu'au
+      résumé et à l'historique, double avec sélecteur de serveur à 4 voies
+      + Match Tie-break 10, abandon manuel, double-tap protégé). 367 tests
+      verts, 0 échec, 0 skip inattendu.
+- [x] Localisation complète (11 locales : ar/de/en/es/fr/it/ja/ko/pt/
+      zh/zh-Hans/zh-Hant) pour toutes les nouvelles chaînes (Tennis,
+      Simple/Double, Avantage/No-Ad, Set/Jeux/Points, Serveur, Deuce,
+      Advantage, Changement de côté, Match Tie-Break...). Les libellés de
+      points (0/15/30/40) sont des numéraux, jamais traduits (voir
+      `docs/LOCALIZATION.md`) — seuls Deuce/Advantage le sont.
+- [x] Revue de compatibilité Padel faite (voir `docs/DATA_MODEL.md`,
+      dernier point de la section RacketMatchRule) : ajoutable par
+      configuration (nouvelle valeur `AdvantageMode` pour la golden
+      point), sans réécriture du moteur — non implémenté dans cette
+      phase.
+- [ ] Padel, Tennis de table, Badminton, Volleyball : hors périmètre de
+      cette phase (voir CLAUDE.md).
+- [ ] Contrat minimal watch (sessionId, ruleset, noms de côté, score
+      affiché courant, sets/jeux, serveur, état tie-break,
+      undoAvailable ; actions `POINT_SIDE_A`/`POINT_SIDE_B`/`UNDO`) —
+      **documenté uniquement** (voir `docs/WATCH_SYNC.md`), aucun code
+      watch dans cette phase.
+- [ ] Build/tests natifs iOS/watchOS et QA runtime réel (simulateur/
+      device) : mêmes réserves que les phases précédentes (environnement
+      non disponible sur cette machine — voir `CLAUDE.md` "Stratégie
+      Apple").
+
 ## Phase 2 — Presets V1
 
 > Jalon intermédiaire : `docs/RELEASE_0_1.md` couvre déjà un sous-ensemble

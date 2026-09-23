@@ -218,6 +218,92 @@ class AppLocalizationsEs extends AppLocalizations {
   String get languageSystemOption => 'Automático';
 
   @override
+  String get presetTennis => 'Tenis';
+
+  @override
+  String get tennisConfigTitle => 'Nuevo partido de tenis';
+
+  @override
+  String get tennisTypeLabel => 'Tipo';
+
+  @override
+  String get tennisTypeSingles => 'Individual';
+
+  @override
+  String get tennisTypeDoubles => 'Dobles';
+
+  @override
+  String get tennisScoringLabel => 'Puntuación';
+
+  @override
+  String get tennisScoringAdvantage => 'Ventaja';
+
+  @override
+  String get tennisScoringNoAd => 'Sin ventaja';
+
+  @override
+  String get tennisFormatLabel => 'Formato';
+
+  @override
+  String get tennisFormatBestOf3 => 'Al mejor de 3';
+
+  @override
+  String get tennisDecidingSetLabel => 'Set decisivo';
+
+  @override
+  String get tennisDecidingSetTieBreak => 'Set con tie-break';
+
+  @override
+  String get tennisDecidingSetMatchTieBreak => 'Tie-break de partido a 10';
+
+  @override
+  String tennisSideSectionLabel(int n) {
+    return 'Lado $n';
+  }
+
+  @override
+  String get tennisInitialServerLabel => 'Primer sacador';
+
+  @override
+  String tennisSetLabel(int n) {
+    return 'Set $n';
+  }
+
+  @override
+  String get tennisSetsRowLabel => 'Sets';
+
+  @override
+  String get tennisGamesRowLabel => 'Juegos';
+
+  @override
+  String get tennisPointsRowLabel => 'Puntos';
+
+  @override
+  String tennisServerLabel(String name) {
+    return 'Saque: $name';
+  }
+
+  @override
+  String get tennisChangeEndsLabel => 'Cambio de lado';
+
+  @override
+  String get tennisUndoLastPoint => 'Deshacer último punto';
+
+  @override
+  String get tennisDeuceLabel => 'Iguales';
+
+  @override
+  String get tennisAdvantageLabel => 'Ventaja';
+
+  @override
+  String tennisPointSemantics(String name) {
+    return 'Punto para $name';
+  }
+
+  @override
+  String get tennisMatchTieBreakShort => 'Tie-break de partido';
+
+  @override
   String get presetPetanque => 'Petanca';
 
   @override

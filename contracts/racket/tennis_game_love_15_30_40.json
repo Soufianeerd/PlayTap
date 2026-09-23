@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "id": "tennis_game_love_15_30_40",
+  "engine": "racket",
+  "description": "Straight 0-15-30-40-Game progression for side_a, verifying point-count sequencing and game-win reset (no deuce).",
+  "config": {
+    "schemaVersion": 1,
+    "rulesetId": "tennis.itf.2026",
+    "sides": [
+      "side_a",
+      "side_b"
+    ],
+    "gameScoring": {
+      "schemaVersion": 1,
+      "advantageMode": "ADVANTAGE"
+    },
+    "setRule": {
+      "schemaVersion": 1,
+      "gamesToWin": 6,
+      "tieBreak": {
+        "schemaVersion": 1,
+        "target": 7,
+        "winBy": 2
+      }
+    },
+    "matchFormat": {
+      "schemaVersion": 1,
+      "setsToWin": 2,
+      "decidingSetFormat": {
+        "type": "REGULAR"
+      }
+    },
+    "service": {
+      "schemaVersion": 1,
+      "order": [
+        {
+          "id": "side_a",
+          "sideId": "side_a"
+        },
+        {
+          "id": "side_b",
+          "sideId": "side_b"
+        }
+      ]
+    }
+  },
+  "events": [
+    {
+      "id": "e1",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e2",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 1000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e3",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 2000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e4",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 3000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    }
+  ],
+  "expected": {
+    "currentGamePoints": {
+      "side_a": 0,
+      "side_b": 0
+    },
+    "gamesWonInCurrentSet": {
+      "side_a": 1,
+      "side_b": 0
+    },
+    "setsWon": {
+      "side_a": 0,
+      "side_b": 0
+    },
+    "currentSetIndex": 0,
+    "isTieBreak": false,
+    "isMatchTieBreak": false,
+    "tieBreakPoints": {
+      "side_a": 0,
+      "side_b": 0
+    },
+    "matchComplete": false,
+    "winner": null
+  }
+}

@@ -1,12 +1,14 @@
 ---
 name: playtap-sports-rules
-description: Presets sportifs V1 de PlayTap (Tennis, Padel, Tennis de table, Badminton, Pétanque, Basketball, Football/Futsal, Volleyball, Score libre) exprimés comme configurations du Score Engine. Utiliser lors de l'ajout ou la modification d'un sport.
+description: Presets sportifs V1 de PlayTap (Tennis, Padel, Tennis de table, Badminton, Pétanque, Basketball, Football/Futsal, Volleyball, Score libre) exprimés comme configurations du Score Engine ou du Racket Engine (sports de raquette). Utiliser lors de l'ajout ou la modification d'un sport.
 ---
 
 # PlayTap — Sports Rules (presets V1)
 
-Chaque sport ci-dessous est un preset de `ScoreRule` (voir
-`playtap-score-engine`) — jamais une implémentation séparée.
+Chaque sport ci-dessous est un preset de `ScoreRule` **ou** du Racket
+Engine (`RacketMatchRule` — Tennis/Padel/Tennis de table/Badminton, voir
+`playtap-score-engine` et `docs/DATA_MODEL.md`) — jamais une
+implémentation séparée par sport.
 
 ## Règle absolue : joueurs ≠ sides de scoring
 
@@ -19,15 +21,22 @@ Chaque sport ci-dessous précise explicitement les deux.
 
 ## Presets V1
 
-### Tennis
+### Tennis — **IMPLEMENTED** (Racket Core Phase 1)
 - Joueurs : 2 (simple) ou 4 (double) → Teams de scoring : toujours 2
-- Scoring : `SEQUENTIAL_SCORE` (0/15/30/40/Game) + `SETS` + `BEST_OF`
-  (3 ou 5) + `WIN_BY` (deuce à 40-40, tie-break configurable)
+- Scoring : moteur dédié **Racket Engine** (`RacketMatchRule`), pas un mode
+  `ScoreRule` — point → jeu (0/15/30/40, deuce/avantage ou No-Ad) → set
+  (6 jeux, tie-break à 6-6 ou set à l'avantage) → match (Best of 3 en V1,
+  Best of 5 supporté par l'architecture). Voir `playtap-score-engine` (le
+  pourquoi de ce moteur séparé) et `docs/DATA_MODEL.md`/`docs/SPORT_RULES.md`
+  pour le détail complet et la source ITF.
 
-### Padel
+### Padel — NOT IMPLEMENTED
 - Joueurs : 4 (toujours double) → Teams de scoring : 2 (2 joueurs/team)
-- Scoring : identique à Tennis (`SEQUENTIAL_SCORE` + `SETS` + `BEST_OF`),
-  avec règle golden point configurable (pas de deuce)
+- Scoring : même famille que Tennis (Racket Engine), avec une règle
+  golden point configurable (pas de deuce) — s'ajouterait comme une
+  valeur `AdvantageMode` supplémentaire, sans réécrire le moteur (revue de
+  compatibilité faite, voir `docs/DATA_MODEL.md`). Non implémenté dans
+  cette phase.
 
 ### Tennis de table
 - Joueurs : 2 (simple) ou 4 (double) → Teams de scoring : 2
@@ -68,30 +77,33 @@ Chaque sport ci-dessous précise explicitement les deux.
 - Scoring : `FREE_SCORE`, incrément configurable, pas de fin automatique
   (l'utilisateur termine manuellement)
 
-## Points d'extension `ScoreRule` identifiés (à traiter en Phase 1, pas avant)
+## Points d'extension identifiés (à traiter au moment de l'implémentation de chaque sport)
 
-Les 9 presets V1 sont tous exprimables avec les modes `ScoreRule`
-existants (voir `playtap-score-engine`). Trois nuances demandent
-cependant une petite extension de `ScoreRule` avant l'implémentation —
-aucune ne justifie un nouveau mode, toutes s'ajoutent comme paramètres
-optionnels aux modes existants :
+Tennis est **implémenté** (Racket Core Phase 1, voir ci-dessus) — sa
+nuance tie-break/deuce/No-Ad est résolue par le Racket Engine dédié
+(`RacketMatchRule`), pas par une extension de `ScoreRule` : c'est
+précisément pourquoi ce nouveau moteur a été introduit plutôt que de
+forcer un mode `ScoreRule` supplémentaire (voir `docs/DATA_MODEL.md`).
+Padel/Tennis de table/Badminton réutiliseront la même famille de moteur
+quand ils seront implémentés — pas construits dans cette phase.
 
-1. **Tennis/Padel — tie-break.** À 6-6 jeux, le jeu décisif se joue en
-   points bruts (0,1,2...7, `WIN_BY` 2) et non avec les labels
-   `SEQUENTIAL_SCORE` (0/15/30/40). `ScoreRule` doit pouvoir décrire un
-   **sous-mode conditionnel** activé à une condition de `SetState`
-   (jeux à 6-6) plutôt qu'un mode unique et fixe pour tout le match.
-2. **Volleyball — cible variable par set.** Le set décisif se joue à 15
+Nuances encore non résolues pour les presets restants :
+
+1. **Volleyball — cible variable par set.** Le set décisif se joue à 15
    points au lieu de 25. `TARGET_SCORE` doit accepter une **cible qui
    dépend de l'index du set en cours** (ex: `targetScore: 25`,
    `finalSetTargetScore: 15`), pas une cible unique pour tout le match.
-3. **Badminton — plafond de marge.** `WIN_BY` (marge 2) doit accepter un
+2. **Badminton — plafond de marge.** `WIN_BY` (marge 2) doit accepter un
    **plafond absolu** (30 points) au-delà duquel un seul point suffit à
-   gagner, même sans marge de 2.
+   gagner, même sans marge de 2. (Badminton et Tennis de table ont aussi
+   des sets — à évaluer au moment de leur implémentation s'ils doivent
+   plutôt rejoindre le Racket Engine, comme Tennis, ou rester sur
+   `ScoreRule` + une extension `SETS`/`BEST_OF` dédiée : pas encore
+   tranché.)
 
-Ces trois points sont à concevoir au moment de l'implémentation du Score
-Engine (Phase 1), pas en Phase 0 — ils ne remettent pas en cause le
-modèle générique, seulement son paramétrage.
+Ces points sont à concevoir au moment de l'implémentation de chaque
+sport, pas avant — ils ne remettent pas en cause le modèle générique,
+seulement son paramétrage.
 
 ## Ajout d'un nouveau sport (V2+)
 

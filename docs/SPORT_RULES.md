@@ -10,7 +10,7 @@
 
 | Sport | Teams de scoring | Modes ScoreRule | Statut |
 |---|---|---|---|
-| Tennis | 2 | SEQUENTIAL_SCORE, SETS, BEST_OF, WIN_BY | NOT IMPLEMENTED |
+| Tennis | 2 | Racket Engine (`RacketMatchRule` — point/jeu/set/match, hors `ScoreRule`) | **IMPLEMENTED** |
 | Padel | 2 | SEQUENTIAL_SCORE, SETS, BEST_OF | NOT IMPLEMENTED |
 | Tennis de table | 2 | TARGET_SCORE, WIN_BY, SETS, BEST_OF | NOT IMPLEMENTED (SETS/BEST_OF manquants) |
 | Badminton | 2 | TARGET_SCORE, WIN_BY, SETS | NOT IMPLEMENTED (SETS manquant) |
@@ -36,7 +36,18 @@ Basketball/Football/Futsal (Phase Sports 2) sont le premier Sport Pack
 complet construit sur le **Match Engine** générique (périodes/clock/
 overtime/shootout, voir `docs/ARCHITECTURE.md` et `MatchRule` dans
 `docs/DATA_MODEL.md`), composé avec le TEAM_SCORE existant — aucun
-nouveau mode `ScoreRule` n'a été nécessaire. Périmètre v1 explicite :
+nouveau mode `ScoreRule` n'a été nécessaire.
+
+Tennis (Racket Core Phase 1) est le premier Sport Pack complet construit
+sur le **Racket Engine** générique (point → jeu → set → match, tie-break,
+rotation de service — voir `docs/ARCHITECTURE.md` et `RacketMatchRule`
+dans `docs/DATA_MODEL.md`) : un moteur entièrement nouveau, pas une
+extension de `ScoreRule`, car la hiérarchie point/jeu/set/match ne peut
+pas s'exprimer dans le réducteur plat de `ScoreEngine`. Padel/Tennis de
+table/Badminton pourront réutiliser la même famille de moteur plus tard
+(non implémenté dans cette phase, voir CLAUDE.md).
+
+Périmètre v1 explicite (Phase Sports 2) :
 
 - Score + périodes + clock + overtime + shootout (Football/Futsal) : **IMPLEMENTED**.
 - Temps additionnel (Football/Futsal) : annonce manuelle (+X min), jamais
@@ -155,6 +166,70 @@ FIFA avant de considérer cette section comme définitive.
   explicitement si une distinction plus fine est ajoutée plus tard.
 - Prolongation/tirs au but : même format que le football (2×5 min de
   prolongation par bloc, tirs au but identiques à `ShootoutRule`).
+
+## Tennis — source officielle
+
+Source : International Tennis Federation (ITF), *Rules of Tennis 2026* —
+https://www.itftennis.com/en/about-us/governance/rules-and-regulations/.
+`rulesetId` persisté : `tennis.itf.2026` (voir
+`mobile/lib/domain/rulesets/tennis_rulesets.dart`). Aucune édition 2027
+n'existe à ce jour ; `rulesetId` reste préparé pour un futur changement de
+règles sans jamais rejouer différemment une session déjà démarrée (voir
+`docs/DATA_MODEL.md`, note sur `RacketMatchRule.rulesetId`).
+
+- **Rule 4 (Score in a Game)** : 0/15/30/40, deuce/avantage — méthode
+  standard (`AdvantageMode.advantage`). Méthode alternative officielle
+  **No-Ad** (`AdvantageMode.noAd`) : à 40-40 ("deciding point"), le point
+  suivant décide le jeu, jamais d'état "avantage". **IMPLEMENTED** — les
+  deux méthodes partagent une seule formule de victoire
+  (`points >= 4 && (points - adversaire) >= marginNeeded`, marge 1 en
+  No-Ad, 2 en Advantage), voir `RacketEngine`.
+- **Rule 5 (Score in a Set)** : premier à 6 jeux, écart de 2 ; tie-break à
+  6-6 (méthode standard, `SetRule.tieBreak` présent). La variante "set à
+  l'avantage" (jamais de tie-break, `SetRule.tieBreak` absent) est
+  supportée par le moteur mais **non exposée** dans l'écran de
+  configuration V1 — voir CLAUDE.md brief section 6.
+- **Tie-break (Rule 5)** : premier à 7 points, écart de 2, sans plafond
+  (8-6, 14-12...). **IMPLEMENTED**.
+- **Match Tie-break** (variante officielle remplaçant le set décisif dans
+  certaines compétitions) : premier à 10 points, écart de 2, sans
+  plafond. Distinct d'un tie-break de set (`RacketMatchState.
+  isMatchTieBreak` vs `isTieBreak`), jamais confondus. **IMPLEMENTED**.
+- **Rule 5 (Score in a Match)** : l'écran V1 propose uniquement **Best of
+  3** (2 sets gagnants) — le moteur ne suppose jamais ce nombre
+  (`MatchFormatRule.setsToWin`), Best of 5 est déjà supporté par
+  l'architecture, seulement pas exposé dans l'UI V1.
+- **Rule 15 (Order of Service) / Rule 16 (doubles)** : le serveur change à
+  chaque jeu complété (un tie-break comptant pour un jeu), en continu à
+  travers les sets, jamais réinitialisé à un changement de set. En
+  double, l'ordre des 4 joueurs est fixé une fois à la création de la
+  session (le côté qui commence, choisi par l'utilisateur ; l'ordre au
+  sein de chaque équipe suit l'ordre du roster) et persisté en entier —
+  **IMPLEMENTED**.
+- **Rotation de service au tie-break** : le joueur dont c'est le tour sert
+  le premier point seul, puis le service alterne par blocs de 2 points
+  (points 2-3, 4-5, 6-7...) — vérifié point par point dans les tests, pas
+  approximé comme une alternance simple par point (CLAUDE.md brief
+  section 13). **IMPLEMENTED**.
+- **Rule 6 (Changement de côté)** : indicateur non-bloquant
+  (`RacketMatchState.changeEndsDue`) — jamais une étape obligatoire de
+  l'UI. Calcul simplifié documenté sur le champ lui-même (parité du
+  nombre total de jeux joués hors tie-break ; multiple positif de 6
+  points pendant un tie-break) — non une modélisation exhaustive de
+  toutes les subtilités de la Rule 6 aux limites de set, une décision
+  volontaire puisque CLAUDE.md n'exige qu'un indicateur, pas un blocage.
+  **IMPLEMENTED** (indicateur uniquement).
+- **Simple / Double** : toujours 2 sides de scoring (`side_a`/`side_b`),
+  1 ou 2 joueurs par side (`ScoringSide.players`) — voir
+  `playtap-sports-rules`. **IMPLEMENTED**.
+- **Undo/recovery** : annule un point ; `RacketEngine.replay` re-simule
+  entièrement la machine à états point/jeu/set/match sur la liste
+  d'events survivante (pas une décrémentation), ce qui rouvre
+  correctement un jeu/set/match tout juste terminé — voir
+  `docs/DATA_MODEL.md`. **IMPLEMENTED**.
+- **Feuille de match complète, classement, warm-up officiel chronométré** :
+  **NOT IMPLEMENTED** (hors périmètre — PlayTap reste un outil de score,
+  pas une feuille d'arbitre officielle).
 
 ## Pétanque — source officielle
 
