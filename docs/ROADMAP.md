@@ -314,7 +314,7 @@ moteur/controller mais restait inaccessible à l'utilisateur.
       ACTIVE → COMPLETED (aucune entrée dupliquée à aucune étape). 144
       tests verts, 2 skip inchangés, Free Score non régressé.
 
-## Phase Sports 2 — Basketball, Football, Futsal (statut : fait — score/périodes/clock/overtime/shootout ; timeouts/fautes cumulées différés v2)
+## Phase Sports 2A — Basketball, Football, Futsal (statut : fait — score/périodes/clock/overtime/shootout ; timeouts/fautes cumulées différés à la Phase Sports 2B ci-dessous)
 
 Basketball/Football/Futsal, construits sur un nouveau Match Engine
 générique (périodes/clock running-vs-stopped/overtime/shootout) composé
@@ -376,6 +376,58 @@ bloqué sur "REPRENDRE" après un tap. Détecté par le premier flow widget
 Basketball (pas par les tests unitaires purs, qui ne testaient pas
 explicitement `projectLiveElapsed` en état "running") ; un test unitaire
 dédié a été ajouté pour ce cas précis avant de continuer.
+
+## Phase Sports 2B — Basketball shot clock/timeouts/fautes, Futsal timeouts/fautes cumulées (statut : fait)
+
+Complète Basketball et Futsal en de vrais tableaux de contrôle sportifs
+(pas seulement score + chrono) — voir `docs/SPORT_RULES.md` pour les
+sources officielles (FIBA Articles 18/29/41, FIFA Futsal Law 7/12/13) et
+`docs/DATA_MODEL.md` "ShotClockRule/TimeoutRule/TeamFoulRule" pour
+l'architecture. Football volontairement non modifié (aucun bug réel
+détecté).
+
+- [x] `ClockAccumulator` réutilisé pour `ShotClockEngine` (Basketball
+      uniquement) — pas de duplication de logique de clock une 3e fois ;
+      `SHOT_CLOCK_STARTED` sert à la fois de premier départ et de reprise
+      après pause (pas de `SHOT_CLOCK_RESUMED` séparé).
+- [x] `TimeoutEngine` — **une seule abstraction générique** pour
+      Basketball (groupement par demi-terrain, sous-plafond des 2
+      dernières minutes du Q4) et Futsal (groupement par période
+      individuelle), aucune branche par sport dans l'engine.
+- [x] `TeamFoulEngine` — **une seule abstraction générique** pour le bonus
+      Basketball (seuil 5) et le DFKSAF Futsal (seuil 6) ; comportement de
+      remise à zéro par période réglementaire / report en prolongation
+      vérifié officiellement identique pour les deux sports, donc câblé
+      dans l'engine plutôt que configurable.
+- [x] Synchronisation game clock / shot clock : mettre en pause le game
+      clock met en pause un shot clock actif dans la même transaction ;
+      reprendre le game clock ne relance **jamais** automatiquement le
+      shot clock (éviterait d'inventer une décision d'arbitre/possession).
+- [x] `MatchRule.shotClockRule`/`timeoutRule`/`teamFoulRule` : trois champs
+      optionnels additifs (pas de bump de `schemaVersion`), `null` pour
+      Football (aucun des trois).
+- [x] UI secondaire compacte (bande shot clock + tuiles fautes/temps
+      morts) sous les contrôles primaires (score/chrono/undo/start-pause),
+      conditionnelle par sport — Football ne montre rien de plus qu'avant.
+      Indicateur bonus jamais uniquement par couleur (texte explicite
+      "BONUS").
+- [x] Undo universel étendu : `SHOT_CLOCK_RESET`, `TIMEOUT_TAKEN`,
+      `TEAM_FOUL_ADDED` rejoignent `resolveMatchUndoTarget`'s ensemble
+      d'events annulables, même mécanisme que score/période/tirs au but.
+- [x] Tests : 3 nouveaux engines purs (33 tests), assertions ruleset
+      étendues, 2 suites de flow widget dédiées (Basketball : shot clock
+      reset 24/14/pause/expiration/synchro game-clock, fautes avec seuil
+      bonus + undo, temps morts avec sous-plafond + undo, recovery
+      complète après restart ; Futsal : absence de shot clock, quota par
+      période avec reset à la période 2, seuil DFKSAF à 6 avec remise à
+      zéro période 2 puis report en prolongation). 297 tests verts, 2 skip
+      inchangés (SEQUENTIAL_SCORE, sans lien).
+- [ ] Fautes de joueur individuelles / feuille de match complète : hors
+      périmètre (voir `docs/SPORT_RULES.md`) — architecture `TeamFoulState`
+      laissée ouverte pour ne pas bloquer un futur `PlayerFoulState`, mais
+      rien construit dans cette phase.
+- [ ] Build/tests natifs iOS/watchOS et QA runtime Android : mêmes
+      réserves que la Phase Sports 2A (environnement non disponible ici).
 
 ## Phase 2 — Presets V1
 

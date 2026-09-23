@@ -383,6 +383,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get matchDrawResultLabel => '平局';
+
+  @override
+  String get shotClockLabel => '进攻时钟';
+
+  @override
+  String get shotClock24Button => '24';
+
+  @override
+  String get shotClock14Button => '14';
+
+  @override
+  String get teamFoulsLabel => '团队犯规';
+
+  @override
+  String get bonusIndicatorLabel => '罚球';
+
+  @override
+  String addTeamFoulSemantics(String team) {
+    return '为$team增加一次团队犯规';
+  }
+
+  @override
+  String get timeoutsLabel => '暂停';
+
+  @override
+  String timeoutsRemainingSemantics(String team, int count) {
+    return '$team：剩余$count次暂停';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -764,6 +792,34 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get matchDrawResultLabel => '平局';
+
+  @override
+  String get shotClockLabel => '进攻时钟';
+
+  @override
+  String get shotClock24Button => '24';
+
+  @override
+  String get shotClock14Button => '14';
+
+  @override
+  String get teamFoulsLabel => '团队犯规';
+
+  @override
+  String get bonusIndicatorLabel => '罚球';
+
+  @override
+  String addTeamFoulSemantics(String team) {
+    return '为$team增加一次团队犯规';
+  }
+
+  @override
+  String get timeoutsLabel => '暂停';
+
+  @override
+  String timeoutsRemainingSemantics(String team, int count) {
+    return '$team：剩余$count次暂停';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1145,4 +1201,32 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get matchDrawResultLabel => '平手';
+
+  @override
+  String get shotClockLabel => '進攻時鐘';
+
+  @override
+  String get shotClock24Button => '24';
+
+  @override
+  String get shotClock14Button => '14';
+
+  @override
+  String get teamFoulsLabel => '團隊犯規';
+
+  @override
+  String get bonusIndicatorLabel => '罰球';
+
+  @override
+  String addTeamFoulSemantics(String team) {
+    return '為$team增加一次團隊犯規';
+  }
+
+  @override
+  String get timeoutsLabel => '暫停';
+
+  @override
+  String timeoutsRemainingSemantics(String team, int count) {
+    return '$team：剩餘$count次暫停';
+  }
 }

@@ -48,6 +48,19 @@ Future<void> pumpTicker(WidgetTester tester) async {
   }
 }
 
+/// The big team-score digits (fontSize 88) — distinguishes a score from
+/// the smaller foul/timeout counters (fontSize 24) now sharing the same
+/// screen and, at small values, the same digits.
+Finder scoreText(String value) => find.byWidgetPredicate(
+  (w) => w is Text && w.data == value && w.style?.fontSize == 88,
+);
+
+/// The summary page's score digits use a smaller size (36) than the
+/// active session's (88).
+Finder summaryScoreText(String value) => find.byWidgetPredicate(
+  (w) => w is Text && w.data == value && w.style?.fontSize == 36,
+);
+
 Future<void> startBasketballSession(WidgetTester tester) async {
   final l10n = l10nOf(tester);
   await tester.tap(find.text(l10n.categoryScore));
@@ -89,7 +102,7 @@ void main() {
     expect(find.text('+1'), findsNWidgets(2));
     expect(find.text('+2'), findsNWidgets(2));
     expect(find.text('+3'), findsNWidgets(2));
-    expect(find.text('0'), findsNWidgets(2));
+    expect(scoreText('0'), findsNWidgets(2));
     expect(find.text(l10n.periodLabelQuarter(1)), findsOneWidget);
     expect(
       find.text('10:00'),
@@ -106,15 +119,15 @@ void main() {
 
     await tester.tap(find.text('+3').first);
     await tester.pumpAndSettle();
-    expect(find.text('3'), findsOneWidget);
+    expect(scoreText('3'), findsOneWidget);
 
     await tester.tap(find.text('+2').last);
     await tester.pumpAndSettle();
-    expect(find.text('2'), findsOneWidget);
+    expect(scoreText('2'), findsOneWidget);
 
     await tester.tap(find.text('+1').first);
     await tester.pumpAndSettle();
-    expect(find.text('4'), findsOneWidget); // 3 + 1.
+    expect(scoreText('4'), findsOneWidget); // 3 + 1.
   });
 
   testWidgets(
@@ -128,8 +141,8 @@ void main() {
       await tester.tap(find.text('+3').first);
       await tester.pumpAndSettle();
 
-      expect(find.text('3'), findsOneWidget);
-      expect(find.text('6'), findsNothing);
+      expect(scoreText('3'), findsOneWidget);
+      expect(scoreText('6'), findsNothing);
     },
   );
 
@@ -158,7 +171,7 @@ void main() {
 
       expect(find.text(l10n.periodLabelQuarter(2)), findsOneWidget);
       expect(find.text('10:00'), findsOneWidget); // fresh Q2 clock.
-      expect(find.text('2'), findsOneWidget); // score survives the transition.
+      expect(scoreText('2'), findsOneWidget); // score survives the transition.
     },
   );
 
@@ -191,7 +204,7 @@ void main() {
 
       // Tied 4-4 after Q4 -> overtime, never a draw.
       expect(find.text(l10n.overtimeLabel(1)), findsOneWidget);
-      expect(find.text('4'), findsNWidgets(2));
+      expect(scoreText('4'), findsNWidgets(2));
       expect(find.text('05:00'), findsOneWidget); // 5-minute OT.
 
       // Decide it in OT: team A scores.
@@ -206,8 +219,8 @@ void main() {
       expect(find.text(l10n.summaryTitle), findsOneWidget);
       final teamA = l10n.teamMatchDefaultTeamName(1);
       expect(find.text(l10n.winnerAnnouncement(teamA)), findsOneWidget);
-      expect(find.text('6'), findsOneWidget); // 4 + 2.
-      expect(find.text('4'), findsOneWidget); // team B unchanged.
+      expect(summaryScoreText('6'), findsOneWidget); // 4 + 2.
+      expect(summaryScoreText('4'), findsOneWidget); // team B unchanged.
 
       final completed = await SessionRepository(db).getCompletedSessions();
       expect(completed, hasLength(1));

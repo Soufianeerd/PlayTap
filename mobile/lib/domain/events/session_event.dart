@@ -2,6 +2,9 @@ import '../models/origin_device.dart';
 import 'match_engine_event.dart';
 import 'score_engine_event.dart';
 import 'shootout_engine_event.dart';
+import 'shot_clock_engine_event.dart';
+import 'team_foul_engine_event.dart';
+import 'timeout_engine_event.dart';
 import 'timer_engine_event.dart';
 
 /// Full set of event types persisted for a session — a superset of
@@ -40,7 +43,13 @@ enum SessionEventType {
   addedTimeAnnounced,
   shootoutStarted,
   shootoutAttempt,
-  shootoutCompleted;
+  shootoutCompleted,
+  shotClockStarted,
+  shotClockPaused,
+  shotClockReset,
+  shotClockCompleted,
+  timeoutTaken,
+  teamFoulAdded;
 
   String toJson() => switch (this) {
     SessionEventType.sessionStarted => 'SESSION_STARTED',
@@ -59,6 +68,12 @@ enum SessionEventType {
     SessionEventType.shootoutStarted => 'SHOOTOUT_STARTED',
     SessionEventType.shootoutAttempt => 'SHOOTOUT_ATTEMPT',
     SessionEventType.shootoutCompleted => 'SHOOTOUT_COMPLETED',
+    SessionEventType.shotClockStarted => 'SHOT_CLOCK_STARTED',
+    SessionEventType.shotClockPaused => 'SHOT_CLOCK_PAUSED',
+    SessionEventType.shotClockReset => 'SHOT_CLOCK_RESET',
+    SessionEventType.shotClockCompleted => 'SHOT_CLOCK_COMPLETED',
+    SessionEventType.timeoutTaken => 'TIMEOUT_TAKEN',
+    SessionEventType.teamFoulAdded => 'TEAM_FOUL_ADDED',
   };
 
   static SessionEventType fromJson(String value) => switch (value) {
@@ -78,6 +93,12 @@ enum SessionEventType {
     'SHOOTOUT_STARTED' => SessionEventType.shootoutStarted,
     'SHOOTOUT_ATTEMPT' => SessionEventType.shootoutAttempt,
     'SHOOTOUT_COMPLETED' => SessionEventType.shootoutCompleted,
+    'SHOT_CLOCK_STARTED' => SessionEventType.shotClockStarted,
+    'SHOT_CLOCK_PAUSED' => SessionEventType.shotClockPaused,
+    'SHOT_CLOCK_RESET' => SessionEventType.shotClockReset,
+    'SHOT_CLOCK_COMPLETED' => SessionEventType.shotClockCompleted,
+    'TIMEOUT_TAKEN' => SessionEventType.timeoutTaken,
+    'TEAM_FOUL_ADDED' => SessionEventType.teamFoulAdded,
     _ => throw ArgumentError.value(value, 'value', 'Unknown SessionEventType'),
   };
 }
@@ -149,5 +170,37 @@ class SessionEvent {
     final engineType = ShootoutEngineEventType.tryFromJson(type.toJson());
     if (engineType == null) return null;
     return ShootoutEngineEvent(id: id, type: engineType, payload: payload);
+  }
+
+  /// Converts to the pure shape `ShotClockEngine.replay` accepts, or null
+  /// for events the Shot Clock Engine doesn't need to see — see
+  /// `domain/engines/shot_clock_engine.dart`.
+  ShotClockEngineEvent? toShotClockEngineEvent() {
+    final engineType = ShotClockEngineEventType.tryFromJson(type.toJson());
+    if (engineType == null) return null;
+    return ShotClockEngineEvent(
+      id: id,
+      type: engineType,
+      atMs: timestamp.millisecondsSinceEpoch,
+      payload: payload,
+    );
+  }
+
+  /// Converts to the pure shape `TimeoutEngine.replay` accepts, or null
+  /// for events the Timeout Engine doesn't need to see — see
+  /// `domain/engines/timeout_engine.dart`.
+  TimeoutEngineEvent? toTimeoutEngineEvent() {
+    final engineType = TimeoutEngineEventType.tryFromJson(type.toJson());
+    if (engineType == null) return null;
+    return TimeoutEngineEvent(id: id, type: engineType, payload: payload);
+  }
+
+  /// Converts to the pure shape `TeamFoulEngine.replay` accepts, or null
+  /// for events the Team Foul Engine doesn't need to see — see
+  /// `domain/engines/team_foul_engine.dart`.
+  TeamFoulEngineEvent? toTeamFoulEngineEvent() {
+    final engineType = TeamFoulEngineEventType.tryFromJson(type.toJson());
+    if (engineType == null) return null;
+    return TeamFoulEngineEvent(id: id, type: engineType, payload: payload);
   }
 }

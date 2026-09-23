@@ -4,6 +4,9 @@ import 'score_state.dart';
 import 'scoring_side.dart';
 import 'session_status.dart';
 import 'shootout_state.dart';
+import 'shot_clock_state.dart';
+import 'team_foul_state.dart';
+import 'timeout_state.dart';
 
 /// A fully-resolved team-match session — sides + derived score + derived
 /// match/clock/period state (+ shootout state once one has started) —
@@ -21,6 +24,9 @@ class MatchSessionSnapshot {
     required this.startedAt,
     required this.endedAt,
     this.shootoutState,
+    this.shotClockState,
+    this.timeoutState,
+    this.teamFoulState,
   });
 
   final List<ScoringSide> sides;
@@ -37,6 +43,16 @@ class MatchSessionSnapshot {
 
   /// Null until a `SHOOTOUT_STARTED` event exists in the log.
   final ShootoutState? shootoutState;
+
+  /// Null when `matchRule.shotClockRule` is absent (Football, Futsal —
+  /// this phase).
+  final ShotClockState? shotClockState;
+
+  /// Null when `matchRule.timeoutRule` is absent (Football, this phase).
+  final TimeoutState? timeoutState;
+
+  /// Null when `matchRule.teamFoulRule` is absent (Football, this phase).
+  final TeamFoulState? teamFoulState;
 
   final SessionStatus status;
   final DateTime startedAt;

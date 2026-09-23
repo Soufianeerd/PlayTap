@@ -104,5 +104,13 @@
   "shootoutMissButton": "VERSCHOSSEN",
   "shootoutNextKickerLabel": "{team} schießt",
   "shootoutScoreLine": "Elfmeterschießen: {scoreA} – {scoreB}",
-  "matchDrawResultLabel": "Unentschieden"
+  "matchDrawResultLabel": "Unentschieden",
+  "shotClockLabel": "Wurfuhr",
+  "shotClock24Button": "24",
+  "shotClock14Button": "14",
+  "teamFoulsLabel": "Mannschaftsfouls",
+  "bonusIndicatorLabel": "BONUS",
+  "addTeamFoulSemantics": "Mannschaftsfoul für {team} hinzufügen",
+  "timeoutsLabel": "Auszeiten",
+  "timeoutsRemainingSemantics": "{team}: {count} Auszeiten übrig"
 }

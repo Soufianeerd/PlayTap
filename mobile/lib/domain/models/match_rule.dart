@@ -4,6 +4,9 @@ import 'overtime_rule.dart';
 import 'period_rule.dart';
 import 'score_rule.dart';
 import 'shootout_rule.dart';
+import 'shot_clock_rule.dart';
+import 'team_foul_rule.dart';
+import 'timeout_rule.dart';
 
 /// Engine-facing match configuration for period/clock/overtime/shootout
 /// sports (Basketball, Football, Futsal) — see `playtap-score-engine`,
@@ -33,6 +36,9 @@ class MatchRule {
     required this.matchEnd,
     this.overtime,
     this.shootout,
+    this.shotClockRule,
+    this.timeoutRule,
+    this.teamFoulRule,
   });
 
   final int schemaVersion;
@@ -66,6 +72,18 @@ class MatchRule {
 
   final MatchEndRule matchEnd;
 
+  /// Null = this sport has no shot clock (Football, Futsal — FIBA-only
+  /// concept in this phase).
+  final ShotClockRule? shotClockRule;
+
+  /// Null = this sport doesn't track timeout quotas (Football, in this
+  /// phase).
+  final TimeoutRule? timeoutRule;
+
+  /// Null = this sport doesn't track team fouls (Football, in this
+  /// phase).
+  final TeamFoulRule? teamFoulRule;
+
   Map<String, dynamic> toJson() => {
     'schemaVersion': schemaVersion,
     'rulesetId': rulesetId,
@@ -75,6 +93,9 @@ class MatchRule {
     'matchEnd': matchEnd.toJson(),
     if (overtime != null) 'overtime': overtime!.toJson(),
     if (shootout != null) 'shootout': shootout!.toJson(),
+    if (shotClockRule != null) 'shotClockRule': shotClockRule!.toJson(),
+    if (timeoutRule != null) 'timeoutRule': timeoutRule!.toJson(),
+    if (teamFoulRule != null) 'teamFoulRule': teamFoulRule!.toJson(),
   };
 
   factory MatchRule.fromJson(Map<String, dynamic> json) => MatchRule(
@@ -99,6 +120,21 @@ class MatchRule {
     shootout: json['shootout'] != null
         ? ShootoutRule.fromJson(
             (json['shootout'] as Map).cast<String, dynamic>(),
+          )
+        : null,
+    shotClockRule: json['shotClockRule'] != null
+        ? ShotClockRule.fromJson(
+            (json['shotClockRule'] as Map).cast<String, dynamic>(),
+          )
+        : null,
+    timeoutRule: json['timeoutRule'] != null
+        ? TimeoutRule.fromJson(
+            (json['timeoutRule'] as Map).cast<String, dynamic>(),
+          )
+        : null,
+    teamFoulRule: json['teamFoulRule'] != null
+        ? TeamFoulRule.fromJson(
+            (json['teamFoulRule'] as Map).cast<String, dynamic>(),
           )
         : null,
   );

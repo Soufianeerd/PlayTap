@@ -104,5 +104,13 @@
   "shootoutMissButton": "失敗",
   "shootoutNextKickerLabel": "{team}のキッカー",
   "shootoutScoreLine": "PK戦：{scoreA} – {scoreB}",
-  "matchDrawResultLabel": "ドロー"
+  "matchDrawResultLabel": "ドロー",
+  "shotClockLabel": "ショットクロック",
+  "shotClock24Button": "24",
+  "shotClock14Button": "14",
+  "teamFoulsLabel": "チームファウル",
+  "bonusIndicatorLabel": "ボーナス",
+  "addTeamFoulSemantics": "{team}にチームファウルを追加",
+  "timeoutsLabel": "タイムアウト",
+  "timeoutsRemainingSemantics": "{team}：残り{count}回のタイムアウト"
 }

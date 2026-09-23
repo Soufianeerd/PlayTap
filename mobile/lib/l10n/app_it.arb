@@ -104,5 +104,13 @@
   "shootoutMissButton": "SBAGLIATO",
   "shootoutNextKickerLabel": "Tira {team}",
   "shootoutScoreLine": "Rigori: {scoreA} – {scoreB}",
-  "matchDrawResultLabel": "Pareggio"
+  "matchDrawResultLabel": "Pareggio",
+  "shotClockLabel": "Tiro ai 24 secondi",
+  "shotClock24Button": "24",
+  "shotClock14Button": "14",
+  "teamFoulsLabel": "Falli di squadra",
+  "bonusIndicatorLabel": "BONUS",
+  "addTeamFoulSemantics": "Aggiungi un fallo di squadra a {team}",
+  "timeoutsLabel": "Time-out",
+  "timeoutsRemainingSemantics": "{team}: {count} time-out rimanenti"
 }

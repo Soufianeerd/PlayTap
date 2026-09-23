@@ -22,6 +22,9 @@
 | Score Engine | Scoring générique tous sports | `playtap-score-engine` |
 | Match Engine | Périodes/clock/overtime pour les sports d'équipe (Basketball/Football/Futsal), composé avec le Score Engine — voir `docs/DATA_MODEL.md` "MatchRule" | `playtap-score-engine` |
 | Shootout Engine | Tirs au but génériques (Football/Futsal), séparé du score du match | `playtap-score-engine` |
+| Shot Clock Engine | Horloge des 24/14 secondes (Basketball uniquement), réutilise `ClockAccumulator` | `playtap-score-engine` |
+| Timeout Engine | Quotas de temps morts génériques (Basketball, Futsal — un seul engine, deux formes de données) | `playtap-score-engine` |
+| Team Foul Engine | Compteur de fautes d'équipe générique (bonus Basketball, DFKSAF Futsal — un seul engine, seuil différent) | `playtap-score-engine` |
 | Timer Engine | Temps fiable — monotonic/elapsed en exécution, timestamps pour la persistence | `playtap-timer-engine` |
 | Interval Engine | Cycles work/rest | `playtap-interval-engine` |
 | Workout Sequence Engine | Séquences d'étapes hétérogènes | `playtap-workout-engine` |

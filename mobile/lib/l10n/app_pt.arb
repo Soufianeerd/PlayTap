@@ -104,5 +104,13 @@
   "shootoutMissButton": "PERDEU",
   "shootoutNextKickerLabel": "{team} cobra",
   "shootoutScoreLine": "Disûte de pênaltis: {scoreA} – {scoreB}",
-  "matchDrawResultLabel": "Empate"
+  "matchDrawResultLabel": "Empate",
+  "shotClockLabel": "Relógio de posse",
+  "shotClock24Button": "24",
+  "shotClock14Button": "14",
+  "teamFoulsLabel": "Faltas de equipe",
+  "bonusIndicatorLabel": "BONUS",
+  "addTeamFoulSemantics": "Adicionar falta de equipe a {team}",
+  "timeoutsLabel": "Tempos técnicos",
+  "timeoutsRemainingSemantics": "{team}: {count} tempos técnicos restantes"
 }

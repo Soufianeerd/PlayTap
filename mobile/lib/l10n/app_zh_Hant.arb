@@ -104,5 +104,13 @@
   "shootoutMissButton": "未命中",
   "shootoutNextKickerLabel": "{team}下一個主射",
   "shootoutScoreLine": "點球大戰：{scoreA} – {scoreB}",
-  "matchDrawResultLabel": "平手"
+  "matchDrawResultLabel": "平手",
+  "shotClockLabel": "進攻時鐘",
+  "shotClock24Button": "24",
+  "shotClock14Button": "14",
+  "teamFoulsLabel": "團隊犯規",
+  "bonusIndicatorLabel": "罰球",
+  "addTeamFoulSemantics": "為{team}增加一次團隊犯規",
+  "timeoutsLabel": "暫停",
+  "timeoutsRemainingSemantics": "{team}：剩餘{count}次暫停"
 }

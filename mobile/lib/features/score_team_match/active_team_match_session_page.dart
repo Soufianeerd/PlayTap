@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/theme.dart';
+import '../../domain/engines/timeout_engine.dart';
 import '../../domain/models/match_clock_kind.dart';
 import '../../domain/models/match_session_snapshot.dart';
 import '../../domain/models/match_state.dart';
+import '../../domain/models/scoring_side.dart';
 import '../../domain/models/session_status.dart';
 import '../../domain/models/timer_status.dart';
 import '../../l10n/app_localizations.dart';
@@ -60,9 +62,11 @@ class _ActiveTeamMatchSessionPageState
 
   void _onTick() {
     if (!mounted) return;
-    ref
-        .read(teamMatchSessionControllerProvider(widget.sessionId).notifier)
-        .checkLivePeriodExpiry();
+    final notifier = ref.read(
+      teamMatchSessionControllerProvider(widget.sessionId).notifier,
+    );
+    notifier.checkLivePeriodExpiry();
+    notifier.checkLiveShotClockExpiry(); // no-op for sports with no shot clock.
     setState(() {}); // repaint only — never mutates match state itself.
   }
 
@@ -306,6 +310,15 @@ class _TeamMatchBody extends ConsumerWidget {
             ],
           ),
         ),
+        if (rule.shotClockRule != null ||
+            rule.teamFoulRule != null ||
+            rule.timeoutRule != null)
+          _SecondaryInfoBar(
+            sessionId: sessionId,
+            view: view,
+            teamA: teamA,
+            teamB: teamB,
+          ),
         Expanded(
           child: Row(
             children: [
@@ -457,6 +470,299 @@ class _TeamScorePanel extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Compact secondary info: shot clock (Basketball), team fouls, timeouts
+/// — all conditionally shown per `MatchRule`, so Football (which has none
+/// of these) renders nothing extra here at all. Kept deliberately small
+/// and below the primary score/clock/undo controls (see the brief section
+/// 8's "priority" layout).
+class _SecondaryInfoBar extends StatelessWidget {
+  const _SecondaryInfoBar({
+    required this.sessionId,
+    required this.view,
+    required this.teamA,
+    required this.teamB,
+  });
+
+  final String sessionId;
+  final MatchSessionSnapshot view;
+  final ScoringSide teamA;
+  final ScoringSide teamB;
+
+  @override
+  Widget build(BuildContext context) {
+    final rule = view.matchRule;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: PlayTapSpacing.lg),
+      child: Column(
+        children: [
+          if (rule.shotClockRule != null)
+            _ShotClockStrip(sessionId: sessionId, view: view),
+          if (rule.teamFoulRule != null || rule.timeoutRule != null)
+            Row(
+              children: [
+                if (rule.teamFoulRule != null)
+                  Expanded(
+                    child: _FoulsTile(
+                      sessionId: sessionId,
+                      view: view,
+                      teamA: teamA,
+                      teamB: teamB,
+                    ),
+                  ),
+                if (rule.teamFoulRule != null && rule.timeoutRule != null)
+                  const SizedBox(width: PlayTapSpacing.sm),
+                if (rule.timeoutRule != null)
+                  Expanded(
+                    child: _TimeoutsTile(
+                      sessionId: sessionId,
+                      view: view,
+                      teamA: teamA,
+                      teamB: teamB,
+                    ),
+                  ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShotClockStrip extends ConsumerWidget {
+  const _ShotClockStrip({required this.sessionId, required this.view});
+
+  final String sessionId;
+  final MatchSessionSnapshot view;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
+    final shotClock = view.shotClockState!;
+    final notifier = ref.read(
+      teamMatchSessionControllerProvider(sessionId).notifier,
+    );
+    final isRunning = shotClock.status == TimerStatus.running;
+    final isExpired = shotClock.status == TimerStatus.completed;
+    final seconds = (shotClock.remainingMs / 1000).ceil();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: PlayTapSpacing.xs),
+      child: Row(
+        children: [
+          Text(
+            l10n.shotClockLabel,
+            style: PlayTapTypography.label.copyWith(color: colors.muted),
+          ),
+          const SizedBox(width: PlayTapSpacing.sm),
+          Semantics(
+            label: l10n.shotClockLabel,
+            child: Text(
+              '$seconds',
+              style: PlayTapTypography.scoreDisplay.copyWith(
+                fontSize: 28,
+                color: isExpired ? colors.danger : colors.foreground,
+              ),
+            ),
+          ),
+          const Spacer(),
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(44, 36),
+              padding: EdgeInsets.zero,
+            ),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              notifier.resetShotClock(const Duration(seconds: 24));
+            },
+            child: Text(l10n.shotClock24Button),
+          ),
+          const SizedBox(width: PlayTapSpacing.xs),
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(44, 36),
+              padding: EdgeInsets.zero,
+            ),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              notifier.resetShotClock(const Duration(seconds: 14));
+            },
+            child: Text(l10n.shotClock14Button),
+          ),
+          IconButton(
+            icon: Icon(isRunning ? Icons.pause : Icons.play_arrow),
+            tooltip: isRunning
+                ? l10n.pauseSemantics
+                : l10n.resumeTimerSemantics,
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              notifier.toggleShotClockPlayPause();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FoulsTile extends ConsumerWidget {
+  const _FoulsTile({
+    required this.sessionId,
+    required this.view,
+    required this.teamA,
+    required this.teamB,
+  });
+
+  final String sessionId;
+  final MatchSessionSnapshot view;
+  final ScoringSide teamA;
+  final ScoringSide teamB;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
+    final foulState = view.teamFoulState!;
+    final notifier = ref.read(
+      teamMatchSessionControllerProvider(sessionId).notifier,
+    );
+
+    Widget sideFoulCount(ScoringSide side) {
+      final count = foulState.countsBySide[side.id] ?? 0;
+      final inBonus = foulState.isInBonus(side.id);
+      return Semantics(
+        button: true,
+        label: l10n.addTeamFoulSemantics(side.name),
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            notifier.addTeamFoul(side.id);
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: PlayTapSpacing.xs,
+              horizontal: PlayTapSpacing.sm,
+            ),
+            child: Column(
+              children: [
+                Text(
+                  '$count',
+                  style: PlayTapTypography.scoreDisplay.copyWith(
+                    fontSize: 24,
+                    color: inBonus ? colors.danger : colors.foreground,
+                  ),
+                ),
+                // Never color-only: an explicit text label backs the bonus
+                // indicator (see the brief section 6's accessibility note).
+                if (inBonus)
+                  Text(
+                    l10n.bonusIndicatorLabel,
+                    style: PlayTapTypography.caption.copyWith(
+                      color: colors.danger,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Text(
+          l10n.teamFoulsLabel,
+          style: PlayTapTypography.label.copyWith(color: colors.muted),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [sideFoulCount(teamA), sideFoulCount(teamB)],
+        ),
+      ],
+    );
+  }
+}
+
+class _TimeoutsTile extends ConsumerWidget {
+  const _TimeoutsTile({
+    required this.sessionId,
+    required this.view,
+    required this.teamA,
+    required this.teamB,
+  });
+
+  final String sessionId;
+  final MatchSessionSnapshot view;
+  final ScoringSide teamA;
+  final ScoringSide teamB;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).playTapColors;
+    final l10n = AppLocalizations.of(context)!;
+    final rule = view.matchRule.timeoutRule!;
+    final timeoutState = view.timeoutState!;
+    final matchState = view.matchState;
+    final notifier = ref.read(
+      teamMatchSessionControllerProvider(sessionId).notifier,
+    );
+
+    int remaining(String sideId) => TimeoutEngine.remainingForSide(
+      rule,
+      timeoutState,
+      sideId,
+      periodIndex: matchState.periodIndex,
+      isOvertimePeriod: matchState.isOvertimePeriod,
+      overtimeCount: matchState.overtimeCount,
+      periodRemainingMs:
+          matchState.clock.remainingMs ?? matchState.clock.elapsedMs,
+    );
+
+    Widget sideTimeouts(ScoringSide side) {
+      final left = remaining(side.id);
+      return Semantics(
+        button: true,
+        label: l10n.timeoutsRemainingSemantics(side.name, left),
+        child: InkWell(
+          onTap: left > 0
+              ? () {
+                  HapticFeedback.selectionClick();
+                  notifier.takeTimeout(side.id);
+                }
+              : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: PlayTapSpacing.xs,
+              horizontal: PlayTapSpacing.sm,
+            ),
+            child: Text(
+              '$left',
+              style: PlayTapTypography.scoreDisplay.copyWith(
+                fontSize: 24,
+                color: left > 0 ? colors.foreground : colors.muted,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Text(
+          l10n.timeoutsLabel,
+          style: PlayTapTypography.label.copyWith(color: colors.muted),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [sideTimeouts(teamA), sideTimeouts(teamB)],
+        ),
+      ],
     );
   }
 }

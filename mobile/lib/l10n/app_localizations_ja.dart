@@ -384,4 +384,32 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get matchDrawResultLabel => 'ドロー';
+
+  @override
+  String get shotClockLabel => 'ショットクロック';
+
+  @override
+  String get shotClock24Button => '24';
+
+  @override
+  String get shotClock14Button => '14';
+
+  @override
+  String get teamFoulsLabel => 'チームファウル';
+
+  @override
+  String get bonusIndicatorLabel => 'ボーナス';
+
+  @override
+  String addTeamFoulSemantics(String team) {
+    return '$teamにチームファウルを追加';
+  }
+
+  @override
+  String get timeoutsLabel => 'タイムアウト';
+
+  @override
+  String timeoutsRemainingSemantics(String team, int count) {
+    return '$team：残り$count回のタイムアウト';
+  }
 }

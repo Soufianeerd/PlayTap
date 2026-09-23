@@ -167,10 +167,80 @@ sport (jamais `BASKETBALL_POINT`/`FOOTBALL_GOAL`) ; la prolongation est
 repliée dans le payload de `PERIOD_STARTED` (`kind: "OVERTIME"`) plutôt
 que d'être un type d'event séparé.
 
-**Périmètre v1 explicitement différé** : temps morts, fautes cumulées
-(Futsal), fautes d'équipe/bonus (Basketball) — voir
-`docs/SPORT_RULES.md`. `MatchRule` ne déclare simplement pas ces champs ;
-les ajouter sera additif (pas de bump de `schemaVersion`).
+**Périmètre v1 (Phase Sports 2A)** : temps morts, fautes cumulées
+(Futsal), fautes d'équipe/bonus (Basketball) étaient différés — voir
+"ShotClockRule/TimeoutRule/TeamFoulRule" ci-dessous pour leur ajout
+(Phase Sports 2B, additif, pas de bump de `schemaVersion`).
+
+## ShotClockRule / TimeoutRule / TeamFoulRule — Phase Sports 2B
+
+Trois champs optionnels supplémentaires sur `MatchRule`
+(`shotClockRule`/`timeoutRule`/`teamFoulRule`, tous `null` par défaut —
+absent = le sport ne l'utilise pas, ex. Football n'a aucun des trois).
+
+```jsonc
+{
+  // ... champs MatchRule existants ...
+  "shotClockRule": { "schemaVersion": 1, "defaultDurationMs": 24000, "shortResetDurationMs": 14000 },
+  "timeoutRule": {
+    "schemaVersion": 1,
+    "regulationGroups": [
+      { "periodIndices": [0, 1], "quota": 2 },
+      { "periodIndices": [2, 3], "quota": 3 }
+    ],
+    "quotaPerOvertimePeriod": 1,
+    "lateGameSubCap": { "periodIndex": 3, "remainingMsThreshold": 120000, "maxUsableWithinWindow": 2 }
+  },
+  "teamFoulRule": { "schemaVersion": 1, "bonusThreshold": 5 }
+}
+```
+
+**`ShotClockRule`/`ShotClockEngine`** (Basketball uniquement — pas de
+concept équivalent en Football/Futsal) réutilise `ClockAccumulator`, la
+même primitive que `TimerEngine`/`MatchEngine` — un `SHOT_CLOCK_RESET`
+démarre une nouvelle "leg" (nouvel accumulateur, nouvelle durée cible
+24000/14000ms), qui continue de tourner immédiatement si l'ancienne
+tournait déjà (un reset arrive à un instant où le ballon est vivant), sans
+jamais deviner la raison du reset (voir `docs/SPORT_RULES.md`). Il n'existe
+pas de `SHOT_CLOCK_RESUMED` séparé : `SHOT_CLOCK_STARTED` sert à la fois de
+premier départ (leg fraîche après un reset) et de reprise après une pause
+— `ShotClockEngine` distingue les deux cas via l'état courant de
+l'accumulateur, jamais via un type d'event différent.
+
+**`TimeoutRule`/`TimeoutEngine`** est **une seule abstraction générique**
+réutilisée par Basketball et Futsal malgré des règles superficiellement
+différentes : `regulationGroups` (liste de `{periodIndices, quota}`)
+exprime aussi bien le groupement par demi-terrain de Basketball (Q1-Q2
+partagent un quota de 2, Q3-Q4 un quota de 3) que le groupement par
+période individuelle de Futsal (chaque période son propre quota de 1) —
+sans aucune branche par sport dans l'engine, uniquement des données
+différentes. `lateGameSubCap` (optionnel) exprime la règle FIBA "au plus 2
+des 3 temps morts de la 2e mi-temps utilisables dans les 2 dernières
+minutes du Q4" comme une contrainte supplémentaire calculée depuis le
+contexte du match au moment de la prise (`TimeoutRecord` capture
+`periodIndex`/`isOvertimePeriod`/`overtimeCount`/
+`periodRemainingMsAtTime` *au moment même* de l'event `TIMEOUT_TAKEN`,
+plutôt que de rejouer `MatchState` en parallèle pour le reconstruire —
+voir `playtap-score-engine` "Déterminisme").
+
+**`TeamFoulRule`/`TeamFoulEngine`** est également **une seule abstraction
+générique** couvrant le bonus Basketball (Article 41, seuil 5) et le
+DFKSAF Futsal (Law 12/13, seuil 6) : seul `bonusThreshold` diffère entre
+les deux rulesets. Le comportement de remise à zéro/report — remis à zéro
+à chaque `PERIOD_STARTED` de type `REGULATION`, jamais remis à zéro en
+entrant en prolongation (`kind: OVERTIME`) — a été vérifié officiellement
+identique pour les deux sports (voir `docs/SPORT_RULES.md`), donc câblé
+directement dans l'engine plutôt que configurable par ruleset ; réutilise
+l'event `PERIOD_STARTED` déjà émis par `MatchEngine` plutôt que d'en
+introduire un second.
+
+**Nouveaux `SessionEventType`** : `SHOT_CLOCK_STARTED`, `SHOT_CLOCK_
+PAUSED`, `SHOT_CLOCK_RESET`, `SHOT_CLOCK_COMPLETED`, `TIMEOUT_TAKEN`,
+`TEAM_FOUL_ADDED`. `UNDO` est réutilisé sans changement pour les trois
+(toujours avec `targetEventId` explicite, jamais le fallback implicite
+"dernier point" réservé à Pétanque/Score libre) ; les trois nouveaux types
+d'action rejoignent `resolveMatchUndoTarget`'s ensemble d'events
+annulables au même titre qu'un point ou une fin de période.
 
 ## Principes
 

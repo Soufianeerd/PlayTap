@@ -388,4 +388,32 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get matchDrawResultLabel => 'Match nul';
+
+  @override
+  String get shotClockLabel => 'Horloge des 24 secondes';
+
+  @override
+  String get shotClock24Button => '24';
+
+  @override
+  String get shotClock14Button => '14';
+
+  @override
+  String get teamFoulsLabel => 'Fautes d\'équipe';
+
+  @override
+  String get bonusIndicatorLabel => 'BONUS';
+
+  @override
+  String addTeamFoulSemantics(String team) {
+    return 'Ajouter une faute d\'équipe à $team';
+  }
+
+  @override
+  String get timeoutsLabel => 'Temps morts';
+
+  @override
+  String timeoutsRemainingSemantics(String team, int count) {
+    return '$team : $count temps morts restants';
+  }
 }

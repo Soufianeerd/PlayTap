@@ -4,6 +4,8 @@ import 'package:uuid/uuid.dart';
 import '../../app/providers/database_providers.dart';
 import '../../domain/engines/match_engine.dart';
 import '../../domain/engines/match_session_deriver.dart';
+import '../../domain/engines/shot_clock_engine.dart';
+import '../../domain/engines/timeout_engine.dart';
 import '../../domain/events/match_engine_event.dart';
 import '../../domain/events/session_event.dart';
 import '../../domain/models/match_clock_kind.dart';
@@ -37,6 +39,13 @@ class TeamMatchSessionController extends AsyncNotifier<MatchSessionSnapshot> {
 
   int? _monotonicAnchorMs;
   int _baselineElapsedMs = 0;
+
+  /// Separate anchor for the shot clock (Basketball) — it doesn't always
+  /// move in lockstep with the match clock (e.g. paused for a reset while
+  /// the game clock keeps running between free throws), so it needs its
+  /// own live-projection baseline.
+  int? _shotClockMonotonicAnchorMs;
+  int _shotClockBaselineElapsedMs = 0;
 
   /// Guards every mutating method against re-entrancy — a rapid double-tap
   /// fires two calls before either `await` settles, which would otherwise
@@ -105,6 +114,12 @@ class TeamMatchSessionController extends AsyncNotifier<MatchSessionSnapshot> {
     _monotonicAnchorMs = snapshot.matchState.clock.status == TimerStatus.running
         ? ref.read(clockProvider).monotonicNowMillis()
         : null;
+
+    _shotClockBaselineElapsedMs = snapshot.shotClockState?.elapsedMs ?? 0;
+    _shotClockMonotonicAnchorMs =
+        snapshot.shotClockState?.status == TimerStatus.running
+        ? ref.read(clockProvider).monotonicNowMillis()
+        : null;
   }
 
   /// Pure, synchronous, never persists anything — call this from the UI's
@@ -113,24 +128,44 @@ class TeamMatchSessionController extends AsyncNotifier<MatchSessionSnapshot> {
   MatchSessionSnapshot? currentDisplaySnapshot() {
     final baseline = state.value;
     if (baseline == null) return null;
-    if (baseline.matchState.clock.status != TimerStatus.running ||
-        _monotonicAnchorMs == null) {
+
+    final matchState =
+        baseline.matchState.clock.status == TimerStatus.running &&
+            _monotonicAnchorMs != null
+        ? MatchEngine.projectLiveElapsed(
+            baseline.matchRule,
+            baseline.matchState,
+            _baselineElapsedMs +
+                (ref.read(clockProvider).monotonicNowMillis() -
+                    _monotonicAnchorMs!),
+          )
+        : baseline.matchState;
+
+    final shotClockState =
+        baseline.shotClockState?.status == TimerStatus.running &&
+            _shotClockMonotonicAnchorMs != null
+        ? ShotClockEngine.projectLiveElapsed(
+            baseline.shotClockState!,
+            _shotClockBaselineElapsedMs +
+                (ref.read(clockProvider).monotonicNowMillis() -
+                    _shotClockMonotonicAnchorMs!),
+          )
+        : baseline.shotClockState;
+
+    if (identical(matchState, baseline.matchState) &&
+        identical(shotClockState, baseline.shotClockState)) {
       return baseline;
     }
-    final liveElapsedMs =
-        _baselineElapsedMs +
-        (ref.read(clockProvider).monotonicNowMillis() - _monotonicAnchorMs!);
-    final projectedMatchState = MatchEngine.projectLiveElapsed(
-      baseline.matchRule,
-      baseline.matchState,
-      liveElapsedMs,
-    );
+
     return MatchSessionSnapshot(
       sides: baseline.sides,
       matchRule: baseline.matchRule,
       scoreState: baseline.scoreState,
-      matchState: projectedMatchState,
+      matchState: matchState,
       shootoutState: baseline.shootoutState,
+      shotClockState: shotClockState,
+      timeoutState: baseline.timeoutState,
+      teamFoulState: baseline.teamFoulState,
       status: baseline.status,
       startedAt: baseline.startedAt,
       endedAt: baseline.endedAt,
@@ -200,6 +235,14 @@ class TeamMatchSessionController extends AsyncNotifier<MatchSessionSnapshot> {
   /// The single START/PAUSE control: starts the clock the first time (no
   /// elapsed time yet this period), resumes it after a pause, or pauses it
   /// while running — one button, like the brief's mockup.
+  ///
+  /// Paired one-way with the shot clock (Basketball): pausing the game
+  /// clock always pauses a currently-running shot clock too, in the same
+  /// transaction — a shot clock that kept ticking while the game is
+  /// paused would be a real bug (see the brief section 4). Resuming the
+  /// game clock deliberately does **not** auto-resume the shot clock —
+  /// that would invent a possession/whistle decision PlayTap never makes
+  /// on its own; the scorer resumes or resets it explicitly.
   Future<void> togglePlayPause() async {
     if (_mutationInFlight) return;
     final current = state.value;
@@ -217,15 +260,44 @@ class TeamMatchSessionController extends AsyncNotifier<MatchSessionSnapshot> {
 
     _mutationInFlight = true;
     try {
-      await ref
-          .read(eventRepositoryProvider)
-          .appendPhoneEvent(
-            id: _uuid.v4(),
-            sessionId: sessionId,
-            type: type,
-            payload: const {},
-            timestamp: ref.read(clockProvider).now(),
-          );
+      final now = ref.read(clockProvider).now();
+      final pausingWhileShotClockRuns =
+          type == SessionEventType.timerPaused &&
+          current.shotClockState?.status == TimerStatus.running;
+
+      if (pausingWhileShotClockRuns) {
+        final db = ref.read(databaseProvider);
+        await db.transaction(() async {
+          await ref
+              .read(eventRepositoryProvider)
+              .appendPhoneEvent(
+                id: _uuid.v4(),
+                sessionId: sessionId,
+                type: type,
+                payload: const {},
+                timestamp: now,
+              );
+          await ref
+              .read(eventRepositoryProvider)
+              .appendPhoneEvent(
+                id: _uuid.v4(),
+                sessionId: sessionId,
+                type: SessionEventType.shotClockPaused,
+                payload: const {},
+                timestamp: now,
+              );
+        });
+      } else {
+        await ref
+            .read(eventRepositoryProvider)
+            .appendPhoneEvent(
+              id: _uuid.v4(),
+              sessionId: sessionId,
+              type: type,
+              payload: const {},
+              timestamp: now,
+            );
+      }
       final snapshot = await _load();
       _resetAnchor(snapshot);
       state = AsyncData(snapshot);
@@ -257,6 +329,189 @@ class TeamMatchSessionController extends AsyncNotifier<MatchSessionSnapshot> {
               'periodIndex': current.matchState.periodIndex,
               'addedTimeMs': addedTime.inMilliseconds,
             },
+            timestamp: ref.read(clockProvider).now(),
+          );
+      final snapshot = await _load();
+      _resetAnchor(snapshot);
+      state = AsyncData(snapshot);
+    } finally {
+      _mutationInFlight = false;
+    }
+  }
+
+  /// Shot clock (Basketball) START/PAUSE — same "started doubles as
+  /// resume" behavior as `ShotClockEngine` itself (see its doc note).
+  Future<void> toggleShotClockPlayPause() async {
+    if (_mutationInFlight) return;
+    final current = state.value;
+    if (current == null || current.status != SessionStatus.active) return;
+    final shotClock = current.shotClockState;
+    if (shotClock == null) return; // no shot clock rule for this sport.
+
+    final type = switch (shotClock.status) {
+      TimerStatus.running => SessionEventType.shotClockPaused,
+      TimerStatus.paused => SessionEventType.shotClockStarted,
+      TimerStatus.completed => null, // buzzer already sounded: reset first.
+    };
+    if (type == null) return;
+
+    _mutationInFlight = true;
+    try {
+      await ref
+          .read(eventRepositoryProvider)
+          .appendPhoneEvent(
+            id: _uuid.v4(),
+            sessionId: sessionId,
+            type: type,
+            payload: const {},
+            timestamp: ref.read(clockProvider).now(),
+          );
+      final snapshot = await _load();
+      _resetAnchor(snapshot);
+      state = AsyncData(snapshot);
+    } finally {
+      _mutationInFlight = false;
+    }
+  }
+
+  /// The "24"/"14" quick-reset actions — PlayTap never infers which one
+  /// applies (see `ShotClockRule`'s doc note); the scorer picks. Starts
+  /// running immediately if the shot clock was already running (a reset
+  /// happens at a live-ball moment), otherwise stays paused at the new
+  /// duration until the scorer taps start.
+  Future<void> resetShotClock(Duration duration) async {
+    if (_mutationInFlight) return;
+    final current = state.value;
+    if (current == null || current.status != SessionStatus.active) return;
+    if (current.shotClockState == null) return;
+
+    _mutationInFlight = true;
+    try {
+      await ref
+          .read(eventRepositoryProvider)
+          .appendPhoneEvent(
+            id: _uuid.v4(),
+            sessionId: sessionId,
+            type: SessionEventType.shotClockReset,
+            payload: {'durationMs': duration.inMilliseconds},
+            timestamp: ref.read(clockProvider).now(),
+          );
+      final snapshot = await _load();
+      _resetAnchor(snapshot);
+      state = AsyncData(snapshot);
+    } finally {
+      _mutationInFlight = false;
+    }
+  }
+
+  /// Called by the UI ticker (Basketball only): if the live shot-clock
+  /// display just crossed into a natural expiry, persist it exactly once
+  /// — purely informational (the buzzer), never forces anything else to
+  /// happen (see `ShotClockRule`'s doc note: the ref/scorer decides what
+  /// comes next, PlayTap only tracks the clock itself).
+  Future<void> checkLiveShotClockExpiry() async {
+    if (_mutationInFlight) return;
+    final current = state.value;
+    final display = currentDisplaySnapshot();
+    if (current == null || display?.shotClockState == null) return;
+    if (current.status != SessionStatus.active) return;
+    if (!ShotClockEngine.isUnfinalizedCompletion(
+      display!.shotClockState!,
+      false,
+    )) {
+      return;
+    }
+    _mutationInFlight = true;
+    try {
+      await ref
+          .read(eventRepositoryProvider)
+          .appendPhoneEvent(
+            id: _uuid.v4(),
+            sessionId: sessionId,
+            type: SessionEventType.shotClockCompleted,
+            payload: const {},
+            timestamp: ref.read(clockProvider).now(),
+          );
+      final snapshot = await _load();
+      _resetAnchor(snapshot);
+      state = AsyncData(snapshot);
+    } finally {
+      _mutationInFlight = false;
+    }
+  }
+
+  /// Records [sideId] taking a timeout — refuses if `TimeoutEngine.
+  /// remainingForSide` says none are left right now (quota enforced by
+  /// the ruleset, never a UI constant). The match context (period/
+  /// overtime/remaining clock) is captured from the live display at this
+  /// exact instant, into the event's own payload — see `TimeoutRecord`'s
+  /// doc note on why replay never needs to re-derive it later.
+  Future<void> takeTimeout(String sideId) async {
+    if (_mutationInFlight) return;
+    final current = state.value;
+    if (current == null || current.status != SessionStatus.active) return;
+    final rule = current.matchRule.timeoutRule;
+    final timeoutState = current.timeoutState;
+    if (rule == null || timeoutState == null) return;
+
+    final display = currentDisplaySnapshot() ?? current;
+    final matchState = display.matchState;
+    final remaining = TimeoutEngine.remainingForSide(
+      rule,
+      timeoutState,
+      sideId,
+      periodIndex: matchState.periodIndex,
+      isOvertimePeriod: matchState.isOvertimePeriod,
+      overtimeCount: matchState.overtimeCount,
+      periodRemainingMs:
+          matchState.clock.remainingMs ?? matchState.clock.elapsedMs,
+    );
+    if (remaining <= 0) return;
+
+    _mutationInFlight = true;
+    try {
+      await ref
+          .read(eventRepositoryProvider)
+          .appendPhoneEvent(
+            id: _uuid.v4(),
+            sessionId: sessionId,
+            type: SessionEventType.timeoutTaken,
+            payload: {
+              'sideId': sideId,
+              'periodIndex': matchState.periodIndex,
+              'isOvertimePeriod': matchState.isOvertimePeriod,
+              'overtimeCount': matchState.overtimeCount,
+              'periodRemainingMsAtTime':
+                  matchState.clock.remainingMs ?? matchState.clock.elapsedMs,
+            },
+            timestamp: ref.read(clockProvider).now(),
+          );
+      final snapshot = await _load();
+      _resetAnchor(snapshot);
+      state = AsyncData(snapshot);
+    } finally {
+      _mutationInFlight = false;
+    }
+  }
+
+  /// Records one team foul on [sideId] — the scorer taps this for
+  /// whatever they judge countable; PlayTap never infers foul type (see
+  /// `TeamFoulRule`'s doc note).
+  Future<void> addTeamFoul(String sideId) async {
+    if (_mutationInFlight) return;
+    final current = state.value;
+    if (current == null || current.status != SessionStatus.active) return;
+    if (current.matchRule.teamFoulRule == null) return;
+
+    _mutationInFlight = true;
+    try {
+      await ref
+          .read(eventRepositoryProvider)
+          .appendPhoneEvent(
+            id: _uuid.v4(),
+            sessionId: sessionId,
+            type: SessionEventType.teamFoulAdded,
+            payload: {'sideId': sideId},
             timestamp: ref.read(clockProvider).now(),
           );
       final snapshot = await _load();
@@ -457,6 +712,18 @@ class TeamMatchSessionController extends AsyncNotifier<MatchSessionSnapshot> {
           SessionEventType.sessionCompleted,
           {'endReason': decision.endReason!.toJson()},
         ));
+    }
+
+    // A new regulation/overtime period always starts with a fresh shot
+    // clock (paused at the default duration — never auto-started, exactly
+    // like the game clock itself waits for an explicit START).
+    if (rule.shotClockRule != null &&
+        (decision.action == NextPhaseAction.continueRegulation ||
+            decision.action == NextPhaseAction.startOvertime)) {
+      toAppend.add((
+        SessionEventType.shotClockReset,
+        {'durationMs': rule.shotClockRule!.defaultDurationMs},
+      ));
     }
 
     final db = ref.read(databaseProvider);

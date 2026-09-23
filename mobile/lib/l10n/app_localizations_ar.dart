@@ -398,4 +398,32 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get matchDrawResultLabel => 'تعادل';
+
+  @override
+  String get shotClockLabel => 'ساعة الرمية';
+
+  @override
+  String get shotClock24Button => '24';
+
+  @override
+  String get shotClock14Button => '14';
+
+  @override
+  String get teamFoulsLabel => 'أخطاء الفريق';
+
+  @override
+  String get bonusIndicatorLabel => 'بونس';
+
+  @override
+  String addTeamFoulSemantics(String team) {
+    return 'إضافة خطأ فريق إلى $team';
+  }
+
+  @override
+  String get timeoutsLabel => 'الأوقات المستقطعة';
+
+  @override
+  String timeoutsRemainingSemantics(String team, int count) {
+    return '$team: $count أوقات مستقطعة متبقية';
+  }
 }

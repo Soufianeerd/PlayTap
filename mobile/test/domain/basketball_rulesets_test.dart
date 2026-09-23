@@ -27,6 +27,33 @@ void main() {
       expect(rule.shootout, isNull);
     });
 
+    test('shot clock: 24s standard, 14s short reset', () {
+      final rule = basketballFiba2024();
+      expect(rule.shotClockRule?.defaultDurationMs, 24000);
+      expect(rule.shotClockRule?.shortResetDurationMs, 14000);
+    });
+
+    test(
+      'timeouts: 2 in H1, 3 in H2 with a late-game sub-cap, 1 per overtime',
+      () {
+        final rule = basketballFiba2024();
+        final groups = rule.timeoutRule!.regulationGroups;
+        expect(groups[0].periodIndices, [0, 1]);
+        expect(groups[0].quota, 2);
+        expect(groups[1].periodIndices, [2, 3]);
+        expect(groups[1].quota, 3);
+        expect(rule.timeoutRule?.quotaPerOvertimePeriod, 1);
+        expect(rule.timeoutRule?.lateGameSubCap?.periodIndex, 3);
+        expect(rule.timeoutRule?.lateGameSubCap?.remainingMsThreshold, 120000);
+        expect(rule.timeoutRule?.lateGameSubCap?.maxUsableWithinWindow, 2);
+      },
+    );
+
+    test('team fouls: bonus from the 5th foul', () {
+      final rule = basketballFiba2024();
+      expect(rule.teamFoulRule?.bonusThreshold, 5);
+    });
+
     test('resolves to FIBA 2024 strictly before the cutover', () {
       final rule = resolveDefaultBasketballRuleset(
         DateTime.utc(2026, 9, 30, 23, 59, 59),

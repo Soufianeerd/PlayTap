@@ -18,6 +18,29 @@ void main() {
       expect(rule.shootout, isNull);
       expect(rule.matchEnd.drawAllowed, isTrue);
       expect(rule.scoreRule.allowedIncrements, [1]);
+      expect(rule.shotClockRule, isNull); // futsal has no shot clock.
+    });
+
+    test('timeouts: 1 per period, own group, none in overtime', () {
+      final rule = resolveDefaultFutsalRuleset(
+        DateTime.utc(2026, 9, 23),
+        TeamMatchFormat.league,
+      );
+      final groups = rule.timeoutRule!.regulationGroups;
+      expect(groups[0].periodIndices, [0]);
+      expect(groups[0].quota, 1);
+      expect(groups[1].periodIndices, [1]);
+      expect(groups[1].quota, 1);
+      expect(rule.timeoutRule?.quotaPerOvertimePeriod, 0);
+      expect(rule.timeoutRule?.lateGameSubCap, isNull);
+    });
+
+    test('accumulated fouls (DFKSAF): threshold at the 6th foul', () {
+      final rule = resolveDefaultFutsalRuleset(
+        DateTime.utc(2026, 9, 23),
+        TeamMatchFormat.league,
+      );
+      expect(rule.teamFoulRule?.bonusThreshold, 6);
     });
 
     test(

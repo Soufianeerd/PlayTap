@@ -745,6 +745,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Draw'**
   String get matchDrawResultLabel;
+
+  /// Label above the Basketball shot-clock display.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot clock'**
+  String get shotClockLabel;
+
+  /// Quick-reset button: restart the shot clock at 24 seconds (FIBA standard reset).
+  ///
+  /// In en, this message translates to:
+  /// **'24'**
+  String get shotClock24Button;
+
+  /// Quick-reset button: restart the shot clock at 14 seconds (FIBA short reset).
+  ///
+  /// In en, this message translates to:
+  /// **'14'**
+  String get shotClock14Button;
+
+  /// Label above the team-fouls row (Basketball bonus / Futsal accumulated fouls).
+  ///
+  /// In en, this message translates to:
+  /// **'Team fouls'**
+  String get teamFoulsLabel;
+
+  /// Explicit text label (never color-only) shown next to a team's foul count once they're in the penalty/bonus situation.
+  ///
+  /// In en, this message translates to:
+  /// **'BONUS'**
+  String get bonusIndicatorLabel;
+
+  /// Accessibility label for the tappable team-foul counter.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a team foul to {team}'**
+  String addTeamFoulSemantics(String team);
+
+  /// Label above the timeouts-remaining row.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeouts'**
+  String get timeoutsLabel;
+
+  /// Accessibility label for the tappable timeouts-remaining counter.
+  ///
+  /// In en, this message translates to:
+  /// **'{team}: {count} timeouts remaining'**
+  String timeoutsRemainingSemantics(String team, int count);
 }
 
 class _AppLocalizationsDelegate

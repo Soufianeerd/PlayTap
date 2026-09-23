@@ -383,5 +383,35 @@
   },
 
   "matchDrawResultLabel": "Draw",
-  "@matchDrawResultLabel": {"description": "Result label on the summary page when a league match ends level."}
+  "@matchDrawResultLabel": {"description": "Result label on the summary page when a league match ends level."},
+
+  "shotClockLabel": "Shot clock",
+  "@shotClockLabel": {"description": "Label above the Basketball shot-clock display."},
+
+  "shotClock24Button": "24",
+  "@shotClock24Button": {"description": "Quick-reset button: restart the shot clock at 24 seconds (FIBA standard reset)."},
+
+  "shotClock14Button": "14",
+  "@shotClock14Button": {"description": "Quick-reset button: restart the shot clock at 14 seconds (FIBA short reset)."},
+
+  "teamFoulsLabel": "Team fouls",
+  "@teamFoulsLabel": {"description": "Label above the team-fouls row (Basketball bonus / Futsal accumulated fouls)."},
+
+  "bonusIndicatorLabel": "BONUS",
+  "@bonusIndicatorLabel": {"description": "Explicit text label (never color-only) shown next to a team's foul count once they're in the penalty/bonus situation."},
+
+  "addTeamFoulSemantics": "Add a team foul to {team}",
+  "@addTeamFoulSemantics": {
+    "description": "Accessibility label for the tappable team-foul counter.",
+    "placeholders": {"team": {"type": "String"}}
+  },
+
+  "timeoutsLabel": "Timeouts",
+  "@timeoutsLabel": {"description": "Label above the timeouts-remaining row."},
+
+  "timeoutsRemainingSemantics": "{team}: {count} timeouts remaining",
+  "@timeoutsRemainingSemantics": {
+    "description": "Accessibility label for the tappable timeouts-remaining counter.",
+    "placeholders": {"team": {"type": "String"}, "count": {"type": "int"}}
+  }
 }

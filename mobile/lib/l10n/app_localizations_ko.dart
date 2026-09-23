@@ -384,4 +384,32 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get matchDrawResultLabel => '무승부';
+
+  @override
+  String get shotClockLabel => '샧클럭';
+
+  @override
+  String get shotClock24Button => '24';
+
+  @override
+  String get shotClock14Button => '14';
+
+  @override
+  String get teamFoulsLabel => '팀 파울';
+
+  @override
+  String get bonusIndicatorLabel => '보너스';
+
+  @override
+  String addTeamFoulSemantics(String team) {
+    return '$team에 팀 파울 추가';
+  }
+
+  @override
+  String get timeoutsLabel => '타임아웃';
+
+  @override
+  String timeoutsRemainingSemantics(String team, int count) {
+    return '$team: 타임아웃 $count회 남음';
+  }
 }

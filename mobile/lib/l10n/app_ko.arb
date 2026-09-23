@@ -104,5 +104,13 @@
   "shootoutMissButton": "실패",
   "shootoutNextKickerLabel": "{team} 쬨",
   "shootoutScoreLine": "승부쬨: {scoreA} – {scoreB}",
-  "matchDrawResultLabel": "무승부"
+  "matchDrawResultLabel": "무승부",
+  "shotClockLabel": "샧클럭",
+  "shotClock24Button": "24",
+  "shotClock14Button": "14",
+  "teamFoulsLabel": "팀 파울",
+  "bonusIndicatorLabel": "보너스",
+  "addTeamFoulSemantics": "{team}에 팀 파울 추가",
+  "timeoutsLabel": "타임아웃",
+  "timeoutsRemainingSemantics": "{team}: 타임아웃 {count}회 남음"
 }

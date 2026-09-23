@@ -104,5 +104,13 @@
   "shootoutMissButton": "مضيعة",
   "shootoutNextKickerLabel": "{team} يركل",
   "shootoutScoreLine": "ركلات الترجيح: {scoreA} – {scoreB}",
-  "matchDrawResultLabel": "تعادل"
+  "matchDrawResultLabel": "تعادل",
+  "shotClockLabel": "ساعة الرمية",
+  "shotClock24Button": "24",
+  "shotClock14Button": "14",
+  "teamFoulsLabel": "أخطاء الفريق",
+  "bonusIndicatorLabel": "بونس",
+  "addTeamFoulSemantics": "إضافة خطأ فريق إلى {team}",
+  "timeoutsLabel": "الأوقات المستقطعة",
+  "timeoutsRemainingSemantics": "{team}: {count} أوقات مستقطعة متبقية"
 }

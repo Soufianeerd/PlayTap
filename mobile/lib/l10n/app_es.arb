@@ -104,5 +104,13 @@
   "shootoutMissButton": "FALLADO",
   "shootoutNextKickerLabel": "Tira {team}",
   "shootoutScoreLine": "Tanda de penaltis: {scoreA} – {scoreB}",
-  "matchDrawResultLabel": "Empate"
+  "matchDrawResultLabel": "Empate",
+  "shotClockLabel": "Reloj de posesión",
+  "shotClock24Button": "24",
+  "shotClock14Button": "14",
+  "teamFoulsLabel": "Faltas de equipo",
+  "bonusIndicatorLabel": "BONUS",
+  "addTeamFoulSemantics": "Añadir una falta de equipo a {team}",
+  "timeoutsLabel": "Tiempos muertos",
+  "timeoutsRemainingSemantics": "{team}: {count} tiempos muertos restantes"
 }

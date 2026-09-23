@@ -41,19 +41,24 @@ nouveau mode `ScoreRule` n'a été nécessaire. Périmètre v1 explicite :
 - Score + périodes + clock + overtime + shootout (Football/Futsal) : **IMPLEMENTED**.
 - Temps additionnel (Football/Futsal) : annonce manuelle (+X min), jamais
   calculé automatiquement (Law 7 — c'est une décision d'arbitre) : **IMPLEMENTED**.
-- Temps morts (timeouts) : **NOT IMPLEMENTED** (v1 — décision de scope
-  explicite, voir la justification ci-dessous).
-- Fautes cumulées (Futsal, "accumulated fouls") : **NOT IMPLEMENTED** (v1).
-- Fautes d'équipe / bonus (Basketball) : **NOT IMPLEMENTED** (v1).
+- Shot clock (Basketball, 24/14 secondes) : **IMPLEMENTED** (Phase Sports
+  2B) — `ShotClockEngine`, générique, réutilise `ClockAccumulator`.
+- Temps morts (Basketball, Futsal) : **IMPLEMENTED** (Phase Sports 2B) —
+  `TimeoutEngine`, une seule abstraction générique pour les deux sports
+  (groupement par demi-terrain pour Basketball, par période pour Futsal).
+- Fautes d'équipe / bonus (Basketball) et fautes cumulées (Futsal,
+  "accumulated fouls") : **IMPLEMENTED** (Phase Sports 2B) —
+  `TeamFoulEngine`, une seule abstraction générique réutilisée par les deux
+  sports (seul le seuil diffère : 5 pour Basketball, 6 pour Futsal/DFKSAF).
+- Fautes de joueur individuelles, feuille de match complète,
+  remplacements : **NOT IMPLEMENTED** (hors périmètre — PlayTap reste un
+  outil de score/match control, pas une feuille officielle de table de
+  marque).
 
-Ces trois fonctionnalités sont volontairement différées à une phase
-ultérieure : chacune ajouterait un nouveau type d'event, un nouvel état,
-une nouvelle surface UI et de nouvelles fixtures pour une fonctionnalité
-qui ne contribue pas à prouver le moteur générique — alors que la
-priorité explicite de cette phase est que score + périodes + clock +
-overtime soient irréprochables. `MatchRule` ne déclare simplement pas ces
-champs en v1 ; les ajouter plus tard sera additif (pas de bump de
-`schemaVersion`).
+`MatchRule.shotClockRule`/`timeoutRule`/`teamFoulRule` sont tous les trois
+optionnels (`null` = le sport ne les utilise pas — Football n'a aucun des
+trois) ; leur ajout a été strictement additif, aucun bump de
+`schemaVersion`.
 
 ### Basketball — source officielle
 
@@ -71,11 +76,21 @@ dupliquer des valeurs identiques").
   que nécessaire (jamais de match nul).
 - Article 16 (Goal value) : lancer franc = 1, panier zone à 2 points = 2,
   panier zone à 3 points = 3.
+- Article 29 (Shot clock) : 24 secondes standard ; reset à 14 secondes
+  uniquement après un rebond offensif d'un tir raté ayant touché l'anneau,
+  une faute de contact défensive juste après un tel tir raté, ou une
+  remise en jeu offensive juste après. PlayTap ne devine jamais lequel de
+  ces cas s'applique (`ShotClockRule` : deux boutons rapides "24"/"14",
+  l'arbitre/marqueur décide). **IMPLEMENTED**.
 - Article 18 (Time-out) : 2 temps morts en 1re mi-temps, 3 en 2e (max 2
-  une fois l'horloge du Q4 ≤ 2:00), 1 par prolongation. **NOT
-  IMPLEMENTED** en v1 (voir périmètre ci-dessus).
+  utilisables une fois l'horloge du Q4 ≤ 2:00 — `TimeoutLateGameSubCap`),
+  1 par prolongation, jamais reporté d'une période à l'autre.
+  **IMPLEMENTED**.
 - Article 41 (Team fouls) : bonus à partir de la 5e faute d'équipe par
-  quart-temps. **NOT IMPLEMENTED** en v1.
+  quart-temps ; remise à zéro à chaque quart-temps réglementaire ; les
+  fautes de prolongation sont comptées comme des fautes du Q4 (jamais
+  remises à zéro en entrant en prolongation — vérifié directement dans
+  Article 41.1.3). **IMPLEMENTED**.
 
 Session persistée avant le 2026-10-01 → `basketball.fiba.2024` pour
 toujours, même après que l'app bascule sur l'édition 2026 par défaut
@@ -117,19 +132,27 @@ FIFA avant de considérer cette section comme définitive.
 
 - Law 7 (Duration of the Match) : 2 périodes égales de 20 minutes, clock
   arrêté (STOPPED_CLOCK).
-- Temps mort : 1 par équipe par période, non reporté à l'autre période,
-  aucun en prolongation. **NOT IMPLEMENTED** en v1.
+- Temps mort : 1 par équipe par période (chaque période son propre quota,
+  jamais reporté à l'autre période), aucun en prolongation. **IMPLEMENTED**
+  — même `TimeoutRule`/`TimeoutEngine` générique que Basketball, seule la
+  donnée de groupement diffère (par période ici, par demi-terrain pour
+  Basketball).
 - Fautes cumulées : à partir de la 6e faute d'équipe cumulée dans une
   période, coup franc direct sans mur (ou penalty si la faute est dans la
-  surface) ; les fautes cumulées de la 2e période sont reportées en
-  prolongation (jamais remises à zéro). Un changement de règle 2025-26
-  exclut désormais les fautes sanctionnées par un penalty du comptage
-  cumulé (seules les fautes sanctionnées par un coup franc direct
-  comptent). **NOT IMPLEMENTED** en v1 — voir le périmètre ci-dessus ; si
-  un compteur simplifié est ajouté plus tard sans cette distinction
-  penalty/coup-franc, le documenter explicitement comme une
-  simplification déclarée, jamais comme une application littérale de la
-  règle 2025-26.
+  surface) ; remise à zéro au début de la 2e période ; les fautes
+  cumulées de la 2e période sont ensuite reportées en prolongation
+  (jamais remises à zéro en entrant en prolongation). **IMPLEMENTED** —
+  même `TeamFoulRule`/`TeamFoulEngine` générique que le bonus Basketball,
+  seul le seuil diffère (6 au lieu de 5) ; le même comportement
+  remise-à-zéro-par-période / report-en-prolongation, vérifié identique
+  pour les deux sports, vit dans le moteur, pas dans la donnée. Un
+  changement de règle 2025-26 exclut désormais les fautes sanctionnées
+  par un penalty du comptage cumulé (seules celles sanctionnées par un
+  coup franc direct comptent) — PlayTap ne fait **pas** cette distinction
+  (un seul bouton générique "ajouter une faute d'équipe", jamais de
+  détection automatique du type de faute) : c'est une simplification
+  déclarée, pas une application littérale de la règle 2025-26 — à noter
+  explicitement si une distinction plus fine est ajoutée plus tard.
 - Prolongation/tirs au but : même format que le football (2×5 min de
   prolongation par bloc, tirs au but identiques à `ShootoutRule`).
 
