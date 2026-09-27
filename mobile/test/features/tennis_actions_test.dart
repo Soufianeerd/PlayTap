@@ -38,7 +38,7 @@ void main() {
         final service = buildTennisServiceOrder(
           matchType: TennisMatchType.doubles,
           initialServerSideId: sideATennisId,
-          initialServerPlayerIndex: 1,
+          firstServerPlayerIndex: 1,
         );
         expect(service.order, hasLength(4));
         final sideSequence = service.order.map((s) => s.sideId).toList();
@@ -52,20 +52,62 @@ void main() {
         // (index 0) serves the side's second turn.
         expect(service.order[0].playerIndex, 1);
         expect(service.order[2].playerIndex, 0);
-        // The other side's roster order is used as-is for both its turns.
+        // The other side's default pick (index 0) serves its first turn,
+        // partner (index 1) its second.
         expect(service.order[1].playerIndex, 0);
         expect(service.order[3].playerIndex, 1);
       },
     );
 
+    test("the second side's first-server choice is independent of the first "
+        "side's — never silently forced to player 0", () {
+      final service = buildTennisServiceOrder(
+        matchType: TennisMatchType.doubles,
+        initialServerSideId: sideATennisId,
+        firstServerPlayerIndex: 0,
+        secondServerPlayerIndex: 1,
+      );
+      expect(service.order[0].playerIndex, 0); // side_a's own pick.
+      expect(service.order[1].playerIndex, 1); // side_b's own pick.
+      expect(service.order[2].playerIndex, 1);
+      expect(service.order[3].playerIndex, 0);
+    });
+
     test('every slot id is unique', () {
       final service = buildTennisServiceOrder(
         matchType: TennisMatchType.doubles,
         initialServerSideId: sideBTennisId,
-        initialServerPlayerIndex: 0,
+        firstServerPlayerIndex: 0,
       );
       final ids = service.order.map((s) => s.id).toSet();
       expect(ids, hasLength(4));
+    });
+  });
+
+  group('buildDoublesSegmentServiceOrder', () {
+    test('starting side occupies slots 0/2, the other side 1/3', () {
+      final order = buildDoublesSegmentServiceOrder(
+        startingSideId: sideATennisId,
+        startingSidePlayerIndex: 1,
+        otherSidePlayerIndex: 0,
+      );
+      expect(order, ['side_a_p1', 'side_b_p0', 'side_a_p0', 'side_b_p1']);
+    });
+
+    test('ids match the ones buildTennisServiceOrder would build for the '
+        'same side/player, so they resolve against the same persisted '
+        'ServiceSlot roster', () {
+      final segment0 = buildTennisServiceOrder(
+        matchType: TennisMatchType.doubles,
+        initialServerSideId: sideATennisId,
+      );
+      final segment1 = buildDoublesSegmentServiceOrder(
+        startingSideId: sideBTennisId,
+        startingSidePlayerIndex: 1,
+        otherSidePlayerIndex: 1,
+      );
+      final knownIds = segment0.order.map((s) => s.id).toSet();
+      expect(segment1.toSet(), knownIds);
     });
   });
 
@@ -116,7 +158,7 @@ void main() {
         final service = buildTennisServiceOrder(
           matchType: TennisMatchType.doubles,
           initialServerSideId: sideBTennisId,
-          initialServerPlayerIndex: 1,
+          firstServerPlayerIndex: 1,
         );
         final rule = buildTennisRule(
           advantageMode: AdvantageMode.advantage,

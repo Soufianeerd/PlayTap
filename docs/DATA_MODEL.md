@@ -234,14 +234,33 @@ table, Badminton) — seuls les nombres/booléens/sous-règles diffèrent.
   Match Tie-Break (`MatchTieBreakDecidingSet`, remplace entièrement le set
   décisif par un tie-break à 10 points) — jamais une variante bricolée
   dans l'UI seule.
-- **Service persisté, jamais recalculé.** `ServiceRule.order` (2 ou 4
-  `ServiceSlot`) est décidé une fois à la création de la session et
-  persisté en entier — le rang de service tourne d'un cran par jeu
-  complété (un tie-break comptant pour exactement un jeu), en continu à
-  travers les sets. Au tie-break, le service alterne : 1 point pour le
-  joueur du rang courant, puis 2 points par bloc en alternance — jamais
-  approximé comme une simple alternance par point (voir CLAUDE.md brief
-  section 13, `RacketEngine._tieBreakServerSlot`).
+- **Service persisté, `ServiceRule.order` = segment 0 uniquement.**
+  `ServiceRule.order` (2 ou 4 `ServiceSlot`) est décidé une fois à la
+  création de la session — c'est l'ordre du premier set du match, et en
+  simple le seul ordre dont le match a jamais besoin (le rang tourne d'un
+  cran par jeu complété, un tie-break comptant pour exactement un jeu, en
+  continu à travers les sets, jamais réinitialisé). En double, la Rule 14
+  ITF permet à chaque équipe de re-choisir lequel de ses deux joueurs
+  ouvre son propre service au début de *chaque* set (et à nouveau avant
+  un Match Tie-Break remplaçant le set décisif) — persisté additivement
+  via l'event générique `SERVICE_ORDER_CONFIGURED`, jamais en réécrivant
+  `ServiceRule.order` (qui reste la référence des 4 `ServiceSlot` connus
+  du match — mêmes `id`s réutilisés, seul l'ordre de rotation change par
+  segment). L'équipe qui sert le premier jeu d'un segment reste toujours
+  la continuation mécanique de la rotation continue, jamais un choix
+  libre — `RacketEngine.replay` valide chaque event contre cette
+  contrainte avant de l'accepter (voir `RacketMatchState.
+  pendingServiceConfigurationSideId`). Au tie-break, le service alterne :
+  1 point pour le joueur du rang courant, puis 2 points par bloc en
+  alternance — jamais approximé comme une simple alternance par point
+  (voir CLAUDE.md brief section 13, `RacketEngine._tieBreakServerSlot`).
+- **Changement de côté par set, jamais un total continu.** `RacketMatchState.
+  changeEndsDue` compte les jeux *du set en cours*, remis à zéro à chaque
+  frontière de set — un total continu sur tout le match donnerait un
+  résultat faux après un set terminé sur un total impair de jeux (ex.
+  6-3 = 9, impair : un second changement est dû après le seul premier jeu
+  du set suivant, qu'un total continu manquerait). Voir ITF Rule 10 et
+  `RacketEngine._simulate`'s `effectiveGames`.
 - **Undo par re-simulation complète, pas incrémentale.** Contrairement à
   `ScoreEngine` (un score plat s'annule par simple soustraction),
   `RacketEngine.replay` résout d'abord la liste ordonnée des points
@@ -256,12 +275,15 @@ table, Badminton) — seuls les nombres/booléens/sous-règles diffèrent.
   sets sont des projections dérivées des seuls `POINT_SCORED`, exactement
   comme pour les mènes Pétanque (voir composition `ScoreRule` ci-dessus).
 - **Réutilise `POINT_SCORED`/`UNDO`/`SESSION_STARTED`/`SESSION_COMPLETED`
-  sans changement** — aucun nouveau `SessionEventType` introduit. Le
-  Racket Engine a son propre type d'event pur (`RacketEngineEvent`/
-  `RacketEngineEventType`), miroir exact de `ScoreEngineEvent`, pour la
-  même raison que chaque moteur a le sien (`MatchEngineEvent`,
-  `ShootoutEngineEvent`, ...) : chaque moteur pur ne dépend que de sa
-  propre forme d'event.
+  sans changement.** Un seul `SessionEventType` nouveau existe :
+  `SERVICE_ORDER_CONFIGURED` (2026-09, correction du service double par
+  set — voir plus haut), délibérément générique/sport-agnostic plutôt que
+  `TENNIS_...`, pour que Padel/Tennis de table/Badminton le réutilisent
+  tel quel. Le Racket Engine a son propre type d'event pur
+  (`RacketEngineEvent`/`RacketEngineEventType`), miroir exact de
+  `ScoreEngineEvent`, pour la même raison que chaque moteur a le sien
+  (`MatchEngineEvent`, `ShootoutEngineEvent`, ...) : chaque moteur pur ne
+  dépend que de sa propre forme d'event.
 - **Compatibilité Padel évaluée.** Padel (15/30/40, avantage, variantes
   golden-point, sets, tie-break, double, ordre de service) est exprimable
   avec exactement les mêmes `RacketMatchRule`/`RacketEngine` par simple

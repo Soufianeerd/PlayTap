@@ -30,7 +30,19 @@ class _TennisConfigPageState extends ConsumerState<TennisConfigPage> {
     2,
     (_) => List.generate(2, (_) => TextEditingController()),
   );
-  String _initialServerId = '0_0';
+
+  /// Which side serves the match's first game (ITF Rule 9 — a free choice
+  /// by toss, unlike every later set's serving side, which is mechanically
+  /// fixed — see `RacketMatchState.pendingServiceConfigurationSideId`).
+  int _firstServingSideIndex = 0;
+
+  /// Doubles only: each side's *own* independent pick of which of its two
+  /// players opens its own service (ITF Rule 14 — ".. their opponents
+  /// shall decide which player shall serve.." is never inferred from the
+  /// first side's choice, CLAUDE.md brief section 6).
+  int _sideAServerPlayerIndex = 0;
+  int _sideBServerPlayerIndex = 0;
+
   bool _defaultNamesApplied = false;
   bool _starting = false;
 
@@ -46,7 +58,7 @@ class _TennisConfigPageState extends ConsumerState<TennisConfigPage> {
       // lowest numbers, so Singles always shows "Player 1"/"Player 2", never
       // skipping to "Player 1"/"Player 3" — the doubles-only second players
       // still get distinct numbers (3/4), never colliding with side A/B's
-      // first players in the initial-server picker (see `_serverOptions`).
+      // first players in the server pickers (see `_playerLabel`).
       var n = 1;
       for (var p = 0; p < 2; p++) {
         for (var side = 0; side < 2; side++) {
@@ -77,30 +89,31 @@ class _TennisConfigPageState extends ConsumerState<TennisConfigPage> {
     return true;
   }
 
-  List<({String id, int sideIndex, int playerIndex, String label})>
-  _serverOptions(AppLocalizations l10n) {
-    final options =
-        <({String id, int sideIndex, int playerIndex, String label})>[];
-    var n = 1;
-    for (var side = 0; side < 2; side++) {
-      for (var p = 0; p < _matchType.playersPerSide; p++) {
-        final text = _playerControllers[side][p].text.trim();
-        options.add((
-          id: '${side}_$p',
-          sideIndex: side,
-          playerIndex: p,
-          label: text.isEmpty ? l10n.defaultParticipantName(n) : text,
-        ));
-        n++;
-      }
-    }
-    return options;
+  /// A single player's name, or its numbered default if left blank — `n`
+  /// follows the same player-major numbering as [didChangeDependencies]
+  /// (side 0/1 alternate fastest), so it never collides with the other
+  /// side's default.
+  String _playerLabel(AppLocalizations l10n, int sideIndex, int playerIndex) {
+    final text = _playerControllers[sideIndex][playerIndex].text.trim();
+    if (text.isNotEmpty) return text;
+    final n = playerIndex * 2 + sideIndex + 1;
+    return l10n.defaultParticipantName(n);
   }
+
+  /// A side's full display label for the first-serving-side picker: just
+  /// that one name in Singles (the side *is* the player), both players
+  /// joined in Doubles — mirrors `ScoringSide.name`'s own `' / '` join.
+  String _sideLabel(AppLocalizations l10n, int sideIndex) => [
+    for (var p = 0; p < _matchType.playersPerSide; p++)
+      _playerLabel(l10n, sideIndex, p),
+  ].join(' / ');
 
   void _onMatchTypeChanged(TennisMatchType type) {
     setState(() {
       _matchType = type;
-      _initialServerId = '0_0';
+      _firstServingSideIndex = 0;
+      _sideAServerPlayerIndex = 0;
+      _sideBServerPlayerIndex = 0;
     });
   }
 
@@ -120,13 +133,20 @@ class _TennisConfigPageState extends ConsumerState<TennisConfigPage> {
     final sideA = buildSide(0, sideATennisId);
     final sideB = buildSide(1, sideBTennisId);
 
-    final parts = _initialServerId.split('_');
-    final serverSideIndex = int.parse(parts[0]);
-    final serverPlayerIndex = int.parse(parts[1]);
+    final initialServerSideId = _firstServingSideIndex == 0
+        ? sideATennisId
+        : sideBTennisId;
+    final firstServerPlayerIndex = _firstServingSideIndex == 0
+        ? _sideAServerPlayerIndex
+        : _sideBServerPlayerIndex;
+    final secondServerPlayerIndex = _firstServingSideIndex == 0
+        ? _sideBServerPlayerIndex
+        : _sideAServerPlayerIndex;
     final service = buildTennisServiceOrder(
       matchType: _matchType,
-      initialServerSideId: serverSideIndex == 0 ? sideATennisId : sideBTennisId,
-      initialServerPlayerIndex: serverPlayerIndex,
+      initialServerSideId: initialServerSideId,
+      firstServerPlayerIndex: firstServerPlayerIndex,
+      secondServerPlayerIndex: secondServerPlayerIndex,
     );
     final rule = buildTennisRule(
       advantageMode: _advantageMode,
@@ -167,10 +187,6 @@ class _TennisConfigPageState extends ConsumerState<TennisConfigPage> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).playTapColors;
     final l10n = AppLocalizations.of(context)!;
-    final serverOptions = _serverOptions(l10n);
-    if (!serverOptions.any((o) => o.id == _initialServerId)) {
-      _initialServerId = serverOptions.first.id;
-    }
 
     Widget sectionLabel(String text) => Text(
       text,
@@ -257,15 +273,43 @@ class _TennisConfigPageState extends ConsumerState<TennisConfigPage> {
                   const SizedBox(height: PlayTapSpacing.xl),
                   sideSection(0),
                   sideSection(1),
-                  sectionLabel(l10n.tennisInitialServerLabel),
+                  sectionLabel(l10n.tennisFirstServingSideLabel),
                   const SizedBox(height: PlayTapSpacing.sm),
-                  PillSelector<String>(
-                    options: [for (final o in serverOptions) o.id],
-                    labelBuilder: (id) =>
-                        serverOptions.firstWhere((o) => o.id == id).label,
-                    value: _initialServerId,
-                    onChanged: (id) => setState(() => _initialServerId = id),
+                  PillSelector<int>(
+                    options: const [0, 1],
+                    labelBuilder: (i) => _sideLabel(l10n, i),
+                    value: _firstServingSideIndex,
+                    onChanged: (i) =>
+                        setState(() => _firstServingSideIndex = i),
                   ),
+                  if (_matchType == TennisMatchType.doubles) ...[
+                    const SizedBox(height: PlayTapSpacing.lg),
+                    sectionLabel(
+                      '${l10n.tennisSideSectionLabel(1)} — '
+                      '${l10n.tennisInitialServerLabel}',
+                    ),
+                    const SizedBox(height: PlayTapSpacing.sm),
+                    PillSelector<int>(
+                      options: const [0, 1],
+                      labelBuilder: (p) => _playerLabel(l10n, 0, p),
+                      value: _sideAServerPlayerIndex,
+                      onChanged: (p) =>
+                          setState(() => _sideAServerPlayerIndex = p),
+                    ),
+                    const SizedBox(height: PlayTapSpacing.lg),
+                    sectionLabel(
+                      '${l10n.tennisSideSectionLabel(2)} — '
+                      '${l10n.tennisInitialServerLabel}',
+                    ),
+                    const SizedBox(height: PlayTapSpacing.sm),
+                    PillSelector<int>(
+                      options: const [0, 1],
+                      labelBuilder: (p) => _playerLabel(l10n, 1, p),
+                      value: _sideBServerPlayerIndex,
+                      onChanged: (p) =>
+                          setState(() => _sideBServerPlayerIndex = p),
+                    ),
+                  ],
                 ],
               ),
             ),

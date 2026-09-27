@@ -92,6 +92,46 @@ class TennisSessionController extends AsyncNotifier<RacketSessionSnapshot> {
     }
   }
 
+  /// Persists a doubles per-segment service-order choice (see
+  /// `RacketEngine`'s "Doubles service order" section) — the confirmation
+  /// step gating scoring on `matchState.needsServiceConfiguration`
+  /// (CLAUDE.md brief section 8). [order] must be built with
+  /// `buildDoublesSegmentServiceOrder`, starting from `matchState.
+  /// pendingServiceConfigurationSideId` — never an arbitrary side, which
+  /// `RacketEngine.replay` would reject anyway (see CLAUDE.md brief
+  /// section 9). Guarded by the same [_mutationInFlight] flag as
+  /// [addPoint]/[undoLast] so a double-tap on "Continuer" can never
+  /// persist two competing configs for the same segment.
+  Future<void> configureServiceOrder({
+    required int segmentIndex,
+    required List<String> order,
+  }) async {
+    if (_mutationInFlight) return;
+    final current = state.value;
+    if (current == null || current.status != SessionStatus.active) return;
+    if (!current.matchState.needsServiceConfiguration) return;
+
+    _mutationInFlight = true;
+    try {
+      await ref
+          .read(eventRepositoryProvider)
+          .appendPhoneEvent(
+            id: _uuid.v4(),
+            sessionId: sessionId,
+            type: SessionEventType.serviceOrderConfigured,
+            payload: {
+              'schemaVersion': 1,
+              'segmentIndex': segmentIndex,
+              'order': order,
+            },
+            timestamp: DateTime.now().toUtc(),
+          );
+      state = AsyncData(await _load());
+    } finally {
+      _mutationInFlight = false;
+    }
+  }
+
   /// Undoes the last point. If it was the point that auto-completed the
   /// match, `RacketEngine` reopens `matchComplete` — this reopens the
   /// persisted session status to match, so play can continue.

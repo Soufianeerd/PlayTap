@@ -304,6 +304,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tennisMatchTieBreakShort => 'Super jeu décisif';
 
   @override
+  String get tennisFirstServingSideLabel => 'Premier camp au service';
+
+  @override
+  String tennisServiceOrderSheetTitle(int n) {
+    return 'Set $n — Ordre de service';
+  }
+
+  @override
+  String get tennisServiceOrderMatchTieBreakTitle =>
+      'Super jeu décisif — Ordre de service';
+
+  @override
+  String get tennisServiceOrderServingFirstLabel =>
+      'Sert le premier jeu de ce segment';
+
+  @override
+  String get tennisContinueButton => 'Continuer';
+
+  @override
   String get presetPetanque => 'Pétanque';
 
   @override

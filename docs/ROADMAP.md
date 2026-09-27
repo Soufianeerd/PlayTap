@@ -403,7 +403,7 @@ dédié a été ajouté pour ce cas précis avant de continuer.
       seuls `POINT_SCORED`, comme les mènes Pétanque. Aucun nouveau
       `SessionEventType` : `POINT_SCORED`/`UNDO`/`SESSION_STARTED`/
       `SESSION_COMPLETED` réutilisés tels quels.
-- [x] `contracts/racket/` : 16 fixtures de conformité (progression de jeu,
+- [x] `contracts/racket/` : 18 fixtures de conformité (progression de jeu,
       deuce/avantage, undo, sets 6-4/7-5, tie-break 7-5/8-6, Match
       Tie-break 10-8/11-9, Best of 3, rotation de service simple/double,
       rotation de service au tie-break point par point, recovery mi-jeu/
@@ -444,6 +444,55 @@ dédié a été ajouté pour ce cas précis avant de continuer.
       device) : mêmes réserves que les phases précédentes (environnement
       non disponible sur cette machine — voir `CLAUDE.md` "Stratégie
       Apple").
+
+## Phase Racket Core 1.1 — correction service double + changement de côté (statut : fait, 2026-09)
+
+Deux bugs identifiés dans la Phase Racket Core 1 avant intégration
+définitive (voir ITF *Rules of Tennis 2026*, source officielle
+https://www.itftennis.com/media/7221/2026-rules-of-tennis-english.pdf) :
+
+- [x] **Service double par set (Rule 14/15)** : l'ordre des 4 joueurs
+      était persisté une seule fois à la création de la session et
+      réutilisé tel quel pour tout le match, alors que la Rule 14 permet
+      à chaque équipe de re-choisir lequel de ses deux joueurs ouvre son
+      propre service au début de *chaque* set (et à nouveau avant un
+      Match Tie-Break remplaçant le set décisif) — seul l'ordre interne
+      change, jamais l'équipe qui sert en premier (toujours la
+      continuation mécanique de la rotation continue). Corrigé par un
+      nouvel event générique, sport-agnostic `SERVICE_ORDER_CONFIGURED`
+      (`RacketEngineEventType.serviceOrderConfigured`), validé par
+      `RacketEngine.replay` contre le côté mécaniquement correct — voir
+      `RacketEngine`'s "Doubles service order", `RacketMatchState.
+      needsServiceConfiguration`/`pendingServiceConfigurationSideId`. Le
+      Racket Core reste inchangé pour le simple (aucune reconfiguration
+      nécessaire) et pour le premier set d'un match double.
+- [x] **Changement de côté par set (Rule 10)** : le calcul utilisait un
+      total continu de jeux sur tout le match, ce qui manquait le
+      changement dû après le seul premier jeu d'un nouveau set lorsque le
+      set précédent s'était terminé sur un total impair (ex. 6-3 = 9
+      jeux). Corrigé pour compter par set (`RacketEngine._simulate`'s
+      `effectiveGames`), avec le cas particulier de la frontière
+      set-terminé/tie-break-décisif traité explicitement.
+- [x] Config Tennis Double : deux sélecteurs indépendants (un par
+      équipe) pour le premier serveur au lieu d'un unique sélecteur à 4
+      voies qui forçait silencieusement le second joueur de l'équipe
+      adverse à l'index 0 — `TennisConfigPage`.
+- [x] Nouvel écran (bottom sheet) `TennisServiceOrderSheet` entre deux
+      sets (et avant un Match Tie-Break) en double, gating le score tant
+      qu'il n'est pas confirmé (`_BigTapZone.onTap` nul,
+      `matchState.needsServiceConfiguration`).
+- [x] `contracts/racket/` : 2 fixtures ajoutées (`tennis_change_of_ends_
+      per_set`, `tennis_doubles_service_order_per_set`), total 18.
+- [x] Tests : 24 nouveaux cas (`racket_engine_test.dart` — changement de
+      côté par set, service double par segment, Match Tie-Break,
+      undo/recovery de la configuration de service ; `tennis_actions_test.dart`
+      — pickers indépendants, `buildDoublesSegmentServiceOrder` ;
+      3 nouveaux flows `tennis_widget_test.dart`). 391 tests verts (>= 367
+      requis), 0 échec, 0 skip.
+- [x] Commentaires citant à tort "Rule 15/16" (Order of Service/Receiving)
+      ou "Rule 6" (Change of Ends) corrigés vers les numéros exacts
+      (Rule 14/15, Rule 10) dans `racket_rule.dart`, `racket_engine.dart`,
+      `racket_state.dart`, `tennis_actions.dart`, `docs/SPORT_RULES.md`.
 
 ## Phase 2 — Presets V1
 

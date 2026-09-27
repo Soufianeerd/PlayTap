@@ -18,17 +18,21 @@ const _uuid = Uuid();
 const sideATennisId = 'side_a';
 const sideBTennisId = 'side_b';
 
-/// Builds the doubles-ready [ServiceRule]: 2 slots for Simple (one per
-/// side, no [ServiceSlot.playerIndex]), 4 for Double — starting from
-/// [initialServerSideId]/[initialServerPlayerIndex], then alternating
-/// teams, with each side's own partner order fixed to roster order (a
-/// deterministic, legal ITF Rule 15/16 order — see the doc note on
-/// `TennisDecidingSetChoice` for why the config screen doesn't expose a
-/// full 4-way order picker in V1).
+/// Builds segment 0's (the match's first set) [ServiceRule]: 2 slots for
+/// Simple (one per side, no [ServiceSlot.playerIndex]), 4 for Double.
+///
+/// In Doubles, ITF Rule 14 gives *each side* its own independent choice of
+/// which player opens its own service — [firstServerPlayerIndex] is
+/// [initialServerSideId]'s pick, [secondServerPlayerIndex] is the other
+/// side's (for the match's second game). Never infer the second side's
+/// choice from the first (CLAUDE.md brief section 6) — a config screen
+/// that only exposes one picker silently hands it `playerIndex: 0` always,
+/// which is not a real choice.
 ServiceRule buildTennisServiceOrder({
   required TennisMatchType matchType,
   required String initialServerSideId,
-  int initialServerPlayerIndex = 0,
+  int firstServerPlayerIndex = 0,
+  int secondServerPlayerIndex = 0,
 }) {
   final otherSideId = initialServerSideId == sideATennisId
       ? sideBTennisId
@@ -41,21 +45,53 @@ ServiceRule buildTennisServiceOrder({
     ],
     TennisMatchType.doubles => [
       ServiceSlot(
-        id: '${initialServerSideId}_p$initialServerPlayerIndex',
+        id: '${initialServerSideId}_p$firstServerPlayerIndex',
         sideId: initialServerSideId,
-        playerIndex: initialServerPlayerIndex,
+        playerIndex: firstServerPlayerIndex,
       ),
-      ServiceSlot(id: '${otherSideId}_p0', sideId: otherSideId, playerIndex: 0),
       ServiceSlot(
-        id: '${initialServerSideId}_p${1 - initialServerPlayerIndex}',
-        sideId: initialServerSideId,
-        playerIndex: 1 - initialServerPlayerIndex,
+        id: '${otherSideId}_p$secondServerPlayerIndex',
+        sideId: otherSideId,
+        playerIndex: secondServerPlayerIndex,
       ),
-      ServiceSlot(id: '${otherSideId}_p1', sideId: otherSideId, playerIndex: 1),
+      ServiceSlot(
+        id: '${initialServerSideId}_p${1 - firstServerPlayerIndex}',
+        sideId: initialServerSideId,
+        playerIndex: 1 - firstServerPlayerIndex,
+      ),
+      ServiceSlot(
+        id: '${otherSideId}_p${1 - secondServerPlayerIndex}',
+        sideId: otherSideId,
+        playerIndex: 1 - secondServerPlayerIndex,
+      ),
     ],
   };
 
   return ServiceRule(schemaVersion: 1, order: order);
+}
+
+/// Builds a later doubles segment's (set >= 1, or a Match Tie-break
+/// replacing the deciding set) reconfigured service order — the payload
+/// for a `SERVICE_ORDER_CONFIGURED` event (see `RacketEngine`'s "Doubles
+/// service order" section). [startingSideId] must be `RacketMatchState.
+/// pendingServiceConfigurationSideId` — the mechanically-correct side,
+/// never a free UI choice; only [startingSidePlayerIndex] (that side's
+/// pick) and [otherSidePlayerIndex] (the other side's, for the segment's
+/// second game) are.
+List<String> buildDoublesSegmentServiceOrder({
+  required String startingSideId,
+  required int startingSidePlayerIndex,
+  required int otherSidePlayerIndex,
+}) {
+  final otherSideId = startingSideId == sideATennisId
+      ? sideBTennisId
+      : sideATennisId;
+  return [
+    '${startingSideId}_p$startingSidePlayerIndex',
+    '${otherSideId}_p$otherSidePlayerIndex',
+    '${startingSideId}_p${1 - startingSidePlayerIndex}',
+    '${otherSideId}_p${1 - otherSidePlayerIndex}',
+  ];
 }
 
 /// Resolves [TennisDecidingSetChoice] into the engine-facing

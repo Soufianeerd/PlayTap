@@ -1,0 +1,853 @@
+{
+  "schemaVersion": 1,
+  "id": "tennis_change_of_ends_per_set",
+  "engine": "racket",
+  "description": "ITF Rule 10 (Change of Ends), verified per set rather than as a match-wide continuous count: set 1 closes 6-3 (9 games, odd) -> change due at set end AND again after set 2's very first game; set 2 closes 6-4 (10 games, even) -> no extra change at set end, deferred to after set 3's first game. A continuous match-wide odd/even count would wrongly miss the change after set 2's first game.",
+  "config": {
+    "schemaVersion": 1,
+    "rulesetId": "tennis.itf.2026",
+    "sides": [
+      "side_a",
+      "side_b"
+    ],
+    "gameScoring": {
+      "schemaVersion": 1,
+      "advantageMode": "ADVANTAGE"
+    },
+    "setRule": {
+      "schemaVersion": 1,
+      "gamesToWin": 6,
+      "tieBreak": {
+        "schemaVersion": 1,
+        "target": 7,
+        "winBy": 2
+      }
+    },
+    "matchFormat": {
+      "schemaVersion": 1,
+      "setsToWin": 2,
+      "decidingSetFormat": {
+        "type": "REGULAR"
+      }
+    },
+    "service": {
+      "schemaVersion": 1,
+      "order": [
+        {
+          "id": "side_a",
+          "sideId": "side_a"
+        },
+        {
+          "id": "side_b",
+          "sideId": "side_b"
+        }
+      ]
+    }
+  },
+  "events": [
+    {
+      "id": "e1",
+      "originDevice": "phone",
+      "originSequence": 1,
+      "tOffsetMs": 0,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e2",
+      "originDevice": "phone",
+      "originSequence": 2,
+      "tOffsetMs": 1000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e3",
+      "originDevice": "phone",
+      "originSequence": 3,
+      "tOffsetMs": 2000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e4",
+      "originDevice": "phone",
+      "originSequence": 4,
+      "tOffsetMs": 3000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e5",
+      "originDevice": "phone",
+      "originSequence": 5,
+      "tOffsetMs": 4000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e6",
+      "originDevice": "phone",
+      "originSequence": 6,
+      "tOffsetMs": 5000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e7",
+      "originDevice": "phone",
+      "originSequence": 7,
+      "tOffsetMs": 6000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e8",
+      "originDevice": "phone",
+      "originSequence": 8,
+      "tOffsetMs": 7000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e9",
+      "originDevice": "phone",
+      "originSequence": 9,
+      "tOffsetMs": 8000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e10",
+      "originDevice": "phone",
+      "originSequence": 10,
+      "tOffsetMs": 9000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e11",
+      "originDevice": "phone",
+      "originSequence": 11,
+      "tOffsetMs": 10000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e12",
+      "originDevice": "phone",
+      "originSequence": 12,
+      "tOffsetMs": 11000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e13",
+      "originDevice": "phone",
+      "originSequence": 13,
+      "tOffsetMs": 12000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e14",
+      "originDevice": "phone",
+      "originSequence": 14,
+      "tOffsetMs": 13000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e15",
+      "originDevice": "phone",
+      "originSequence": 15,
+      "tOffsetMs": 14000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e16",
+      "originDevice": "phone",
+      "originSequence": 16,
+      "tOffsetMs": 15000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e17",
+      "originDevice": "phone",
+      "originSequence": 17,
+      "tOffsetMs": 16000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e18",
+      "originDevice": "phone",
+      "originSequence": 18,
+      "tOffsetMs": 17000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e19",
+      "originDevice": "phone",
+      "originSequence": 19,
+      "tOffsetMs": 18000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e20",
+      "originDevice": "phone",
+      "originSequence": 20,
+      "tOffsetMs": 19000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e21",
+      "originDevice": "phone",
+      "originSequence": 21,
+      "tOffsetMs": 20000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e22",
+      "originDevice": "phone",
+      "originSequence": 22,
+      "tOffsetMs": 21000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e23",
+      "originDevice": "phone",
+      "originSequence": 23,
+      "tOffsetMs": 22000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e24",
+      "originDevice": "phone",
+      "originSequence": 24,
+      "tOffsetMs": 23000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e25",
+      "originDevice": "phone",
+      "originSequence": 25,
+      "tOffsetMs": 24000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e26",
+      "originDevice": "phone",
+      "originSequence": 26,
+      "tOffsetMs": 25000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e27",
+      "originDevice": "phone",
+      "originSequence": 27,
+      "tOffsetMs": 26000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e28",
+      "originDevice": "phone",
+      "originSequence": 28,
+      "tOffsetMs": 27000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e29",
+      "originDevice": "phone",
+      "originSequence": 29,
+      "tOffsetMs": 28000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e30",
+      "originDevice": "phone",
+      "originSequence": 30,
+      "tOffsetMs": 29000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e31",
+      "originDevice": "phone",
+      "originSequence": 31,
+      "tOffsetMs": 30000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e32",
+      "originDevice": "phone",
+      "originSequence": 32,
+      "tOffsetMs": 31000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e33",
+      "originDevice": "phone",
+      "originSequence": 33,
+      "tOffsetMs": 32000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e34",
+      "originDevice": "phone",
+      "originSequence": 34,
+      "tOffsetMs": 33000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e35",
+      "originDevice": "phone",
+      "originSequence": 35,
+      "tOffsetMs": 34000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e36",
+      "originDevice": "phone",
+      "originSequence": 36,
+      "tOffsetMs": 35000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e37",
+      "originDevice": "phone",
+      "originSequence": 37,
+      "tOffsetMs": 36000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e38",
+      "originDevice": "phone",
+      "originSequence": 38,
+      "tOffsetMs": 37000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e39",
+      "originDevice": "phone",
+      "originSequence": 39,
+      "tOffsetMs": 38000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e40",
+      "originDevice": "phone",
+      "originSequence": 40,
+      "tOffsetMs": 39000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e41",
+      "originDevice": "phone",
+      "originSequence": 41,
+      "tOffsetMs": 40000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e42",
+      "originDevice": "phone",
+      "originSequence": 42,
+      "tOffsetMs": 41000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e43",
+      "originDevice": "phone",
+      "originSequence": 43,
+      "tOffsetMs": 42000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e44",
+      "originDevice": "phone",
+      "originSequence": 44,
+      "tOffsetMs": 43000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e45",
+      "originDevice": "phone",
+      "originSequence": 45,
+      "tOffsetMs": 44000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e46",
+      "originDevice": "phone",
+      "originSequence": 46,
+      "tOffsetMs": 45000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e47",
+      "originDevice": "phone",
+      "originSequence": 47,
+      "tOffsetMs": 46000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e48",
+      "originDevice": "phone",
+      "originSequence": 48,
+      "tOffsetMs": 47000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e49",
+      "originDevice": "phone",
+      "originSequence": 49,
+      "tOffsetMs": 48000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e50",
+      "originDevice": "phone",
+      "originSequence": 50,
+      "tOffsetMs": 49000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e51",
+      "originDevice": "phone",
+      "originSequence": 51,
+      "tOffsetMs": 50000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e52",
+      "originDevice": "phone",
+      "originSequence": 52,
+      "tOffsetMs": 51000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e53",
+      "originDevice": "phone",
+      "originSequence": 53,
+      "tOffsetMs": 52000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e54",
+      "originDevice": "phone",
+      "originSequence": 54,
+      "tOffsetMs": 53000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e55",
+      "originDevice": "phone",
+      "originSequence": 55,
+      "tOffsetMs": 54000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e56",
+      "originDevice": "phone",
+      "originSequence": 56,
+      "tOffsetMs": 55000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e57",
+      "originDevice": "phone",
+      "originSequence": 57,
+      "tOffsetMs": 56000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e58",
+      "originDevice": "phone",
+      "originSequence": 58,
+      "tOffsetMs": 57000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e59",
+      "originDevice": "phone",
+      "originSequence": 59,
+      "tOffsetMs": 58000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e60",
+      "originDevice": "phone",
+      "originSequence": 60,
+      "tOffsetMs": 59000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e61",
+      "originDevice": "phone",
+      "originSequence": 61,
+      "tOffsetMs": 60000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e62",
+      "originDevice": "phone",
+      "originSequence": 62,
+      "tOffsetMs": 61000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e63",
+      "originDevice": "phone",
+      "originSequence": 63,
+      "tOffsetMs": 62000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e64",
+      "originDevice": "phone",
+      "originSequence": 64,
+      "tOffsetMs": 63000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_b"
+      }
+    },
+    {
+      "id": "e65",
+      "originDevice": "phone",
+      "originSequence": 65,
+      "tOffsetMs": 64000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e66",
+      "originDevice": "phone",
+      "originSequence": 66,
+      "tOffsetMs": 65000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e67",
+      "originDevice": "phone",
+      "originSequence": 67,
+      "tOffsetMs": 66000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e68",
+      "originDevice": "phone",
+      "originSequence": 68,
+      "tOffsetMs": 67000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e69",
+      "originDevice": "phone",
+      "originSequence": 69,
+      "tOffsetMs": 68000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e70",
+      "originDevice": "phone",
+      "originSequence": 70,
+      "tOffsetMs": 69000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e71",
+      "originDevice": "phone",
+      "originSequence": 71,
+      "tOffsetMs": 70000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e72",
+      "originDevice": "phone",
+      "originSequence": 72,
+      "tOffsetMs": 71000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e73",
+      "originDevice": "phone",
+      "originSequence": 73,
+      "tOffsetMs": 72000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e74",
+      "originDevice": "phone",
+      "originSequence": 74,
+      "tOffsetMs": 73000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e75",
+      "originDevice": "phone",
+      "originSequence": 75,
+      "tOffsetMs": 74000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    },
+    {
+      "id": "e76",
+      "originDevice": "phone",
+      "originSequence": 76,
+      "tOffsetMs": 75000,
+      "type": "POINT_SCORED",
+      "payload": {
+        "side": "side_a"
+      }
+    }
+  ],
+  "expectedCheckpoints": [
+    {
+      "afterPointNumber": 4,
+      "label": "set1_game1_end",
+      "changeEndsDue": true
+    },
+    {
+      "afterPointNumber": 8,
+      "label": "set1_game2_end",
+      "changeEndsDue": false
+    },
+    {
+      "afterPointNumber": 12,
+      "label": "set1_game3_end",
+      "changeEndsDue": true
+    },
+    {
+      "afterPointNumber": 16,
+      "label": "set1_game4_end",
+      "changeEndsDue": false
+    },
+    {
+      "afterPointNumber": 36,
+      "label": "set1_end_6_3_odd",
+      "changeEndsDue": true,
+      "currentSetIndex": 1
+    },
+    {
+      "afterPointNumber": 40,
+      "label": "set2_game1_end_change_again",
+      "changeEndsDue": true
+    },
+    {
+      "afterPointNumber": 44,
+      "label": "set2_game2_end",
+      "changeEndsDue": false
+    },
+    {
+      "afterPointNumber": 76,
+      "label": "set2_end_6_4_even_no_extra_change",
+      "changeEndsDue": false,
+      "currentSetIndex": 2
+    }
+  ]
+}

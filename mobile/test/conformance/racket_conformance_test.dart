@@ -170,6 +170,13 @@ void _checkState(
       reason: '$id: changeEndsDue',
     );
   }
+  if (expected.containsKey('needsServiceConfiguration')) {
+    expect(
+      state.needsServiceConfiguration,
+      expected['needsServiceConfiguration'],
+      reason: '$id: needsServiceConfiguration',
+    );
+  }
   if (expected.containsKey('completedSets')) {
     final actual = state.completedSets.map((s) => s.toJson()).toList();
     expect(actual, expected['completedSets'], reason: '$id: completedSets');

@@ -40,7 +40,12 @@ enum SessionEventType {
   addedTimeAnnounced,
   shootoutStarted,
   shootoutAttempt,
-  shootoutCompleted;
+  shootoutCompleted,
+
+  /// Racket Core (Tennis, later Padel/Table Tennis/Badminton): per-segment
+  /// doubles service-order override — see `RacketEngineEventType.
+  /// serviceOrderConfigured`.
+  serviceOrderConfigured;
 
   String toJson() => switch (this) {
     SessionEventType.sessionStarted => 'SESSION_STARTED',
@@ -59,6 +64,7 @@ enum SessionEventType {
     SessionEventType.shootoutStarted => 'SHOOTOUT_STARTED',
     SessionEventType.shootoutAttempt => 'SHOOTOUT_ATTEMPT',
     SessionEventType.shootoutCompleted => 'SHOOTOUT_COMPLETED',
+    SessionEventType.serviceOrderConfigured => 'SERVICE_ORDER_CONFIGURED',
   };
 
   static SessionEventType fromJson(String value) => switch (value) {
@@ -78,6 +84,7 @@ enum SessionEventType {
     'SHOOTOUT_STARTED' => SessionEventType.shootoutStarted,
     'SHOOTOUT_ATTEMPT' => SessionEventType.shootoutAttempt,
     'SHOOTOUT_COMPLETED' => SessionEventType.shootoutCompleted,
+    'SERVICE_ORDER_CONFIGURED' => SessionEventType.serviceOrderConfigured,
     _ => throw ArgumentError.value(value, 'value', 'Unknown SessionEventType'),
   };
 }

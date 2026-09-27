@@ -9,12 +9,48 @@ import '../../domain/models/racket_session_snapshot.dart';
 import '../../l10n/app_localizations.dart';
 import '../shared/session_actions.dart';
 import 'tennis_actions.dart';
+import 'tennis_service_order_sheet.dart';
 import 'tennis_session_controller.dart';
 
-class ActiveTennisSessionPage extends ConsumerWidget {
+class ActiveTennisSessionPage extends ConsumerStatefulWidget {
   const ActiveTennisSessionPage({super.key, required this.sessionId});
 
   final String sessionId;
+
+  @override
+  ConsumerState<ActiveTennisSessionPage> createState() =>
+      _ActiveTennisSessionPageState();
+}
+
+class _ActiveTennisSessionPageState
+    extends ConsumerState<ActiveTennisSessionPage> {
+  /// Guards against opening the sheet twice (e.g. two rebuilds racing
+  /// through their post-frame callbacks before the first `showModalBottomSheet`
+  /// call has actually mounted it) — mirrors the controller's own
+  /// `_mutationInFlight` guard, applied here to a UI action instead of a
+  /// persisted event (CLAUDE.md brief section 25).
+  bool _serviceOrderSheetOpen = false;
+
+  /// Shown whenever `matchState.needsServiceConfiguration` is true —
+  /// on entering a new doubles set/Match Tie-break, and again on cold
+  /// start/recovery if the app was killed before it was confirmed (CLAUDE.md
+  /// brief sections 8/11). Not dismissible: scoring stays blocked (see
+  /// `_TennisBody`'s tap zones) until a valid choice is confirmed.
+  Future<void> _maybeShowServiceOrderSheet(RacketSessionSnapshot view) async {
+    if (_serviceOrderSheetOpen || !view.matchState.needsServiceConfiguration) {
+      return;
+    }
+    _serviceOrderSheetOpen = true;
+    await showModalBottomSheet<void>(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      builder: (_) =>
+          TennisServiceOrderSheet(sessionId: widget.sessionId, view: view),
+    );
+    _serviceOrderSheetOpen = false;
+  }
 
   Future<void> _confirmAbandon(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
@@ -35,14 +71,15 @@ class ActiveTennisSessionPage extends ConsumerWidget {
       ),
     );
     if (confirmed != true) return;
-    await abandonSession(ref, sessionId);
+    await abandonSession(ref, widget.sessionId);
     if (context.mounted) context.go('/history');
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colors = Theme.of(context).playTapColors;
+    final sessionId = widget.sessionId;
 
     ref.listen<AsyncValue<RacketSessionSnapshot>>(
       tennisSessionControllerProvider(sessionId),
@@ -56,6 +93,13 @@ class ActiveTennisSessionPage extends ConsumerWidget {
     );
 
     final asyncView = ref.watch(tennisSessionControllerProvider(sessionId));
+
+    final view = asyncView.value;
+    if (view != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _maybeShowServiceOrderSheet(view);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -127,6 +171,14 @@ class _TennisBody extends ConsumerWidget {
     void addPoint(String sideId) => ref
         .read(tennisSessionControllerProvider(sessionId).notifier)
         .addPoint(sideId);
+
+    // Blocks scoring while a doubles service-order confirmation is
+    // pending (CLAUDE.md brief section 8) — the sheet is already showing
+    // (see `_ActiveTennisSessionPageState._maybeShowServiceOrderSheet`),
+    // but the tap zones underneath it must not accept a point that would
+    // race ahead of it, e.g. via a stray tap next to the (non-dismissible,
+    // but not full-screen) sheet.
+    final scoringBlocked = state.needsServiceConfiguration;
 
     return Column(
       children: [
@@ -204,7 +256,7 @@ class _TennisBody extends ConsumerWidget {
                   background: colors.primary,
                   foreground: colors.onPrimary,
                   semanticsLabel: l10n.tennisPointSemantics(sideA.name),
-                  onTap: () => addPoint(sideATennisId),
+                  onTap: scoringBlocked ? null : () => addPoint(sideATennisId),
                 ),
               ),
               Expanded(
@@ -213,7 +265,7 @@ class _TennisBody extends ConsumerWidget {
                   background: colors.accent,
                   foreground: colors.onAccent,
                   semanticsLabel: l10n.tennisPointSemantics(sideB.name),
-                  onTap: () => addPoint(sideBTennisId),
+                  onTap: scoringBlocked ? null : () => addPoint(sideBTennisId),
                 ),
               ),
             ],
@@ -329,7 +381,11 @@ class _BigTapZone extends StatelessWidget {
   final Color background;
   final Color foreground;
   final String semanticsLabel;
-  final VoidCallback onTap;
+
+  /// Null disables the zone entirely (no ripple, no haptic) — used while
+  /// `matchState.needsServiceConfiguration` blocks scoring (CLAUDE.md
+  /// brief section 8).
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -339,10 +395,12 @@ class _BigTapZone extends StatelessWidget {
       child: Material(
         color: background,
         child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap();
-          },
+          onTap: onTap == null
+              ? null
+              : () {
+                  HapticFeedback.lightImpact();
+                  onTap!();
+                },
           child: Center(
             child: Text(
               name,

@@ -148,8 +148,9 @@ void main() {
   );
 
   testWidgets(
-    'FLOW — doubles: 4 player fields, 4-way server picker, chosen server '
-    'shown on the active session, Match Tie-Break 10 selectable',
+    'FLOW — doubles: 4 player fields, independent first-server choice per '
+    'side, chosen server shown on the active session, Match Tie-Break 10 '
+    'selectable',
     (tester) async {
       await tester.pumpWidget(appWithFreshDb());
       await tester.pumpAndSettle();
@@ -165,30 +166,131 @@ void main() {
       expect(find.text(l10n.participantNameLabel(1)), findsNWidgets(2));
       expect(find.text(l10n.participantNameLabel(2)), findsNWidgets(2));
 
-      // 4-way initial-server picker, defaulting to player 1. Scoped to the
-      // PillSelector explicitly (not `.last`): the same name also appears
-      // in its own TextField, and relying on tree-traversal order between
-      // the two would be fragile.
-      final player3 = l10n.defaultParticipantName(3);
-      expect(find.text(player3), findsWidgets); // field + pill option.
+      // 3 int pickers once doubles is selected: first serving side, side
+      // A's own first-server choice, side B's own — each independent, per
+      // ITF Rule 14 (CLAUDE.md brief section 6: never infer side B's pick
+      // from side A's).
+      final pickers = find.byType(PillSelector<int>);
+      expect(pickers, findsNWidgets(3));
+      final sideAServerPicker = pickers.at(1);
+      final sideBServerPicker = pickers.at(2);
+
+      final player3 = l10n.defaultParticipantName(3); // side A's 2nd player.
+      final player4 = l10n.defaultParticipantName(4); // side B's 2nd player.
+
       final player3Pill = find.descendant(
-        of: find.byType(PillSelector<String>),
+        of: sideAServerPicker,
         matching: find.text(player3),
       );
       expect(player3Pill, findsOneWidget);
-
-      // The picker sits below the fold in the config page's scroll view —
-      // tapping it without scrolling first hits an off-screen coordinate
-      // and silently no-ops (no exception, `_initialServerId` just never
-      // changes).
       await tester.ensureVisible(player3Pill);
       await tester.tap(player3Pill);
+      await tester.pumpAndSettle();
+
+      final player4Pill = find.descendant(
+        of: sideBServerPicker,
+        matching: find.text(player4),
+      );
+      expect(player4Pill, findsOneWidget);
+      await tester.ensureVisible(player4Pill);
+      await tester.tap(player4Pill);
       await tester.pumpAndSettle();
 
       await tester.tap(find.text(l10n.startButton));
       await tester.pumpAndSettle();
 
+      // First serving side defaults to side A -> side A's own pick (player
+      // 3) serves the match's first game, never side B's independent pick.
       expect(find.text(l10n.tennisServerLabel(player3)), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'FLOW — doubles: closing set 1 blocks scoring behind a service-order '
+    'sheet (ITF Rule 14), confirming it resumes scoring with the newly '
+    'chosen server',
+    (tester) async {
+      await tester.pumpWidget(appWithFreshDb());
+      await tester.pumpAndSettle();
+      final l10n = l10nOf(tester);
+
+      await openTennisConfig(tester);
+      await tester.tap(find.text(l10n.tennisTypeDoubles));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l10n.startButton));
+      await tester.pumpAndSettle();
+
+      final player1 = l10n.defaultParticipantName(1);
+      final player3 = l10n.defaultParticipantName(3);
+      final player4 = l10n.defaultParticipantName(4);
+      final sideAName = '$player1 / $player3';
+
+      // Default config: side A serves first, via player 1. Straight 6-0
+      // closes set 1 with an even total (6 games) — side A mechanically
+      // opens set 2's service too.
+      await playStraightGames(tester, sideAName, 6);
+
+      // Scoring is blocked behind the (non-dismissible) sheet: the big tap
+      // zones underneath a real modal barrier can't be reached, but assert
+      // the sheet itself is what's showing.
+      expect(find.text(l10n.tennisServiceOrderSheetTitle(2)), findsOneWidget);
+      expect(find.text(l10n.tennisContinueButton), findsOneWidget);
+
+      // Reconfigure: side A's 2nd player (player 3) and side B's 2nd
+      // player (player 4) open set 2's service instead of the set 1
+      // defaults.
+      final sheetPickers = find.byType(PillSelector<int>);
+      expect(sheetPickers, findsNWidgets(2));
+      await tester.tap(
+        find.descendant(of: sheetPickers.at(0), matching: find.text(player3)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(of: sheetPickers.at(1), matching: find.text(player4)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(l10n.tennisContinueButton));
+      await tester.pumpAndSettle();
+
+      // Sheet dismissed, scoring resumed, server is the newly chosen one.
+      expect(find.text(l10n.tennisServiceOrderSheetTitle(2)), findsNothing);
+      expect(find.text(l10n.tennisServerLabel(player3)), findsOneWidget);
+
+      // One more game (side B) rotates locally within set 2's own order:
+      // side B's newly chosen player (player 4) serves next.
+      final sideBName = '${l10n.defaultParticipantName(2)} / $player4';
+      await playStraightGames(tester, sideBName, 1);
+      expect(find.text(l10n.tennisServerLabel(player4)), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'FLOW — change-of-ends indicator appears after odd games and clears on '
+    "the next game's first point (ITF Rule 10)",
+    (tester) async {
+      await tester.pumpWidget(appWithFreshDb());
+      await tester.pumpAndSettle();
+      final l10n = l10nOf(tester);
+
+      await openTennisConfig(tester);
+      await tester.tap(find.text(l10n.startButton));
+      await tester.pumpAndSettle();
+
+      final playerA = l10n.defaultParticipantName(1);
+      final playerB = l10n.defaultParticipantName(2);
+
+      expect(find.text(l10n.tennisChangeEndsLabel), findsNothing);
+
+      await playStraightGames(tester, playerA, 1); // game 1: odd -> due.
+      expect(find.text(l10n.tennisChangeEndsLabel), findsOneWidget);
+
+      await tester.tap(find.text(playerA)); // 1st point of game 2.
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.tennisChangeEndsLabel), findsNothing);
+
+      await playStraightGames(tester, playerB, 2); // finishes game 2, then 3.
+      expect(find.text(l10n.tennisChangeEndsLabel), findsOneWidget);
     },
   );
 

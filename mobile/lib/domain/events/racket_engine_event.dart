@@ -8,18 +8,29 @@
 enum RacketEngineEventType {
   pointScored,
   undo,
-  sessionCompleted;
+  sessionCompleted,
+
+  /// Generic, sport-agnostic per-segment service-order override — see
+  /// `RacketEngine`'s "Doubles service order" section. A "segment" is a
+  /// set index (0-based `RacketMatchState.currentSetIndex`), including the
+  /// Match Tie-break (which shares its deciding set's index, since it
+  /// replaces that set entirely rather than following it). Deliberately
+  /// not `TENNIS_...`-prefixed: Padel/Table Tennis/Badminton will reuse
+  /// this same event unchanged (CLAUDE.md brief section 5/24).
+  serviceOrderConfigured;
 
   String toJson() => switch (this) {
     RacketEngineEventType.pointScored => 'POINT_SCORED',
     RacketEngineEventType.undo => 'UNDO',
     RacketEngineEventType.sessionCompleted => 'SESSION_COMPLETED',
+    RacketEngineEventType.serviceOrderConfigured => 'SERVICE_ORDER_CONFIGURED',
   };
 
   static RacketEngineEventType? tryFromJson(String value) => switch (value) {
     'POINT_SCORED' => RacketEngineEventType.pointScored,
     'UNDO' => RacketEngineEventType.undo,
     'SESSION_COMPLETED' => RacketEngineEventType.sessionCompleted,
+    'SERVICE_ORDER_CONFIGURED' => RacketEngineEventType.serviceOrderConfigured,
     _ => null,
   };
 }
