@@ -79,6 +79,8 @@ class RacketMatchState {
     required this.winner,
     required this.appliedEventCount,
     required this.changeEndsDue,
+    required this.needsServiceConfiguration,
+    required this.pendingServiceConfigurationSideId,
   });
 
   /// Raw per-side point counters for the game in progress — 0,1,2,3,4...
@@ -127,11 +129,38 @@ class RacketMatchState {
   final int appliedEventCount;
 
   /// Non-blocking "changer de côté" indicator (CLAUDE.md brief section
-  /// 14) — purely a UI hint, never a gate on scoring. Odd total games
-  /// played in the match so far outside a tie-break, or a positive
-  /// multiple of 6 tie-break points while [isTieBreak]/[isMatchTieBreak] —
-  /// ITF Rule 6 (Change of Ends).
+  /// 14) — purely a UI hint, never a gate on scoring. ITF Rule 10 (Change
+  /// of Ends): outside a tie-break, true after an odd number of games
+  /// completed *within the current set* (reset at each set boundary —
+  /// never the match-wide total, which would miss the change due after
+  /// just the first game of a new set when the previous set ended on an
+  /// odd total, e.g. 6-3) and only until the next game's first point is
+  /// scored (so it never stays lit through an entire game, CLAUDE.md
+  /// brief section 17); during [isTieBreak]/[isMatchTieBreak], true on a
+  /// positive multiple of 6 tie-break points, which inherently clears
+  /// itself the instant one more point is scored.
   final bool changeEndsDue;
+
+  /// True when this segment (the current set, or the Match Tie-break
+  /// replacing the deciding set — see `RacketEngineEventType.
+  /// serviceOrderConfigured`) is a doubles segment past the first
+  /// ([currentSetIndex] >= 1) that has no valid `SERVICE_ORDER_CONFIGURED`
+  /// event yet — ITF Rule 14: in doubles, each side picks which of its two
+  /// players serves its first service game of *this* set/Match Tie-break,
+  /// a choice the engine can't infer, unlike [currentServerSlotId] for
+  /// every other segment. The UI must gate scoring on this (CLAUDE.md
+  /// brief section 8) rather than silently keep using segment 0's order.
+  /// Always false in singles ([currentSetIndex] never needs
+  /// reconfiguration there) and once [matchComplete].
+  final bool needsServiceConfiguration;
+
+  /// The side id that must mechanically serve this segment's first game —
+  /// non-null exactly when [needsServiceConfiguration] is true. The UI
+  /// reads this to know which side's picker to build first (CLAUDE.md
+  /// brief section 6's "Premier jeu: Équipe A" label) and which side a
+  /// submitted `SERVICE_ORDER_CONFIGURED` event's first two slots must
+  /// belong to — never the user's own choice (ITF Rule 14).
+  final String? pendingServiceConfigurationSideId;
 
   Map<String, dynamic> toJson() => {
     'currentGamePoints': currentGamePoints,
@@ -147,5 +176,8 @@ class RacketMatchState {
     'winner': winner,
     'appliedEventCount': appliedEventCount,
     'changeEndsDue': changeEndsDue,
+    'needsServiceConfiguration': needsServiceConfiguration,
+    if (pendingServiceConfigurationSideId != null)
+      'pendingServiceConfigurationSideId': pendingServiceConfigurationSideId,
   };
 }

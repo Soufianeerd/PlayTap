@@ -626,6 +626,36 @@ abstract class AppLocalizations {
   /// **'Match Tie-Break'**
   String get tennisMatchTieBreakShort;
 
+  /// Label above the selector that picks which side serves the match's first game, on the doubles Tennis configuration page (ITF Rule 9).
+  ///
+  /// In en, this message translates to:
+  /// **'First serving side'**
+  String get tennisFirstServingSideLabel;
+
+  /// Title of the between-set doubles service-order sheet, shown before the first point of a new set.
+  ///
+  /// In en, this message translates to:
+  /// **'Set {n} — Service order'**
+  String tennisServiceOrderSheetTitle(int n);
+
+  /// Title of the doubles service-order sheet shown before a Match Tie-break replacing the deciding set.
+  ///
+  /// In en, this message translates to:
+  /// **'Match Tie-Break — Service order'**
+  String get tennisServiceOrderMatchTieBreakTitle;
+
+  /// Caption on the between-set doubles service-order sheet naming the side that mechanically serves first (not a user choice, ITF Rule 14).
+  ///
+  /// In en, this message translates to:
+  /// **'Serves this segment\'s first game'**
+  String get tennisServiceOrderServingFirstLabel;
+
+  /// Confirms the between-set doubles service-order sheet and resumes scoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get tennisContinueButton;
+
   /// Name of the Pétanque Score preset. Used as a list item, page title, and history entry label.
   ///
   /// In en, this message translates to:

@@ -295,6 +295,24 @@
   "tennisMatchTieBreakShort": "Match Tie-Break",
   "@tennisMatchTieBreakShort": {"description": "Short label prefixing a Match Tie-break's score in the sets list (Summary/History)."},
 
+  "tennisFirstServingSideLabel": "First serving side",
+  "@tennisFirstServingSideLabel": {"description": "Label above the selector that picks which side serves the match's first game, on the doubles Tennis configuration page (ITF Rule 9)."},
+
+  "tennisServiceOrderSheetTitle": "Set {n} — Service order",
+  "@tennisServiceOrderSheetTitle": {
+    "description": "Title of the between-set doubles service-order sheet, shown before the first point of a new set.",
+    "placeholders": {"n": {"type": "int"}}
+  },
+
+  "tennisServiceOrderMatchTieBreakTitle": "Match Tie-Break — Service order",
+  "@tennisServiceOrderMatchTieBreakTitle": {"description": "Title of the doubles service-order sheet shown before a Match Tie-break replacing the deciding set."},
+
+  "tennisServiceOrderServingFirstLabel": "Serves this segment's first game",
+  "@tennisServiceOrderServingFirstLabel": {"description": "Caption on the between-set doubles service-order sheet naming the side that mechanically serves first (not a user choice, ITF Rule 14)."},
+
+  "tennisContinueButton": "Continue",
+  "@tennisContinueButton": {"description": "Confirms the between-set doubles service-order sheet and resumes scoring."},
+
   "presetPetanque": "Pétanque",
   "@presetPetanque": {"description": "Name of the Pétanque Score preset. Used as a list item, page title, and history entry label."},
 

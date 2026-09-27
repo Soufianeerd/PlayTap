@@ -332,14 +332,22 @@ class ServiceSlot {
   );
 }
 
-/// Persisted service rotation order — ITF Rules of Tennis, Rule 15
-/// (Order of Service) and Rule 16 (Order of Receiving in Doubles).
-/// [order] has 2 entries for singles (the two sides alternate every game)
-/// or 4 for doubles (rotates through all four players — the pair's chosen
-/// serving order for the match, fixed once chosen, see
-/// `RacketEngine.serverSlotForRotation`). Decided once at session creation
-/// and persisted whole — never recomputed from "who served last" at
-/// display time (see [RacketMatchRule.rulesetId]'s persistence note).
+/// Persisted service rotation order — ITF Rules of Tennis, Rule 14 (Order
+/// of Service) and Rule 15 (Order of Receiving in Doubles). [order] has 2
+/// entries for singles (the two sides alternate every game, continuously,
+/// with no set-boundary reset — the only order the match ever needs) or 4
+/// for doubles (this match's 4 known server slots — see [ServiceSlot]).
+///
+/// This is **segment 0's order only** (the match's first set) — Rule 14
+/// lets a doubles side re-pick which of its two players opens its own
+/// service at the start of every later set (and again before a Match
+/// Tie-break replacing the deciding set), which segment 0's slots stay
+/// perfectly usable for (the 4 known ids never change, only which order
+/// they're walked in) via a `SERVICE_ORDER_CONFIGURED` event — see the
+/// "Doubles service order" section on `RacketEngine`. Decided once at
+/// session creation and persisted whole — never recomputed from "who
+/// served last" at display time (see [RacketMatchRule.rulesetId]'s
+/// persistence note).
 class ServiceRule {
   const ServiceRule({required this.schemaVersion, required this.order});
 

@@ -86,6 +86,12 @@
   "tennisPointSemantics": "Point pour {name}",
   "tennisMatchTieBreakShort": "Super jeu décisif",
 
+  "tennisFirstServingSideLabel": "Premier camp au service",
+  "tennisServiceOrderSheetTitle": "Set {n} — Ordre de service",
+  "tennisServiceOrderMatchTieBreakTitle": "Super jeu décisif — Ordre de service",
+  "tennisServiceOrderServingFirstLabel": "Sert le premier jeu de ce segment",
+  "tennisContinueButton": "Continuer",
+
   "presetPetanque": "Pétanque",
   "petanqueConfigTitle": "Nouvelle partie de pétanque",
   "petanqueFormatLabel": "Format",

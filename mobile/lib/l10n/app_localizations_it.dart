@@ -304,6 +304,25 @@ class AppLocalizationsIt extends AppLocalizations {
   String get tennisMatchTieBreakShort => 'Match Tie-Break';
 
   @override
+  String get tennisFirstServingSideLabel => 'First serving side';
+
+  @override
+  String tennisServiceOrderSheetTitle(int n) {
+    return 'Set $n — Service order';
+  }
+
+  @override
+  String get tennisServiceOrderMatchTieBreakTitle =>
+      'Match Tie-Break — Service order';
+
+  @override
+  String get tennisServiceOrderServingFirstLabel =>
+      'Serves this segment\'s first game';
+
+  @override
+  String get tennisContinueButton => 'Continue';
+
+  @override
   String get presetPetanque => 'Petanque';
 
   @override

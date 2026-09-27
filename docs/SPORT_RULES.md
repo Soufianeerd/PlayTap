@@ -199,26 +199,51 @@ règles sans jamais rejouer différemment une session déjà démarrée (voir
   3** (2 sets gagnants) — le moteur ne suppose jamais ce nombre
   (`MatchFormatRule.setsToWin`), Best of 5 est déjà supporté par
   l'architecture, seulement pas exposé dans l'UI V1.
-- **Rule 15 (Order of Service) / Rule 16 (doubles)** : le serveur change à
-  chaque jeu complété (un tie-break comptant pour un jeu), en continu à
-  travers les sets, jamais réinitialisé à un changement de set. En
-  double, l'ordre des 4 joueurs est fixé une fois à la création de la
-  session (le côté qui commence, choisi par l'utilisateur ; l'ordre au
-  sein de chaque équipe suit l'ordre du roster) et persisté en entier —
-  **IMPLEMENTED**.
+- **Rule 14 (Order of Service) / Rule 15 (Order of Receiving in Doubles)** :
+  in singles, the server alternates every completed game (a tie-break
+  counting as one game for this purpose), continuously across set
+  boundaries, never reset. In doubles, the *team* due to serve a set's (or
+  a Match Tie-break's) first game is likewise the mechanical continuation
+  of that same continuous rotation — never a free choice past the match's
+  very first game (Rule 9, decided by toss at session creation). What
+  *is* re-chosen at the start of every set (and again before a Match
+  Tie-break replacing the deciding set) is which of each side's two
+  players opens its side's own service that segment — persisted via a
+  generic, sport-agnostic `SERVICE_ORDER_CONFIGURED` event
+  (`RacketEngineEventType.serviceOrderConfigured`), validated by
+  `RacketEngine.replay` against the mechanically-correct serving side
+  (never trusting an arbitrary side from the event payload) — see
+  `RacketEngine`'s "Doubles service order" section and
+  `RacketMatchState.needsServiceConfiguration`/
+  `pendingServiceConfigurationSideId`, which gate the active-session UI
+  behind a confirmation sheet until it's set. **IMPLEMENTED** (corrected
+  2026-09: the original Phase 1 implementation persisted one 4-player
+  order for the whole match, contradicting Rule 14's per-set/per-Match-
+  Tie-break choice).
 - **Rotation de service au tie-break** : le joueur dont c'est le tour sert
   le premier point seul, puis le service alterne par blocs de 2 points
   (points 2-3, 4-5, 6-7...) — vérifié point par point dans les tests, pas
   approximé comme une alternance simple par point (CLAUDE.md brief
-  section 13). **IMPLEMENTED**.
-- **Rule 6 (Changement de côté)** : indicateur non-bloquant
+  section 13). En double, cette rotation utilise l'ordre configuré pour
+  le segment courant. **IMPLEMENTED**.
+- **Rule 10 (Change of Ends)** : indicateur non-bloquant
   (`RacketMatchState.changeEndsDue`) — jamais une étape obligatoire de
-  l'UI. Calcul simplifié documenté sur le champ lui-même (parité du
-  nombre total de jeux joués hors tie-break ; multiple positif de 6
-  points pendant un tie-break) — non une modélisation exhaustive de
-  toutes les subtilités de la Rule 6 aux limites de set, une décision
-  volontaire puisque CLAUDE.md n'exige qu'un indicateur, pas un blocage.
-  **IMPLEMENTED** (indicateur uniquement).
+  l'UI. Calcul exact par set (jamais un total continu sur tout le match) :
+  changement dû après le 1er, 3e et chaque jeu impair suivant *du set en
+  cours* — un total continu manquerait le changement dû après le seul
+  premier jeu d'un nouveau set lorsque le set précédent s'est terminé sur
+  un total impair (ex. 6-3 = 9 jeux). Changement également à la fin de
+  chaque set, sauf si son total de jeux est pair, auquel cas le
+  changement est différé après le premier jeu du set suivant. Pendant un
+  tie-break (set ou Match Tie-break) : changement après chaque multiple
+  de 6 points, y compris à la frontière d'entrée dans un tie-break/Match
+  Tie-break (parité du set qui vient de se terminer, tant qu'aucun point
+  du tie-break n'a encore été joué). L'indicateur disparaît dès que le
+  premier point du jeu suivant est joué — il ne reste jamais affiché
+  pendant tout un jeu. **IMPLEMENTED** (corrigé 2026-09 : le calcul
+  original comptait les jeux en continu sur tout le match plutôt que par
+  set, ce qui manquait le second changement requis après un set terminé
+  sur un total impair — voir `RacketEngine._simulate`'s `effectiveGames`).
 - **Simple / Double** : toujours 2 sides de scoring (`side_a`/`side_b`),
   1 ou 2 joueurs par side (`ScoringSide.players`) — voir
   `playtap-sports-rules`. **IMPLEMENTED**.

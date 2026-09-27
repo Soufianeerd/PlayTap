@@ -300,6 +300,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tennisMatchTieBreakShort => '制胜局';
 
   @override
+  String get tennisFirstServingSideLabel => 'First serving side';
+
+  @override
+  String tennisServiceOrderSheetTitle(int n) {
+    return 'Set $n — Service order';
+  }
+
+  @override
+  String get tennisServiceOrderMatchTieBreakTitle =>
+      'Match Tie-Break — Service order';
+
+  @override
+  String get tennisServiceOrderServingFirstLabel =>
+      'Serves this segment\'s first game';
+
+  @override
+  String get tennisContinueButton => 'Continue';
+
+  @override
   String get presetPetanque => '滚球';
 
   @override
