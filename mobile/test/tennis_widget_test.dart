@@ -10,6 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtap/app/app.dart';
 import 'package:playtap/app/providers/database_providers.dart';
 import 'package:playtap/data/local/app_database.dart';
+import 'package:playtap/domain/events/session_event.dart';
+import 'package:playtap/domain/models/racket_state.dart';
+import 'package:playtap/features/score_tennis/tennis_actions.dart';
+import 'package:playtap/features/score_tennis/tennis_session_controller.dart';
 import 'package:playtap/features/shared/pill_selector.dart';
 import 'package:playtap/l10n/app_localizations.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -339,6 +343,92 @@ void main() {
       // Exactly one point recorded (15), not two (30).
       expect(find.text('15'), findsOneWidget);
       expect(find.text('30'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'CONTROLLER GUARD — TennisSessionController.addPoint() itself refuses '
+    'a point while a doubles set needs service configuration, independent '
+    "of the UI's tap-zone gating, and accepts one normally once configured",
+    (tester) async {
+      await tester.pumpWidget(appWithFreshDb());
+      await tester.pumpAndSettle();
+      final l10n = l10nOf(tester);
+
+      await openTennisConfig(tester);
+      await tester.tap(find.text(l10n.tennisTypeDoubles));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l10n.startButton));
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(Scaffold).first),
+      );
+      final session = await container
+          .read(sessionRepositoryProvider)
+          .getActiveSession();
+      final sessionId = session!.id;
+      final notifier = container.read(
+        tennisSessionControllerProvider(sessionId).notifier,
+      );
+      RacketMatchState currentMatchState() => container
+          .read(tennisSessionControllerProvider(sessionId))
+          .value!
+          .matchState;
+
+      final player1 = l10n.defaultParticipantName(1);
+      final player3 = l10n.defaultParticipantName(3);
+      final sideAName = '$player1 / $player3';
+
+      // Close set 1 (6-0, even) through the UI — same as any real match —
+      // leaving set 2 unconfigured behind the (already-tested) sheet.
+      await playStraightGames(tester, sideAName, 6);
+      expect(currentMatchState().needsServiceConfiguration, isTrue);
+
+      Future<int> pointEventCount() async =>
+          (await container
+                  .read(eventRepositoryProvider)
+                  .getEventsForSession(sessionId))
+              .where((e) => e.type == SessionEventType.pointScored)
+              .length;
+      final pointsBefore = await pointEventCount();
+
+      // Call the controller method directly — never through a tap — to
+      // prove the guard lives in TennisSessionController.addPoint itself,
+      // not merely in the UI disabling its tap zones (CLAUDE.md brief
+      // section 2): a future caller (watch sync, a direct action) must not
+      // be able to bypass it.
+      await notifier.addPoint(sideATennisId);
+      await tester.pumpAndSettle();
+
+      expect(await pointEventCount(), pointsBefore); // no new POINT_SCORED.
+      final blocked = currentMatchState();
+      expect(blocked.needsServiceConfiguration, isTrue);
+      expect(blocked.currentSetIndex, 1);
+      expect(blocked.gamesWonInCurrentSet, {
+        sideATennisId: 0,
+        sideBTennisId: 0,
+      });
+      expect(blocked.currentGamePoints, {sideATennisId: 0, sideBTennisId: 0});
+
+      // Configure service order (also directly through the controller) —
+      // addPoint must now be accepted normally.
+      await notifier.configureServiceOrder(
+        segmentIndex: 1,
+        order: buildDoublesSegmentServiceOrder(
+          startingSideId: sideATennisId,
+          startingSidePlayerIndex: 0,
+          otherSidePlayerIndex: 0,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(currentMatchState().needsServiceConfiguration, isFalse);
+
+      await notifier.addPoint(sideATennisId);
+      await tester.pumpAndSettle();
+
+      expect(await pointEventCount(), pointsBefore + 1);
+      expect(currentMatchState().currentGamePoints[sideATennisId], 1);
     },
   );
 }

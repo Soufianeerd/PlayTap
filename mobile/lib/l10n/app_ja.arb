@@ -86,6 +86,12 @@
   "tennisPointSemantics": "{name}のポイント",
   "tennisMatchTieBreakShort": "マッチタイブレーク",
 
+  "tennisFirstServingSideLabel": "最初にサーブするサイド",
+  "tennisServiceOrderSheetTitle": "セット{n} — サーブ順",
+  "tennisServiceOrderMatchTieBreakTitle": "マッチタイブレーク — サーブ順",
+  "tennisServiceOrderServingFirstLabel": "この区間の最初のゲームでサーブ",
+  "tennisContinueButton": "続ける",
+
   "presetPetanque": "ペタンク",
   "petanqueConfigTitle": "新しいペタンクゲーム",
   "petanqueFormatLabel": "フォーマット",

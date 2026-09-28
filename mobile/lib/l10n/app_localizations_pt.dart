@@ -304,23 +304,23 @@ class AppLocalizationsPt extends AppLocalizations {
   String get tennisMatchTieBreakShort => 'Tie-break de partida';
 
   @override
-  String get tennisFirstServingSideLabel => 'First serving side';
+  String get tennisFirstServingSideLabel => 'Lado que saca primeiro';
 
   @override
   String tennisServiceOrderSheetTitle(int n) {
-    return 'Set $n — Service order';
+    return 'Set $n — Ordem de saque';
   }
 
   @override
   String get tennisServiceOrderMatchTieBreakTitle =>
-      'Match Tie-Break — Service order';
+      'Tie-break de partida — Ordem de saque';
 
   @override
   String get tennisServiceOrderServingFirstLabel =>
-      'Serves this segment\'s first game';
+      'Saca no primeiro game deste segmento';
 
   @override
-  String get tennisContinueButton => 'Continue';
+  String get tennisContinueButton => 'Continuar';
 
   @override
   String get presetPetanque => 'Petanca';

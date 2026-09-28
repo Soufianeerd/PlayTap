@@ -67,6 +67,12 @@ class TennisSessionController extends AsyncNotifier<RacketSessionSnapshot> {
     final current = state.value;
     if (current == null || current.status != SessionStatus.active) return;
     if (current.matchState.matchComplete) return;
+    // Authoritative guard, independent of the UI (CLAUDE.md brief section
+    // 2): `ActiveTennisSessionPage` already disables the tap zones while a
+    // doubles service-order confirmation is pending, but any other future
+    // caller of this controller (watch sync, a direct action) must not be
+    // able to bypass that gate by calling `addPoint` straight through.
+    if (current.matchState.needsServiceConfiguration) return;
 
     _mutationInFlight = true;
     try {
