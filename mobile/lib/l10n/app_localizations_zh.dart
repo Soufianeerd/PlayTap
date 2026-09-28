@@ -300,23 +300,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tennisMatchTieBreakShort => '制胜局';
 
   @override
-  String get tennisFirstServingSideLabel => 'First serving side';
+  String get tennisFirstServingSideLabel => '首先发球的一方';
 
   @override
   String tennisServiceOrderSheetTitle(int n) {
-    return 'Set $n — Service order';
+    return '第$n盘 — 发球顺序';
   }
 
   @override
-  String get tennisServiceOrderMatchTieBreakTitle =>
-      'Match Tie-Break — Service order';
+  String get tennisServiceOrderMatchTieBreakTitle => '制胜局 — 发球顺序';
 
   @override
-  String get tennisServiceOrderServingFirstLabel =>
-      'Serves this segment\'s first game';
+  String get tennisServiceOrderServingFirstLabel => '发球本阶段的第一局';
 
   @override
-  String get tennisContinueButton => 'Continue';
+  String get tennisContinueButton => '继续';
 
   @override
   String get presetPetanque => '滚球';
@@ -814,6 +812,23 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tennisMatchTieBreakShort => '制胜局';
 
   @override
+  String get tennisFirstServingSideLabel => '首先发球的一方';
+
+  @override
+  String tennisServiceOrderSheetTitle(int n) {
+    return '第$n盘 — 发球顺序';
+  }
+
+  @override
+  String get tennisServiceOrderMatchTieBreakTitle => '制胜局 — 发球顺序';
+
+  @override
+  String get tennisServiceOrderServingFirstLabel => '发球本阶段的第一局';
+
+  @override
+  String get tennisContinueButton => '继续';
+
+  @override
   String get presetPetanque => '滚球';
 
   @override
@@ -1307,6 +1322,23 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tennisMatchTieBreakShort => '制勝局';
+
+  @override
+  String get tennisFirstServingSideLabel => '首先發球的一方';
+
+  @override
+  String tennisServiceOrderSheetTitle(int n) {
+    return '第$n盤 — 發球順序';
+  }
+
+  @override
+  String get tennisServiceOrderMatchTieBreakTitle => '制勝局 — 發球順序';
+
+  @override
+  String get tennisServiceOrderServingFirstLabel => '發球本階段的第一局';
+
+  @override
+  String get tennisContinueButton => '繼續';
 
   @override
   String get presetPetanque => '滾球';

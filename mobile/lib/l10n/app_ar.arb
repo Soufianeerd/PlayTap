@@ -86,6 +86,12 @@
   "tennisPointSemantics": "نقطة لـ {name}",
   "tennisMatchTieBreakShort": "كسر تعادل المباراة",
 
+  "tennisFirstServingSideLabel": "الجانب الذي يُرسل أولاً",
+  "tennisServiceOrderSheetTitle": "الشوط {n}: ترتيب الإرسال",
+  "tennisServiceOrderMatchTieBreakTitle": "كسر تعادل المباراة: ترتيب الإرسال",
+  "tennisServiceOrderServingFirstLabel": "يُرسل في أول لعبة من هذا الجزء",
+  "tennisContinueButton": "متابعة",
+
   "presetPetanque": "البيتانك",
   "petanqueConfigTitle": "مباراة بيتانك جديدة",
   "petanqueFormatLabel": "الصيغة",

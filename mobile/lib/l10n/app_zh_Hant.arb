@@ -86,6 +86,12 @@
   "tennisPointSemantics": "{name}得分",
   "tennisMatchTieBreakShort": "制勝局",
 
+  "tennisFirstServingSideLabel": "首先發球的一方",
+  "tennisServiceOrderSheetTitle": "第{n}盤 — 發球順序",
+  "tennisServiceOrderMatchTieBreakTitle": "制勝局 — 發球順序",
+  "tennisServiceOrderServingFirstLabel": "發球本階段的第一局",
+  "tennisContinueButton": "繼續",
+
   "presetPetanque": "滾球",
   "petanqueConfigTitle": "新建滾球比賽",
   "petanqueFormatLabel": "賽制",

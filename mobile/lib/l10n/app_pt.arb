@@ -86,6 +86,12 @@
   "tennisPointSemantics": "Ponto para {name}",
   "tennisMatchTieBreakShort": "Tie-break de partida",
 
+  "tennisFirstServingSideLabel": "Lado que saca primeiro",
+  "tennisServiceOrderSheetTitle": "Set {n} — Ordem de saque",
+  "tennisServiceOrderMatchTieBreakTitle": "Tie-break de partida — Ordem de saque",
+  "tennisServiceOrderServingFirstLabel": "Saca no primeiro game deste segmento",
+  "tennisContinueButton": "Continuar",
+
   "presetPetanque": "Petanca",
   "petanqueConfigTitle": "Nova partida de petanca",
   "petanqueFormatLabel": "Formato",

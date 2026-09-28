@@ -86,6 +86,12 @@
   "tennisPointSemantics": "Punkt für {name}",
   "tennisMatchTieBreakShort": "Match-Tie-Break",
 
+  "tennisFirstServingSideLabel": "Seite mit erstem Aufschlag",
+  "tennisServiceOrderSheetTitle": "Satz {n} — Aufschlagreihenfolge",
+  "tennisServiceOrderMatchTieBreakTitle": "Match-Tie-Break — Aufschlagreihenfolge",
+  "tennisServiceOrderServingFirstLabel": "Schlägt im ersten Spiel dieses Abschnitts auf",
+  "tennisContinueButton": "Weiter",
+
   "presetPetanque": "Pétanque",
   "petanqueConfigTitle": "Neue Pétanque-Partie",
   "petanqueFormatLabel": "Format",

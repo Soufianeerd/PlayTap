@@ -301,23 +301,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tennisMatchTieBreakShort => 'マッチタイブレーク';
 
   @override
-  String get tennisFirstServingSideLabel => 'First serving side';
+  String get tennisFirstServingSideLabel => '最初にサーブするサイド';
 
   @override
   String tennisServiceOrderSheetTitle(int n) {
-    return 'Set $n — Service order';
+    return 'セット$n — サーブ順';
   }
 
   @override
-  String get tennisServiceOrderMatchTieBreakTitle =>
-      'Match Tie-Break — Service order';
+  String get tennisServiceOrderMatchTieBreakTitle => 'マッチタイブレーク — サーブ順';
 
   @override
-  String get tennisServiceOrderServingFirstLabel =>
-      'Serves this segment\'s first game';
+  String get tennisServiceOrderServingFirstLabel => 'この区間の最初のゲームでサーブ';
 
   @override
-  String get tennisContinueButton => 'Continue';
+  String get tennisContinueButton => '続ける';
 
   @override
   String get presetPetanque => 'ペタンク';

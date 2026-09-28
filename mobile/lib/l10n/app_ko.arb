@@ -86,6 +86,12 @@
   "tennisPointSemantics": "{name} 포인트",
   "tennisMatchTieBreakShort": "매치 타이브레이크",
 
+  "tennisFirstServingSideLabel": "먼저 서브하는 사이드",
+  "tennisServiceOrderSheetTitle": "{n}세트 — 서브 순서",
+  "tennisServiceOrderMatchTieBreakTitle": "매치 타이브레이크 — 서브 순서",
+  "tennisServiceOrderServingFirstLabel": "이 구간의 첫 게임에서 서브",
+  "tennisContinueButton": "계속",
+
   "presetPetanque": "페탕크",
   "petanqueConfigTitle": "새 페탕크 게임",
   "petanqueFormatLabel": "형식",
